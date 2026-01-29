@@ -1,0 +1,27 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="assets/logo.png" alt="NeoBank Logo" class="logo">
+      <h1>Yeni Hesap Oluşturun</h1>
+      <p>Hızlı ve güvenli bankacılık için aramıza katılın.</p>
+    </div>
+
+    <form class="auth-form">
+      <div class="grid-inputs">
+        <lib-input label="Ad" placeholder="Adınız"></lib-input>
+        <lib-input label="Soyad" placeholder="Soyadınız"></lib-input>
+      </div>
+
+      <lib-input label="T.C. Kimlik No" placeholder="11 haneli TC no"></lib-input>
+      <lib-input label="E-Posta" placeholder="ornek@mail.com"></lib-input>
+      <lib-input label="Şifre" type="password" placeholder="••••••••"></lib-input>
+
+      <lib-button type="submit" class="primary-btn">Kayıt Ol 👤+</lib-button>
+    </form>
+
+    <div class="auth-footer">
+      <span>Zaten hesabınız var mı?</span>
+      <a routerLink="/auth/login">Giriş Yap</a>
+    </div>
+  </div>
+</div>

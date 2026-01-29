@@ -1,0 +1,35 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="assets/logo.png" alt="NeoBank Logo" class="logo">
+      <h1>Hesabınıza Giriş Yapın</h1>
+      <p>NeoBank'ın modern dünyasına hoş geldiniz.</p>
+    </div>
+
+    <form class="auth-form">
+      <lib-input 
+        label="T.C. Kimlik No" 
+        placeholder="11 haneli kimlik numaranız"
+        icon="user">
+      </lib-input>
+
+      <lib-input 
+        label="Şifre" 
+        type="password" 
+        placeholder="••••••••"
+        icon="lock">
+      </lib-input>
+
+      <div class="form-options">
+        <a href="#">Şifremi Unuttum</a>
+      </div>
+
+      <lib-button type="submit" class="primary-btn">Giriş Yap</lib-button>
+    </form>
+
+    <div class="auth-footer">
+      <span>Henüz üye değil misiniz?</span>
+      <a routerLink="/auth/register">Hemen Kayıt Olun</a>
+    </div>
+  </div>
+</div>
