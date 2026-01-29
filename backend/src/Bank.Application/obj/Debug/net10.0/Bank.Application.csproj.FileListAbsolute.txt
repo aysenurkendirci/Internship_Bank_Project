@@ -1,0 +1,17 @@
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Application.deps.json
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Application.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Application.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Contracts.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Domain.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Domain.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/bin/Debug/net10.0/Bank.Contracts.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.csproj.AssemblyReference.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.AssemblyInfoInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.AssemblyInfo.cs
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.csproj.CoreCompileInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.App.D97C6606.Up2Date
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/refint/Bank.Application.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/ref/Bank.Application.dll

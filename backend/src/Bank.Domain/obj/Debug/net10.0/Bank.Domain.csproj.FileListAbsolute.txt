@@ -1,0 +1,11 @@
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/bin/Debug/net10.0/Bank.Domain.deps.json
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/bin/Debug/net10.0/Bank.Domain.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/bin/Debug/net10.0/Bank.Domain.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.AssemblyInfoInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.AssemblyInfo.cs
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.csproj.CoreCompileInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/refint/Bank.Domain.dll
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/Bank.Domain.pdb
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/Debug/net10.0/ref/Bank.Domain.dll
