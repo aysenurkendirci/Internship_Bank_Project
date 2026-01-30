@@ -8,10 +8,8 @@ import { ButtonComponent } from '../../../../../../../ui/src/lib/atoms/button/bu
 @Component({
   selector: 'app-login',
   standalone: true,
-  // Buraya eklediğinde hata gidecek
   imports: [CommonModule, RouterModule, InputComponent, ButtonComponent], 
   templateUrl: './login.component.html',
-  styles: [] // scss hatası almamak için şimdilik böyle kalsın
+  styles: [] 
 })
 export class LoginComponent {}
-// styleUrls satırını siliyoruz veya boş bırakıyoruz

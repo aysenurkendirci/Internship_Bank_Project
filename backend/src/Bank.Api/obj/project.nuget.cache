@@ -1,12 +1,19 @@
 {
   "version": 2,
-  "dgSpecHash": "RBRTpUlTtNw=",
+  "dgSpecHash": "braly7CatZ4=",
   "success": true,
   "projectFilePath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/Bank.Api.csproj",
   "expectedPackageFiles": [
     "/Users/kubrakendirci/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/10.0.2/microsoft.aspnetcore.authentication.jwtbearer.10.0.2.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.aspnetcore.openapi/10.0.2/microsoft.aspnetcore.openapi.10.0.2.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.extensions.apidescription.server/10.0.0/microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.abstractions/8.0.1/microsoft.identitymodel.abstractions.8.0.1.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.jsonwebtokens/8.0.1/microsoft.identitymodel.jsonwebtokens.8.0.1.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.logging/8.0.1/microsoft.identitymodel.logging.8.0.1.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.protocols/8.0.1/microsoft.identitymodel.protocols.8.0.1.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.protocols.openidconnect/8.0.1/microsoft.identitymodel.protocols.openidconnect.8.0.1.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/microsoft.identitymodel.tokens/8.0.1/microsoft.identitymodel.tokens.8.0.1.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.openapi/2.3.0/microsoft.openapi.2.3.0.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/oracle.manageddataaccess.core/23.26.100/oracle.manageddataaccess.core.23.26.100.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/swashbuckle.aspnetcore/10.1.0/swashbuckle.aspnetcore.10.1.0.nupkg.sha512",
@@ -16,6 +23,7 @@
     "/Users/kubrakendirci/.nuget/packages/system.configuration.configurationmanager/8.0.0/system.configuration.configurationmanager.8.0.0.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/system.diagnostics.performancecounter/8.0.0/system.diagnostics.performancecounter.8.0.0.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/system.directoryservices.protocols/8.0.2/system.directoryservices.protocols.8.0.2.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/system.identitymodel.tokens.jwt/8.0.1/system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/system.security.cryptography.pkcs/8.0.1/system.security.cryptography.pkcs.8.0.1.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/system.security.cryptography.protecteddata/8.0.0/system.security.cryptography.protecteddata.8.0.0.nupkg.sha512"
   ],

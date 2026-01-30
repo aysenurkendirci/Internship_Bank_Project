@@ -12,6 +12,7 @@
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Infrastructure.AssemblyInfoInputs.cache
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Infrastructure.AssemblyInfo.cs
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Infrastructure.sourcelink.json
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Inf.EBD0854A.Up2Date
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/Bank.Infrastructure.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/Debug/net10.0/refint/Bank.Infrastructure.dll

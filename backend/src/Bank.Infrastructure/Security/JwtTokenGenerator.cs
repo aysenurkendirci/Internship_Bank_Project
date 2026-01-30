@@ -1,8 +1,7 @@
-using Bank.Application.Abstractions.Security; // Arayüzü tanıması için şart
+using Bank.Application.Abstractions.Security; 
 
 namespace Bank.Infrastructure.Security;
 
-// ": ITokenGenerator" kısmının olduğundan ve doğru yazıldığından emin ol
 public class JwtTokenGenerator : ITokenGenerator 
 {
     public string Generate(long userId, string? email) => "test-token";

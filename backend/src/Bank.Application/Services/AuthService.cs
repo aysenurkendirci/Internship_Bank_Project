@@ -3,7 +3,7 @@ using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Contracts.Auth;
 using Bank.Application.Abstractions.Services;
-namespace Bank.Application.Services; // Program.cs 3. satırın çalışması için bu şart
+namespace Bank.Application.Services; 
 public sealed class AuthService : IAuthService
 {
     private readonly IAuthRepository _repo;
@@ -24,17 +24,23 @@ public sealed class AuthService : IAuthService
         return new AuthResponse(user.UserId, $"{user.FirstName} {user.LastName}", jwt);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest req)
-    {
-        var user = await _repo.GetUserByIdentifierAsync(req.Identifier);//kullanıcı var mı yok mu kontrolü
-        var cred = await _repo.GetCredentialsAsync(user.UserId);//kullanıcının şifre bilgilerini al
+   public async Task<AuthResponse> LoginAsync(LoginRequest req)
+{
+    var user = await _repo.GetUserByTcAsync(req.TcNo);
+    if (user is null)
+        throw new UnauthorizedAccessException("Invalid credentials.");
 
-        if (!_hasher.Verify(req.Password, cred.PasswordHash))//şifre doğrulama
-            throw new UnauthorizedAccessException("Invalid credentials.");
+    var cred = await _repo.GetCredentialsAsync(user.UserId);
+    if (cred is null)
+        throw new UnauthorizedAccessException("Invalid credentials.");
 
-        await _repo.UpdateLastLoginAsync(user.UserId);
+    if (!_hasher.Verify(req.Password, cred.PasswordHash))
+        throw new UnauthorizedAccessException("Invalid credentials.");
 
-        var jwt = _token.Generate(user.UserId, user.Email);
-        return new AuthResponse(user.UserId, $"{user.FirstName} {user.LastName}", jwt);
-    }
+    await _repo.UpdateLastLoginAsync(user.UserId);
+
+    var jwt = _token.Generate(user.UserId, user.Email);
+    return new AuthResponse(user.UserId, $"{user.FirstName} {user.LastName}", jwt);
+}
+
 }

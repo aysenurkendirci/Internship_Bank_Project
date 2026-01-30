@@ -2,7 +2,7 @@ using Bank.Contracts.Auth;
 namespace Bank.Application.Abstractions.Repositories;
 public interface IAuthRepository
 {
-    Task<UserRow> GetUserByIdentifierAsync(string identifier);//kullanıcı var mı yok mu kontrolo
+    Task<UserRow> GetUserByTcAsync(string tcNo);//kullanıcı var mı yok mu kontrol
     Task UpdateLastLoginAsync(long userId);//Sadece şifre doğrulaması yapılacağı zaman çağrılır 
     Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash);//kayıt
 

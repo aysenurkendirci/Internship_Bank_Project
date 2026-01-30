@@ -10,6 +10,7 @@
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.AssemblyInfoInputs.cache
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.AssemblyInfo.cs
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.csproj.CoreCompileInputs.cache
+/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.sourcelink.json
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.App.D97C6606.Up2Date
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/Bank.Application.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/Debug/net10.0/refint/Bank.Application.dll

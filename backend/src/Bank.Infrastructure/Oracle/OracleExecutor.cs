@@ -31,7 +31,6 @@ public sealed class OracleExecutor
         );
     }
 
-    // ✅ Stored Procedure Execute
     public async Task<int> ExecuteAsync(string procName, object? param = null)
     {
         using var conn = _factory.CreateConnection();
@@ -43,4 +42,19 @@ public sealed class OracleExecutor
             commandType: CommandType.StoredProcedure
         );
     }
+
+    public async Task<IReadOnlyList<T>> QueryAsync<T>(string procName, object? param = null)
+{
+    using var conn = _factory.CreateConnection();
+    await conn.OpenAsync();
+
+    var result = await conn.QueryAsync<T>(
+        procName,
+        param,
+        commandType: CommandType.StoredProcedure
+    );
+
+    return result.AsList();
+}
+
 }

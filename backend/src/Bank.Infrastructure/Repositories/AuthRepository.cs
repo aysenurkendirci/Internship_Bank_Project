@@ -1,6 +1,8 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Contracts.Auth;
 using Bank.Infrastructure.Oracle;
+using Dapper;
+using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,21 +17,21 @@ public sealed class AuthRepository : IAuthRepository
         _db = db;
     }
 
-    public async Task<UserRow> GetUserByIdentifierAsync(string identifier)
+    public async Task<UserRow> GetUserByTcAsync(string tcNo)
     {
         var result = await _db.QuerySingleAsync<UserRow>(
-            "PKG_AUTH.GET_USER_BY_IDENTIFIER",
-            new { p_identifier = identifier }
+            "PKG_AUTH.GET_USER_BY_TCN",
+            new { P_TC_NO = tcNo }
         );
 
-        return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {identifier}");
+        return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {tcNo}");
     }
 
     public async Task<CredentialRow> GetCredentialsAsync(long userId)
     {
         var result = await _db.QuerySingleAsync<CredentialRow>(
             "PKG_AUTH.GET_CREDENTIALS",
-            new { p_user_id = userId }
+            new { P_USER_ID = userId }
         );
 
         return result ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
@@ -37,34 +39,36 @@ public sealed class AuthRepository : IAuthRepository
 
     public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash)
     {
-        // ✅ 1) Önce procedure ile INSERT/REGISTER işlemini yap
-        await _db.ExecuteAsync(
-            "PKG_AUTH.REGISTER_USER",
-            new
-            {
-                p_tc_no = req.TcNo,
-                p_first_name = req.FirstName,
-                p_last_name = req.LastName,
-                p_email = req.Email,
-                p_phone = req.Phone,
-                p_membership = req.Membership,
-                p_password_hash = passwordHash
-            }
-        );
+        var p = new DynamicParameters();
 
-        // ✅ 2) Sonra kayıt edilen kullanıcıyı tekrar çek (procedure satır döndürmüyor olabilir)
-        // Identifier parametren email veya tcno ise ona göre seç.
-        // En mantıklısı: email ile çekmek.
-        var user = await GetUserByIdentifierAsync(req.Email);
+        // IN parametreler (DB signature ile birebir)
+        p.Add("P_TC_NO", req.TcNo, DbType.String, ParameterDirection.Input);
+        p.Add("P_FIRST_NAME", req.FirstName, DbType.String, ParameterDirection.Input);
+        p.Add("P_LAST_NAME", req.LastName, DbType.String, ParameterDirection.Input);
+        p.Add("P_EMAIL", req.Email, DbType.String, ParameterDirection.Input);
+        p.Add("P_PHONE", req.Phone, DbType.String, ParameterDirection.Input);
+        p.Add("P_MEMBERSHIP", req.Membership, DbType.String, ParameterDirection.Input);
+        p.Add("P_PASSWORD_HASH", passwordHash, DbType.String, ParameterDirection.Input);
 
-        return user;
+        // OUT parametre
+        p.Add("O_USER_ID", dbType: DbType.Int64, direction: ParameterDirection.Output);
+
+        await _db.ExecuteAsync("PKG_AUTH.REGISTER_USER", p);
+
+        var userId = p.Get<long>("O_USER_ID");
+        if (userId <= 0)
+            throw new InvalidOperationException("Kullanıcı oluşturuldu ama O_USER_ID dönmedi.");
+
+        // İstersen burada userId ile getiren ayrı proc varsa onu kullanabiliriz.
+        // Şimdilik TC ile çekiyoruz:
+        return await GetUserByTcAsync(req.TcNo);
     }
 
     public async Task UpdateLastLoginAsync(long userId)
     {
         await _db.ExecuteAsync(
             "PKG_AUTH.UPDATE_LAST_LOGIN",
-            new { p_user_id = userId }
+            new { P_USER_ID = userId }
         );
     }
 }

@@ -1,6 +1,6 @@
 using Bank.Application.Abstractions.Security;
 
-namespace Bank.Infrastructure.Security; // BU SATIR ÇOK KRİTİK
+namespace Bank.Infrastructure.Security; 
 
 public class PasswordHasher : IPasswordHasher 
 {

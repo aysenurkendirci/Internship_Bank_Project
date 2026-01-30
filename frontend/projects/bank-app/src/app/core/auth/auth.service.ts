@@ -8,8 +8,6 @@ import { TokenStorage } from './token.storage';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   constructor(private api: AuthApi, private token: TokenStorage) {}
-
-  // Login işlemi başarılı olduğunda dönen token'ı storage'a kaydeder
   login(req: LoginRequest) {
     return this.api.login(req).pipe(
       tap(res => {
@@ -19,8 +17,6 @@ export class AuthService {
       })
     );
   }
-
-  // Yeni kullanıcı kaydı ve otomatik giriş
   register(req: RegisterRequest) {
     return this.api.register(req).pipe(
       tap(res => {
@@ -33,6 +29,5 @@ export class AuthService {
 
   logout() { 
     this.token.clear(); 
-    // Gerekirse sayfayı login ekranına yönlendir: this.router.navigate(['/login']);
   }
 }

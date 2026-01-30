@@ -4,9 +4,6 @@ import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ButtonComponent } from '../../../../../../../ui/src/lib/atoms/button/button.component';
 import { InputComponent } from '../../../../../../../ui/src/lib/atoms/input/input.component';
-// pages/register/ klasöründen projenin köküne çıkıp data-access'e giriyoruz
-// Tam olarak 6 tane ../ olmalı
-// pages/register/ klasöründen projects/ seviyesine çıkmak için 6 adım geri gidiyoruz
 import { AuthApi } from '../../../../../../../data-access/src/lib/api/auth.api';
 
 @Component({
@@ -33,15 +30,14 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      // 'any' ekleyerek unknown hatasını (TS2571) geçiyoruz
       const api = this.authApi as any; 
       
       api.register(this.registerForm.value).subscribe({
-        next: (response: any) => { // 'any' ekleyerek TS7006 hatasını çözdük
+        next: (response: any) => {
           console.log('Kayıt Başarılı!', response);
           this.router.navigate(['/auth/login']);
         },
-        error: (err: any) => { // 'any' ekleyerek TS7006 hatasını çözdük
+        error: (err: any) => { 
           console.error('Kayıt Hatası:', err);
           alert('Kayıt sırasında bir sorun oluştu.');
         }
