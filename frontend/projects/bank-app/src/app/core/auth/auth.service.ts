@@ -1,33 +1,33 @@
-// src/app/core/auth/auth.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { tap } from 'rxjs';
-import { AuthApi } from '../../../../../../projects/data-access/src/lib/api/auth.api';
-import { LoginRequest, RegisterRequest } from '../../../../../../projects/data-access/src/lib/models/auth.models';
+
+import { AuthApi } from '../../data-access/api/auth.api';
+import { LoginRequest, RegisterRequest } from '../../data-access/models/auth.models';
 import { TokenStorage } from './token.storage';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private api: AuthApi, private token: TokenStorage) {}
+  private api = inject(AuthApi);
+  private token = inject(TokenStorage);
+
   login(req: LoginRequest) {
     return this.api.login(req).pipe(
-      tap(res => {
-        if (res && res.token) {
-          this.token.set(res.token);
-        }
-      })
-    );
-  }
-  register(req: RegisterRequest) {
-    return this.api.register(req).pipe(
-      tap(res => {
-        if (res && res.token) {
-          this.token.set(res.token);
-        }
+      tap((res: any) => {
+        const token = res?.token;
+        if (token) this.token.set(token);
       })
     );
   }
 
-  logout() { 
-    this.token.clear(); 
+  register(req: RegisterRequest) {
+    return this.api.register(req);
+  }
+
+  logout() {
+    this.token.clear();
+  }
+
+  isLoggedIn() {
+    return !!this.token.get();
   }
 }

@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "uWcM8FOhmVc=",
+  "dgSpecHash": "0PmHqSF4ya8=",
   "success": true,
   "projectFilePath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/Bank.Infrastructure.csproj",
   "expectedPackageFiles": [
     "/Users/kubrakendirci/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",
+    "/Users/kubrakendirci/.nuget/packages/dapper.oracle/2.0.2/dapper.oracle.2.0.2.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.extensions.configuration/10.0.2/microsoft.extensions.configuration.10.0.2.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.2/microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",
     "/Users/kubrakendirci/.nuget/packages/microsoft.extensions.configuration.binder/10.0.2/microsoft.extensions.configuration.binder.10.0.2.nupkg.sha512",

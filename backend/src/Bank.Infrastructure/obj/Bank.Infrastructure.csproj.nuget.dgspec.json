@@ -1064,6 +1064,10 @@
               "target": "Package",
               "version": "[2.1.66, )"
             },
+            "Dapper.Oracle": {
+              "target": "Package",
+              "version": "[2.0.2, )"
+            },
             "Microsoft.Extensions.Options": {
               "target": "Package",
               "version": "[10.0.2, )"

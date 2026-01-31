@@ -1,0 +1,37 @@
+.container{ max-width:1200px; margin:0 auto; }
+.hdr h2{ margin:0; font-size:30px; font-weight:950; color:#0f172a; }
+.hdr p{ margin:6px 0 0; color:#64748b; font-weight:600; }
+
+.hero{
+  margin-top:18px;
+  background:#fff;
+  border:1px solid #eef2f7;
+  border-radius:28px;
+  padding:22px;
+}
+.k{ font-size:11px; font-weight:900; color:#94a3b8; letter-spacing:.12em; }
+.row{ display:flex; align-items:center; gap:12px; margin-top:10px; }
+.money{ font-size:44px; font-weight:950; }
+.chip{
+  background: rgba(16,185,129,.12);
+  color:#059669;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:900;
+}
+
+.cards{ margin-top:22px; }
+.cards h3{ margin:0 0 10px; font-size:22px; font-weight:950; color:#0f172a; }
+.cardRow{ display:flex; gap:14px; overflow:auto; padding-bottom:8px; }
+.bankCard{
+  min-width:320px;
+  background: linear-gradient(90deg,#0f172a,#2563eb);
+  color:#fff;
+  border-radius:26px;
+  padding:18px;
+}
+.t{ font-weight:900; opacity:.9; display:flex; justify-content:space-between; }
+.t span{ background: rgba(255,255,255,.18); padding:2px 8px; border-radius:999px; font-size:11px; }
+.no{ margin:22px 0; font-weight:900; letter-spacing:.22em; }
+.k2{ font-size:11px; opacity:.7; font-weight:900; }
+.bal{ font-size:22px; font-weight:950; }

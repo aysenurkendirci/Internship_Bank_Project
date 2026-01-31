@@ -1,0 +1,35 @@
+<div *ngIf="loading">Yükleniyor...</div>
+
+<div class="container" *ngIf="data">
+  <header class="hdr">
+    <div>
+      <h2>Merhaba, {{ data.user.firstName }} 👋</h2>
+      <p>İşte bugünkü finansal özetin.</p>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="k">TOPLAM VARLIĞIM</div>
+      <div class="row">
+        <div class="money">{{ data.totalWealth | currency:'TRY':'symbol-narrow':'1.2-2' }}</div>
+        <div class="chip">+%{{ (data.wealthChangeRate * 100) | number:'1.0-2' }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cards">
+    <h3>Kartlarım</h3>
+
+    <div class="cardRow">
+      <div class="bankCard" *ngFor="let c of data.cards">
+        <div class="t">{{ c.cardType }} <span *ngIf="c.isVirtual">Sanal</span></div>
+        <div class="no">{{ c.cardNoMasked }}</div>
+        <div class="b">
+          <div class="k2">BAKİYE</div>
+          <div class="bal">{{ c.balance | currency:'TRY':'symbol-narrow' }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

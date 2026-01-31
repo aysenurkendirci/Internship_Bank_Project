@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -15,12 +13,8 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "data-access": [
-        "./dist/data-access"
-      ],
-      "ui": [
-        "./dist/ui"
-      ]
+      "data-access": ["./dist/data-access"],
+      "ui": ["./dist/ui"]
     }
   },
   "angularCompilerOptions": {
@@ -31,23 +25,9 @@
   },
   "files": [],
   "references": [
-    {
-      "path": "./projects/ui/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/ui/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/data-access/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/data-access/tsconfig.spec.json"
-    },
-    {
-      "path": "./projects/bank-app/tsconfig.app.json"
-    },
-    {
-      "path": "./projects/bank-app/tsconfig.spec.json"
-    }
+    { "path": "./projects/ui/tsconfig.lib.json" },
+    { "path": "./projects/data-access/tsconfig.lib.json" },
+    { "path": "./projects/bank-app/tsconfig.app.json" },
+    { "path": "./projects/bank-app/tsconfig.spec.json" }
   ]
 }

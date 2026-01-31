@@ -1,15 +1,48 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-// Atomları import ediyoruz
-import { InputComponent } from '../../../../../../../ui/src/lib/atoms/input/input.component';
-import { ButtonComponent } from '../../../../../../../ui/src/lib/atoms/button/button.component';
+import { finalize } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
+
+// ✅ UI components: corrected paths
+import { InputComponent } from '../../../../shared/input/input.component';
+import { ButtonComponent } from '../../../../shared/button/button.component';
 
 @Component({
-  selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterModule, InputComponent, ButtonComponent], 
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './login.component.html',
-  styles: [] 
+  styleUrl: './login.component.scss',
 })
-export class LoginComponent {}
+export class LoginComponent {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
+  loading = false;
+  error?: string;
+
+  form = this.fb.group({
+    // ✅ Senin backend login req'in tcNo ise:
+    tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  submit() {
+    if (this.form.invalid || this.loading) return;
+
+    this.loading = true;
+    this.error = undefined;
+
+    this.auth
+      .login(this.form.getRawValue() as any)
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => this.router.navigateByUrl('/dashboard'),
+        error: (err: any) => {
+          this.error = err?.error?.message ?? err?.message ?? 'Giriş başarısız';
+        },
+      });
+  }
+}

@@ -1,4 +1,3 @@
-// src/app/core/auth/auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { TokenStorage } from './token.storage';

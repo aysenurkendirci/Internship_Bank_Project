@@ -1,47 +1,62 @@
 import { Component, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ButtonComponent } from '../../../../../../../ui/src/lib/atoms/button/button.component';
-import { InputComponent } from '../../../../../../../ui/src/lib/atoms/input/input.component';
-import { AuthApi } from '../../../../../../../data-access/src/lib/api/auth.api';
+import { finalize, switchMap } from 'rxjs';
+import { AuthService } from '../../../../core/auth/auth.service';
+
+import { InputComponent } from '../../../../shared/input/input.component';
+import { ButtonComponent } from '../../../../shared/button/button.component';
 
 @Component({
-  selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, InputComponent, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './register.component.html',
-  styles: []
+  styleUrls: ['./register.component.scss'], // ✅ DÜZELTİLDİ
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private authApi = inject(AuthApi);
+  private auth = inject(AuthService);
   private router = inject(Router);
 
-  registerForm = this.fb.group({
-    tcNo: ['', [Validators.required, Validators.minLength(11)]],
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
+  loading = false;
+  error?: string;
+
+  form = this.fb.group({
+    tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
+    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', Validators.required],
-    password: ['', Validators.required],
-    membership: ['Personal']
+    phone: [''],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    membership: ['Personal' as 'Personal' | 'Corporate'],
   });
 
-  onSubmit() {
-    if (this.registerForm.valid) {
-      const api = this.authApi as any; 
-      
-      api.register(this.registerForm.value).subscribe({
-        next: (response: any) => {
-          console.log('Kayıt Başarılı!', response);
-          this.router.navigate(['/auth/login']);
+  setMembership(v: 'Personal' | 'Corporate') {
+    this.form.controls.membership.setValue(v);
+  }
+
+  submit() {
+    if (this.form.invalid || this.loading) return;
+
+    this.loading = true;
+    this.error = undefined;
+
+    const payload = this.form.getRawValue() as any;
+
+    this.auth
+      .register(payload)
+      .pipe(
+        switchMap(() =>
+          this.auth.login({ tcNo: payload.tcNo, password: payload.password } as any)
+        ),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe({
+        next: () => this.router.navigateByUrl('/dashboard'),
+        error: (err: any) => {
+          this.error = err?.error?.message ?? err?.message ?? 'Kayıt başarısız.';
         },
-        error: (err: any) => { 
-          console.error('Kayıt Hatası:', err);
-          alert('Kayıt sırasında bir sorun oluştu.');
-        }
       });
-    }
   }
 }

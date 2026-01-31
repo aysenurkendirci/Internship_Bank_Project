@@ -1,13 +1,30 @@
 using Bank.Contracts.Auth;
-namespace Bank.Application.Abstractions.Repositories;
+using System.Threading.Tasks;
+
+namespace Bank.Application.Abstractions.Repositories; // Namespace bu olmalı
+
 public interface IAuthRepository
 {
-    Task<UserRow> GetUserByTcAsync(string tcNo);//kullanıcı var mı yok mu kontrol
-    Task UpdateLastLoginAsync(long userId);//Sadece şifre doğrulaması yapılacağı zaman çağrılır 
-    Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash);//kayıt
-
+    Task<UserRow> GetUserByTcAsync(string tcNo);
+    Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo);
+    Task UpdateLastLoginAsync(long userId);
+    Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash);
     Task<CredentialRow> GetCredentialsAsync(long userId);
 }
 
-public sealed record UserRow(long UserId, string Email, string FirstName, string LastName); //class yerine record kullanmak sadece veri taşıyıcılığı için vardır
-public sealed record CredentialRow(long UserId, string PasswordHash); //sealed miras alınmasını engeller
+public sealed class UserRow // Burayı record'dan class'a çevirmiştik
+{
+    public UserRow() { }
+    public long UserId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string TcNo { get; set; } = string.Empty;
+}
+
+public sealed class CredentialRow
+{
+    public CredentialRow() { }
+    public long UserId { get; set; }
+    public string PasswordHash { get; set; } = string.Empty;
+}

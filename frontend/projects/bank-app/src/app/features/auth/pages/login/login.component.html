@@ -1,35 +1,36 @@
-<div class="auth-container">
-  <div class="auth-card">
-    <div class="auth-header">
-      <img src="assets/logo.png" alt="NeoBank Logo" class="logo">
-      <h1>Hesabınıza Giriş Yapın</h1>
-      <p>NeoBank'ın modern dünyasına hoş geldiniz.</p>
-    </div>
+<div class="page">
+  <div class="card">
+    <h1>Giriş Yap</h1>
+    <p>Kurumsal portalınıza güvenli erişim.</p>
 
-    <form class="auth-form">
-      <lib-input 
-        label="T.C. Kimlik No" 
-        placeholder="11 haneli kimlik numaranız"
-        icon="user">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <lib-input
+        label="T.C. Kimlik No"
+        placeholder="11 haneli"
+        [control]="form.controls.tcNo"
+        [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
+        errorText="TC No 11 haneli olmalı">
       </lib-input>
 
-      <lib-input 
-        label="Şifre" 
-        type="password" 
+      <lib-input
+        label="Şifre"
+        type="password"
         placeholder="••••••••"
-        icon="lock">
+        [control]="form.controls.password"
+        [showError]="form.controls.password.touched && form.controls.password.invalid"
+        errorText="Şifre en az 6 karakter">
       </lib-input>
 
-      <div class="form-options">
-        <a href="#">Şifremi Unuttum</a>
+      <div class="err" *ngIf="error">{{ error }}</div>
+
+      <lib-button type="submit" [disabled]="loading || form.invalid">
+        {{ loading ? 'Giriş yapılıyor...' : 'GİRİŞ YAP' }}
+      </lib-button>
+
+      <div class="footer">
+        <span>Hesabın yok mu?</span>
+        <a routerLink="/auth/register">Kayıt Ol</a>
       </div>
-
-      <lib-button type="submit" class="primary-btn">Giriş Yap</lib-button>
     </form>
-
-    <div class="auth-footer">
-      <span>Henüz üye değil misiniz?</span>
-      <a routerLink="/auth/register">Hemen Kayıt Olun</a>
-    </div>
   </div>
 </div>

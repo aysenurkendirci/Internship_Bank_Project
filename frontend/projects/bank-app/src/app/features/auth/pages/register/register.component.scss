@@ -1,0 +1,33 @@
+.page{ min-height:100vh; display:grid; place-items:center; background:#0b1220; padding:24px; }
+.card{
+  width:100%; max-width:520px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(148,163,184,.2);
+  border-radius:24px;
+  padding:26px;
+  color:#e2e8f0;
+}
+h1{ margin:0 0 6px; font-size:34px; font-weight:950; color:#fff; }
+p{ margin:0 0 18px; opacity:.75; font-weight:600; }
+.form{ display:flex; flex-direction:column; gap:12px; }
+.row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width: 560px){ .row2{ grid-template-columns:1fr; } }
+
+.seg{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+.seg-btn{
+  border:1px solid rgba(148,163,184,.25);
+  background: rgba(255,255,255,.06);
+  color:#cbd5e1;
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.seg-btn.active{
+  border-color: rgba(34,211,238,.35);
+  background: rgba(34,211,238,.12);
+  color:#22d3ee;
+}
+.err{ color:#fecaca; font-weight:900; }
+.footer{ margin-top:12px; display:flex; justify-content:center; gap:8px; font-weight:700; }
+.footer a{ color:#22d3ee; text-decoration:none; font-weight:950; }

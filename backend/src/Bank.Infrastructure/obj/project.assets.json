@@ -15,6 +15,22 @@
           }
         }
       },
+      "Dapper.Oracle/2.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Dapper": "2.0.35"
+        },
+        "compile": {
+          "lib/netstandard2.0/Dapper.Oracle.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Dapper.Oracle.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
       "Microsoft.Extensions.Configuration/10.0.2": {
         "type": "package",
         "dependencies": {
@@ -356,6 +372,23 @@
         "lib/netstandard2.0/Dapper.dll",
         "lib/netstandard2.0/Dapper.xml",
         "readme.md"
+      ]
+    },
+    "Dapper.Oracle/2.0.2": {
+      "sha512": "vB1b+fkh1sFQOQcaXtGV48sxnvv9K5ituPWIkeP1jU95u4NnSs+bOgBb+Lfm29GNRIQDQAQougoCbYg7C+hD2Q==",
+      "type": "package",
+      "path": "dapper.oracle/2.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "dapper.oracle.2.0.2.nupkg.sha512",
+        "dapper.oracle.nuspec",
+        "dips.png",
+        "lib/net461/Dapper.Oracle.dll",
+        "lib/net461/Dapper.Oracle.pdb",
+        "lib/netstandard2.0/Dapper.Oracle.dll",
+        "lib/netstandard2.0/Dapper.Oracle.pdb"
       ]
     },
     "Microsoft.Extensions.Configuration/10.0.2": {
@@ -855,6 +888,7 @@
       "Bank.Contracts >= 1.0.0",
       "Bank.Domain >= 1.0.0",
       "Dapper >= 2.1.66",
+      "Dapper.Oracle >= 2.0.2",
       "Microsoft.Extensions.Options >= 10.0.2",
       "Microsoft.Extensions.Options.ConfigurationExtensions >= 10.0.2",
       "Oracle.ManagedDataAccess.Core >= 23.26.100"
@@ -916,6 +950,10 @@
           "Dapper": {
             "target": "Package",
             "version": "[2.1.66, )"
+          },
+          "Dapper.Oracle": {
+            "target": "Package",
+            "version": "[2.0.2, )"
           },
           "Microsoft.Extensions.Options": {
             "target": "Package",

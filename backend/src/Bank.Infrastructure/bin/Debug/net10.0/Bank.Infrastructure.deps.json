@@ -12,6 +12,7 @@
           "Bank.Contracts": "1.0.0",
           "Bank.Domain": "1.0.0",
           "Dapper": "2.1.66",
+          "Dapper.Oracle": "2.0.2",
           "Microsoft.Extensions.Options": "10.0.2",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.2",
           "Oracle.ManagedDataAccess.Core": "23.26.100"
@@ -25,6 +26,17 @@
           "lib/net8.0/Dapper.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.1.66.48463"
+          }
+        }
+      },
+      "Dapper.Oracle/2.0.2": {
+        "dependencies": {
+          "Dapper": "2.1.66"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Dapper.Oracle.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.2.0"
           }
         }
       },
@@ -266,6 +278,13 @@
       "sha512": "sha512-/q77jUgDOS+bzkmk3Vy9SiWMaetTw+NOoPAV0xPBsGVAyljd5S6P+4RUW7R3ZUGGr9lDRyPKgAMj2UAOwvqZYw==",
       "path": "dapper/2.1.66",
       "hashPath": "dapper.2.1.66.nupkg.sha512"
+    },
+    "Dapper.Oracle/2.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vB1b+fkh1sFQOQcaXtGV48sxnvv9K5ituPWIkeP1jU95u4NnSs+bOgBb+Lfm29GNRIQDQAQougoCbYg7C+hD2Q==",
+      "path": "dapper.oracle/2.0.2",
+      "hashPath": "dapper.oracle.2.0.2.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/10.0.2": {
       "type": "package",

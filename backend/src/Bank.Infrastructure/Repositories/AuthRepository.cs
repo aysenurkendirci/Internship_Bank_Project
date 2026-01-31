@@ -2,6 +2,7 @@ using Bank.Application.Abstractions.Repositories;
 using Bank.Contracts.Auth;
 using Bank.Infrastructure.Oracle;
 using Dapper;
+using Dapper.Oracle;
 using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,21 +18,43 @@ public sealed class AuthRepository : IAuthRepository
         _db = db;
     }
 
+    // ✅ exception fırlatan (login için kullanıyorsun)
     public async Task<UserRow> GetUserByTcAsync(string tcNo)
     {
+        var p = new OracleDynamicParameters();
+        p.Add("P_TC_NO", tcNo, OracleMappingType.Varchar2, ParameterDirection.Input);
+        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+
         var result = await _db.QuerySingleAsync<UserRow>(
             "PKG_AUTH.GET_USER_BY_TCN",
-            new { P_TC_NO = tcNo }
+            p
         );
 
         return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {tcNo}");
     }
 
+    // ✅ null dönen (register’da “var mı?” kontrolü için)
+    public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo)
+    {
+        var p = new OracleDynamicParameters();
+        p.Add("P_TC_NO", tcNo, OracleMappingType.Varchar2, ParameterDirection.Input);
+        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+
+        return await _db.QuerySingleAsync<UserRow>(
+            "PKG_AUTH.GET_USER_BY_TCN",
+            p
+        );
+    }
+
     public async Task<CredentialRow> GetCredentialsAsync(long userId)
     {
+        var p = new OracleDynamicParameters();
+        p.Add("P_USER_ID", userId, OracleMappingType.Int64, ParameterDirection.Input);
+        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+
         var result = await _db.QuerySingleAsync<CredentialRow>(
             "PKG_AUTH.GET_CREDENTIALS",
-            new { P_USER_ID = userId }
+            p
         );
 
         return result ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
@@ -41,7 +64,6 @@ public sealed class AuthRepository : IAuthRepository
     {
         var p = new DynamicParameters();
 
-        // IN parametreler (DB signature ile birebir)
         p.Add("P_TC_NO", req.TcNo, DbType.String, ParameterDirection.Input);
         p.Add("P_FIRST_NAME", req.FirstName, DbType.String, ParameterDirection.Input);
         p.Add("P_LAST_NAME", req.LastName, DbType.String, ParameterDirection.Input);
@@ -50,17 +72,16 @@ public sealed class AuthRepository : IAuthRepository
         p.Add("P_MEMBERSHIP", req.Membership, DbType.String, ParameterDirection.Input);
         p.Add("P_PASSWORD_HASH", passwordHash, DbType.String, ParameterDirection.Input);
 
-        // OUT parametre
         p.Add("O_USER_ID", dbType: DbType.Int64, direction: ParameterDirection.Output);
 
         await _db.ExecuteAsync("PKG_AUTH.REGISTER_USER", p);
 
-        var userId = p.Get<long>("O_USER_ID");
-        if (userId <= 0)
+        var newUserId = p.Get<long>("O_USER_ID");
+        if (newUserId <= 0)
             throw new InvalidOperationException("Kullanıcı oluşturuldu ama O_USER_ID dönmedi.");
 
-        // İstersen burada userId ile getiren ayrı proc varsa onu kullanabiliriz.
-        // Şimdilik TC ile çekiyoruz:
+        // ✅ kayıt sonrası tekrar çekiyoruz// ExecuteAsync satırından hemen sonra bunu ekle:
+        Console.WriteLine($"Yeni Kullanıcı ID: {newUserId}");
         return await GetUserByTcAsync(req.TcNo);
     }
 
