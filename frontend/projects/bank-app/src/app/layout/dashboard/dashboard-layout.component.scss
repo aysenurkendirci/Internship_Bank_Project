@@ -1,14 +1,4 @@
-.wrap{ min-height:100vh; display:grid; grid-template-columns:260px 1fr; background:#f8fafc; }
-.side{ background:#fff; border-right:1px solid #eef2f7; padding:18px; }
-.brand{ font-weight:950; color:#0f172a; letter-spacing:.06em; margin-bottom:14px; }
-.nav{ display:flex; flex-direction:column; gap:8px; }
-.nav a{
-  padding:12px 12px; border-radius:14px; font-weight:800;
-  color:#334155; cursor:pointer;
-}
-.nav a.active{ background: rgba(37,99,235,.10); color:#2563eb; }
-.main{ padding:28px; }
-@media (max-width: 960px){
-  .wrap{ grid-template-columns:1fr; }
-  .side{ display:none; }
+.activeLink {
+  background: rgba(37, 99, 235, 0.10);
+  color: #2563eb;
 }

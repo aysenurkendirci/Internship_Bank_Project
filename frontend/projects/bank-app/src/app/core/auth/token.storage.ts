@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
 
-const KEY = 'bank_token';
-
 @Injectable({ providedIn: 'root' })
 export class TokenStorage {
+  private key = 'token';
+
   get(): string | null {
-    return localStorage.getItem(KEY);
+    return localStorage.getItem(this.key);
   }
+
   set(token: string) {
-    localStorage.setItem(KEY, token);
+    localStorage.setItem(this.key, token);
   }
+
   clear() {
-    localStorage.removeItem(KEY);
+    localStorage.removeItem(this.key);
   }
 }

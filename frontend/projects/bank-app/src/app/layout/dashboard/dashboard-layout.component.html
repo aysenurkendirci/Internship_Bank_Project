@@ -1,16 +1,34 @@
-<div class="wrap">
-  <aside class="side">
-    <div class="brand">NEOBANK</div>
-    <nav class="nav">
-      <a class="active">Ana Sayfa</a>
-      <a>Cüzdanım</a>
-      <a>İstatistikler</a>
-      <a>Kartlarım</a>
-      <a>Transferler</a>
+<div class="min-h-screen flex">
+  <aside class="w-80 bg-white p-8 flex flex-col border-r border-slate-100 hidden lg:flex">
+    <div class="flex items-center gap-3 mb-12">
+      <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
+        <span class="material-symbols-outlined">bolt</span>
+      </div>
+      <span class="text-2xl font-black text-slate-900 tracking-tight">NeoBank</span>
+    </div>
+
+    <nav class="space-y-2 flex-1">
+      <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-blue-600" class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">
+        <span class="material-symbols-outlined">grid_view</span> Ana Sayfa
+      </a>
+      <a class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50">
+        <span class="material-symbols-outlined">sync_alt</span> İşlemler
+      </a>
+      <a class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50">
+        <span class="material-symbols-outlined">credit_card</span> Kartlarım
+      </a>
     </nav>
+
+    <div class="mt-auto bg-slate-50 p-6 rounded-[32px] border border-slate-100">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">PRO PLAN</p>
+      <p class="text-sm font-black text-slate-900 mb-4">%2 Nakit İade Alın</p>
+      <button class="w-full py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm">Şimdi Yükselt</button>
+    </div>
   </aside>
 
-  <main class="main">
-    <router-outlet></router-outlet>
+  <main class="flex-1 p-10 overflow-y-auto">
+    <div class="max-w-6xl mx-auto">
+      <router-outlet></router-outlet>
+    </div>
   </main>
 </div>

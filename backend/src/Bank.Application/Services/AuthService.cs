@@ -20,7 +20,6 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req)
     {
-        // ✅ 500 yerine kontrollü hata: "zaten var"
         var existing = await _repo.GetUserByTcOrDefaultAsync(req.TcNo);
         if (existing is not null)
             throw new InvalidOperationException("Bu TC ile kayıt zaten var.");

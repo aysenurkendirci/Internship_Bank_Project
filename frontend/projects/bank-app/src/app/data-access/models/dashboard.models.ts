@@ -1,9 +1,16 @@
+// src/app/data-access/models/dashboard.models.ts
 export interface DashboardResponse {
-  user: { userId: number; firstName: string; membership: string };
+  user: UserSummary;
   totalWealth: number;
   wealthChangeRate: number;
   cards: CardItem[];
-  recentTransactions: TransactionItem[];
+  recentTransactions: TransactionItem[]; // Backend'deki IReadOnlyList ile uyumlu
+}
+
+export interface UserSummary {
+  userId: number;
+  firstName: string;
+  membership: string;
 }
 
 export interface CardItem {
@@ -12,16 +19,16 @@ export interface CardItem {
   cardType: string;
   isVirtual: boolean;
   status: string;
-  balance: number;
+  balance: number; // Backend CardItem.Balance property'si
   settings: { contactless: boolean; onlineUse: boolean };
   limits: { dailyLimit: number; monthlyLimit: number };
 }
 
 export interface TransactionItem {
   txId: number;
-  title: string;
+  title: string; // Backend TransactionItem.Title (t.DESCRIPTION'dan maplendi)
   category: string;
   amount: number;
-  direction: 'Inbound' | 'Outbound';
+  direction: 'Inbound' | 'Outbound'; // Backend Direction string'i
   createdAt: string;
 }

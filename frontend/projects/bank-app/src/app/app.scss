@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Resimdeki modern gri arka plan */
+body {
+  background-color: #f6f8fc;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Kartlar için gerekli özel renkler */
+.elegant-gradient-1 { background: linear-gradient(135deg, #2d3436, #000000); }
+.elegant-gradient-2 { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.elegant-gradient-3 { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+
+/* Scrollbar gizleme (Kartlar için) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 
-// ✅ UI components: corrected paths
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';
 
@@ -19,18 +18,30 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = false;
   error?: string;
+  success?: string;
 
   form = this.fb.group({
-    // ✅ Senin backend login req'in tcNo ise:
     tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
+  ngOnInit() {
+    this.route.queryParamMap.subscribe(params => {
+      if (params.get('registered') === '1') {
+        this.success = params.get('message') ?? 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!';
+      }
+      const tcNo = params.get('tcNo');
+      if (tcNo) this.form.controls.tcNo.setValue(tcNo);
+    });
+  }
+
   submit() {
     if (this.form.invalid || this.loading) return;
+    this.form.markAllAsTouched();
 
     this.loading = true;
     this.error = undefined;

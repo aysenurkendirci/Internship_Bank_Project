@@ -7,21 +7,20 @@ namespace Bank.Api.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]
+[Authorize]
 public sealed class DashboardController : ControllerBase
 {
-    private readonly IDashboardService _dashboard;
+    private readonly IDashboardService _service;
 
-    public DashboardController(IDashboardService dashboard) => _dashboard = dashboard;
+    public DashboardController(IDashboardService service)
+    {
+        _service = service;
+    }
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<DashboardResponse>> Get(CancellationToken ct)
     {
-        var userIdClaim = User.FindFirst("userId")?.Value;
-
-        if (!long.TryParse(userIdClaim, out var userId))
-            return Unauthorized("userId claim not found in token.");
-
-        return Ok(await _dashboard.GetDashboardAsync(userId, ct));
+        var res = await _service.GetDashboardAsync(ct);
+        return Ok(res);
     }
 }

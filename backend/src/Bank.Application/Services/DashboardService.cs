@@ -8,8 +8,17 @@ public sealed class DashboardService : IDashboardService
 {
     private readonly IDashboardRepository _repo;
 
-    public DashboardService(IDashboardRepository repo) => _repo = repo;
+    public DashboardService(IDashboardRepository repo)
+    {
+        _repo = repo;
+    }
 
-    public Task<DashboardResponse> GetDashboardAsync(long userId, CancellationToken ct = default)
-        => _repo.GetDashboardAsync(userId, ct);
+    public Task<DashboardResponse> GetDashboardAsync(CancellationToken ct = default)
+        => _repo.GetDashboardAsync(userId: 1, ct); // şimdilik demo userId
+
+    public async Task<IReadOnlyList<TransactionItem>> GetRecentTransactionsAsync(CancellationToken ct = default)
+    {
+        var dash = await GetDashboardAsync(ct);
+        return dash.RecentTransactions;
+    }
 }

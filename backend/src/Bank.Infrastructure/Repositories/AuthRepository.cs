@@ -2,10 +2,11 @@ using Bank.Application.Abstractions.Repositories;
 using Bank.Contracts.Auth;
 using Bank.Infrastructure.Oracle;
 using Dapper;
-using Dapper.Oracle;
+using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 
 namespace Bank.Infrastructure.Repositories;
 
@@ -19,46 +20,44 @@ public sealed class AuthRepository : IAuthRepository
     }
 
     // ✅ exception fırlatan (login için kullanıyorsun)
-    public async Task<UserRow> GetUserByTcAsync(string tcNo)
-    {
-        var p = new OracleDynamicParameters();
-        p.Add("P_TC_NO", tcNo, OracleMappingType.Varchar2, ParameterDirection.Input);
-        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+   public async Task<UserRow> GetUserByTcAsync(string tcNo)
+{
+    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
+    p.Add("P_TC_NO", tcNo, OracleDbType.Varchar2, ParameterDirection.Input);
+    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
 
-        var result = await _db.QuerySingleAsync<UserRow>(
-            "PKG_AUTH.GET_USER_BY_TCN",
-            p
-        );
+    var result = await _db.QuerySingleAsync<UserRow>(
+        "GENCBANK.PKG_AUTH.GET_USER_BY_TCN",
+        p
+    );
 
-        return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {tcNo}");
-    }
+    return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {tcNo}");
+}
+public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo)
+{
+    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
+    p.Add("P_TC_NO", tcNo, OracleDbType.Varchar2, ParameterDirection.Input);
+    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
 
-    // ✅ null dönen (register’da “var mı?” kontrolü için)
-    public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo)
-    {
-        var p = new OracleDynamicParameters();
-        p.Add("P_TC_NO", tcNo, OracleMappingType.Varchar2, ParameterDirection.Input);
-        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+    return await _db.QuerySingleAsync<UserRow>(
+        "GENCBANK.PKG_AUTH.GET_USER_BY_TCN",
+        p
+    );
+}
 
-        return await _db.QuerySingleAsync<UserRow>(
-            "PKG_AUTH.GET_USER_BY_TCN",
-            p
-        );
-    }
+   public async Task<CredentialRow> GetCredentialsAsync(long userId)
+{
+    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
+    p.Add("P_USER_ID", userId, OracleDbType.Int64, ParameterDirection.Input);
+    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
 
-    public async Task<CredentialRow> GetCredentialsAsync(long userId)
-    {
-        var p = new OracleDynamicParameters();
-        p.Add("P_USER_ID", userId, OracleMappingType.Int64, ParameterDirection.Input);
-        p.Add("O_CURSOR", dbType: OracleMappingType.RefCursor, direction: ParameterDirection.Output);
+    var result = await _db.QuerySingleAsync<CredentialRow>(
+        "GENCBANK.PKG_AUTH.GET_CREDENTIALS",
+        p
+    );
 
-        var result = await _db.QuerySingleAsync<CredentialRow>(
-            "PKG_AUTH.GET_CREDENTIALS",
-            p
-        );
-
-        return result ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
-    }
+    return result ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
+}
 
     public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash)
     {

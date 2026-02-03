@@ -14,20 +14,44 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
     </div>
   `,
   styles: [`
-    .field{ display:flex; flex-direction:column; gap:6px; }
-    label{ font-size:12px; font-weight:800; color:#64748b; }
-    .inp{
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.25);
-      outline:none;
-      transition:.2s;
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .inp:focus{
-      border-color: rgba(37,99,235,.55);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+
+    label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #cbd5f5;
     }
-    .err{ color:#ef4444; font-weight:700; }
+
+    .inp {
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, .25);
+      outline: none;
+      transition: .2s;
+
+      background: #ffffff;
+      color: #0f172a;          /* 👈 ASIL FIX */
+      font-weight: 600;
+    }
+
+    .inp::placeholder {
+      color: #94a3b8;          /* 👈 placeholder görünür */
+      font-weight: 500;
+    }
+
+    .inp:focus {
+      border-color: rgba(37, 99, 235, .55);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+    }
+
+    .err {
+      color: #ef4444;
+      font-weight: 700;
+    }
   `]
 })
 export class InputComponent {

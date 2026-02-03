@@ -1,49 +1,109 @@
-<div class="page">
-  <div class="card">
-    <div class="header-section">
-      <h1>Kayıt Ol</h1>
-      <p>NeoBank hesabınızı oluşturun.</p>
+<div class="shell">
+  <section class="hero">
+    <div class="hero__bg"></div>
+    <div class="hero__grid"></div>
+    <div class="hero__content">
+      <div class="brand">
+        <div class="brand__icon">🏦</div>
+        <div class="brand__text">NEO<span>Bank</span></div>
+      </div>
+
+      <div class="hero__copy">
+        <h1>FİNANSIN <br><span>YENİ NESİL</span><br> MİMARİSİ.</h1>
+        <p>Kurumsal varlıklarınızı kuantum hızıyla yönetin, geleceğin bankacılık ekosisteminde yerinizi alın.</p>
+      </div>
+
+      <div class="hero__meta">
+        <span>EST. 2024</span><i></i><span>NEXT-GEN PROTOCOL</span>
+      </div>
     </div>
+  </section>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-      <div class="row2">
-        <lib-input label="Ad" placeholder="Adınız" [control]="form.controls.firstName"></lib-input>
-        <lib-input label="Soyad" placeholder="Soyadınız" [control]="form.controls.lastName"></lib-input>
-      </div>
-
-      <lib-input label="T.C. Kimlik No" placeholder="11 haneli" [control]="form.controls.tcNo"></lib-input>
-      <lib-input label="E-Posta" placeholder="ornek@mail.com" [control]="form.controls.email"></lib-input>
-      <lib-input label="Telefon" placeholder="05xx..." [control]="form.controls.phone"></lib-input>
-      <lib-input label="Şifre" type="password" placeholder="••••••••" [control]="form.controls.password"></lib-input>
-
-      <div class="membership-toggle">
-        <label class="label-hint">Üyelik Tipi</label>
-        <div class="seg">
-          <button type="button" class="seg-btn"
-            [class.active]="form.controls.membership.value === 'Personal'"
-            (click)="setMembership('Personal')">Bireysel</button>
-
-          <button type="button" class="seg-btn" 
-            [class.active]="form.controls.membership.value === 'Corporate'"
-            (click)="setMembership('Corporate')">Kurumsal</button>
+  <section class="auth">
+    <div class="auth__wrap">
+      <div class="card">
+        <div class="card__head">
+          <h2>Kayıt Ol</h2>
+          <p>NeoBank hesabınızı oluşturun.</p>
         </div>
-      </div>
 
-      <div class="err-container" *ngIf="error">
-        <span class="err-text">{{ error }}</span>
-      </div>
+        <div class="notice notice--error" *ngIf="error">{{ error }}</div>
 
-      <lib-button 
-        type="submit" 
-        [disabled]="loading || form.invalid"
-        (click)="form.valid ? submit() : null">
-        {{ loading ? 'Hesap Oluşturuluyor...' : 'KAYIT OL' }}
-      </lib-button>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+          <div class="row2">
+            <lib-input
+              label="Ad"
+              placeholder="Adınız"
+              [control]="form.controls.firstName"
+              [showError]="form.controls.firstName.touched && form.controls.firstName.invalid"
+              errorText="Ad en az 2 karakter olmalı">
+            </lib-input>
 
-      <div class="footer">
-        <span>Zaten hesabın var mı?</span>
-        <a routerLink="/auth/login" class="login-link">Giriş Yap</a>
+            <lib-input
+              label="Soyad"
+              placeholder="Soyadınız"
+              [control]="form.controls.lastName"
+              [showError]="form.controls.lastName.touched && form.controls.lastName.invalid"
+              errorText="Soyad en az 2 karakter olmalı">
+            </lib-input>
+          </div>
+
+          <lib-input
+            label="T.C. Kimlik No"
+            placeholder="11 haneli"
+            [control]="form.controls.tcNo"
+            [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
+            errorText="TC No 11 haneli olmalı">
+          </lib-input>
+
+          <lib-input
+            label="E-Posta"
+            placeholder="ornek@mail.com"
+            type="email"
+            [control]="form.controls.email"
+            [showError]="form.controls.email.touched && form.controls.email.invalid"
+            errorText="Geçerli bir e-posta girin">
+          </lib-input>
+
+          <lib-input
+            label="Telefon"
+            placeholder="05xx..."
+            type="tel"
+            [control]="form.controls.phone">
+          </lib-input>
+
+          <lib-input
+            label="Şifre"
+            type="password"
+            placeholder="••••••••"
+            [control]="form.controls.password"
+            [showError]="form.controls.password.touched && form.controls.password.invalid"
+            errorText="Şifre en az 6 karakter olmalı">
+          </lib-input>
+
+          <div class="membership">
+            <div class="label">Üyelik Tipi</div>
+            <div class="seg">
+              <button type="button" class="seg-btn"
+                [class.active]="form.controls.membership.value === 'Personal'"
+                (click)="setMembership('Personal')">Bireysel</button>
+
+              <button type="button" class="seg-btn"
+                [class.active]="form.controls.membership.value === 'Corporate'"
+                (click)="setMembership('Corporate')">Kurumsal</button>
+            </div>
+          </div>
+
+          <lib-button type="submit" [disabled]="loading || form.invalid">
+            {{ loading ? 'Hesap oluşturuluyor...' : 'KAYIT OL' }}
+          </lib-button>
+
+          <div class="footer">
+            <span>Zaten hesabın var mı?</span>
+            <a routerLink="/auth/login">Giriş Yap</a>
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
+    </div>
+  </section>
 </div>

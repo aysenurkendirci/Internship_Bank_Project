@@ -9,7 +9,6 @@
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Dapper.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Dapper.Oracle.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
-/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Microsoft.AspNetCore.OpenApi.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Abstractions.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
 /Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Api/bin/Debug/net10.0/Microsoft.IdentityModel.Logging.dll

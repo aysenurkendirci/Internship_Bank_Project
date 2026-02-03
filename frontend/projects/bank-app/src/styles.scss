@@ -1,31 +1,19 @@
-/* You can add global styles to this file, and also import other style files */
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f8fafc;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* senin global stilin devam edebilir */
+body {
+  background-color: #f6f8fc;
+  margin: 0;
   font-family: 'Inter', sans-serif;
 }
 
-.auth-card {
-  background: white;
-  padding: 2.5rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  max-width: 450px;
-  text-align: center;
-}
+/* Kart gradient classların */
+.elegant-gradient-1 { background: linear-gradient(135deg, #2d3436, #0f172a); }
+.elegant-gradient-2 { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.elegant-gradient-3 { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
 
-.auth-header {
-  margin-bottom: 2rem;
-  h1 { color: #1e293b; font-size: 1.5rem; margin-bottom: 0.5rem; }
-  p { color: #64748b; font-size: 0.9rem; }
-}
-
-.primary-btn {
-  margin-top: 1rem;
-  background: #6366f1; // Görseldeki o şık mor/mavi tonu
-  &:hover { background: #4f46e5; }
-}
+/* no-scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

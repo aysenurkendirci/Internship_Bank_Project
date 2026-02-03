@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { finalize, switchMap } from 'rxjs';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 
 import { InputComponent } from '../../../../shared/input/input.component';
@@ -12,7 +12,7 @@ import { ButtonComponent } from '../../../../shared/button/button.component';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'], // ✅ DÜZELTİLDİ
+  styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
@@ -39,6 +39,9 @@ export class RegisterComponent {
   submit() {
     if (this.form.invalid || this.loading) return;
 
+    // tüm hataları göstermek için
+    this.form.markAllAsTouched();
+
     this.loading = true;
     this.error = undefined;
 
@@ -46,14 +49,17 @@ export class RegisterComponent {
 
     this.auth
       .register(payload)
-      .pipe(
-        switchMap(() =>
-          this.auth.login({ tcNo: payload.tcNo, password: payload.password } as any)
-        ),
-        finalize(() => (this.loading = false))
-      )
+      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigateByUrl('/dashboard'),
+        next: () => {
+          this.router.navigate(['/auth/login'], {
+            queryParams: {
+              registered: '1',
+              message: 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!',
+              tcNo: payload.tcNo, // login formuna otomatik basmak istersen
+            },
+          });
+        },
         error: (err: any) => {
           this.error = err?.error?.message ?? err?.message ?? 'Kayıt başarısız.';
         },
