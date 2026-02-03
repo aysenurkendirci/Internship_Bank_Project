@@ -4,118 +4,108 @@ using Bank.Infrastructure.Oracle;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 
+// ✅ AccountItem çakışmasını bitirir (Domain vs Contracts)
+using ContractsAccountItem = Bank.Contracts.Dashboard.AccountItem;
+
 namespace Bank.Infrastructure.Repositories;
 
 public sealed class DashboardRepository : IDashboardRepository
 {
     private readonly OracleExecutor _db;
 
-    public DashboardRepository(OracleExecutor db)
-    {
-        _db = db;
-    }
+    public DashboardRepository(OracleExecutor db) => _db = db;
 
     public async Task<DashboardResponse> GetDashboardAsync(long userId, CancellationToken ct = default)
     {
-        // 1) User summary (PKG_DASHBOARD.GET_USER_SUMMARY)
-        var summaryParams = new OracleDynamicParameters();
-        summaryParams.Add("p_user_id", userId);
-        summaryParams.Add("o_cursor", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
+        // 1) Kullanıcı Özeti ve Null Güvenliği
         var user = await _db.QuerySingleAsync<UserSummaryRow>(
             "PKG_DASHBOARD.GET_USER_SUMMARY",
-            summaryParams
+            CreateParams(userId)
         );
 
         if (user is null)
-            throw new KeyNotFoundException($"Kullanıcı bulunamadı. userId={userId}");
+            throw new KeyNotFoundException($"Kullanıcı bulunamadı. ID: {userId}");
 
-        // 2) Total wealth (PKG_DASHBOARD.GET_TOTAL_WEALTH)
-        var wealthParams = new OracleDynamicParameters();
-        wealthParams.Add("p_user_id", userId);
-        wealthParams.Add("o_cursor", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
+        // 2) Toplam Varlık
         var wealth = await _db.QuerySingleAsync<TotalWealthRow>(
             "PKG_DASHBOARD.GET_TOTAL_WEALTH",
-            wealthParams
+            CreateParams(userId)
         );
-        var totalWealth = wealth?.TOTAL_WEALTH ?? 0m;
 
-        // 3) Cards list (PKG_DASHBOARD.GET_CARDS)
-        var cardsParams = new OracleDynamicParameters();
-        cardsParams.Add("p_user_id", userId);
-        cardsParams.Add("o_cursor", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
-        var cardsRows = await _db.QueryAsync<CardRow>(
+        // 3) Kartlar
+        var cardRows = await _db.QueryAsync<CardRow>(
             "PKG_DASHBOARD.GET_CARDS",
-            cardsParams
+            CreateParams(userId)
         );
 
-        // 4) Recent transactions list (PKG_DASHBOARD.GET_RECENT_TRANSACTIONS)
-        var txParams = new OracleDynamicParameters();
-        txParams.Add("p_user_id", userId);
+        // 4) Son İşlemler
+        var txParams = CreateParams(userId);
         txParams.Add("p_take", 5);
-        txParams.Add("o_cursor", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
 
         var txRows = await _db.QueryAsync<TransactionRow>(
             "PKG_DASHBOARD.GET_RECENT_TRANSACTIONS",
             txParams
         );
 
-        // 5) Map -> Contracts DTO
-        var cards = new List<CardItem>(cardsRows.Count);
-        foreach (var c in cardsRows)
-        {
-            cards.Add(new CardItem(
+        // 5) Hesaplar Listesi
+        var accRows = await _db.QueryAsync<AccountRow>(
+            "PKG_DASHBOARD.GET_ACCOUNTS",
+            CreateParams(userId)
+        );
+
+        // ✅ Domain.AccountItem ile çakışmayı bitiren mapping (tam isim / alias)
+        var accounts = accRows.Select(a => new ContractsAccountItem(
+            a.ACCOUNT_ID,
+            a.TYPE == "VADESIZ" ? "Vadesiz TL"
+              : (a.TYPE == "VADELI" ? "Vadeli Mevduat" : "Dolar Hesabı"),
+            a.IBAN,
+            a.BALANCE,
+            a.STATUS,
+            a.TYPE == "VADELI" ? "%32 Faiz" : "Aktif",
+            a.TYPE == "VADESIZ" ? "bank"
+              : (a.TYPE == "VADELI" ? "trend" : "wallet")
+        )).ToList();
+
+        return new DashboardResponse(
+            new UserSummary(user.USER_ID, user.FIRST_NAME, user.MEMBERSHIP),
+            wealth?.TOTAL_WEALTH ?? 0m,
+            0.024m,
+            cardRows.Select(c => new CardItem(
                 c.CARD_ID,
-                MaskCard(c.CARD_NO),
+                Mask(c.CARD_NO),
                 c.CARD_TYPE,
                 c.IS_VIRTUAL == "Y",
                 c.STATUS,
                 c.ACCOUNT_BALANCE,
-                new CardSettings(
-                    c.CONTACTLESS == "Y",
-                    c.ONLINE_USE == "Y"
-                ),
-                new CardLimits(
-                    c.DAILY_LIMIT,
-                    c.MONTHLY_LIMIT
-                )
-            ));
-        }
-
-        var recent = new List<TransactionItem>(txRows.Count);
-        foreach (var t in txRows)
-        {
-            recent.Add(new TransactionItem(
+                new CardSettings(c.CONTACTLESS == "Y", c.ONLINE_USE == "Y"),
+                new CardLimits(c.DAILY_LIMIT, c.MONTHLY_LIMIT)
+            )).ToList(),
+            txRows.Select(t => new TransactionItem(
                 t.TX_ID,
                 t.DESCRIPTION,
                 t.CATEGORY,
                 t.AMOUNT,
                 t.DIRECTION,
                 t.CREATED_AT
-            ));
-        }
-
-        var wealthChangeRate = 0.024m; // MVP Sabit Değer
-
-        return new DashboardResponse(
-            new UserSummary(user.USER_ID, user.FIRST_NAME, user.MEMBERSHIP),
-            totalWealth,
-            wealthChangeRate,
-            cards,
-            recent
+            )).ToList(),
+            accounts
         );
     }
 
-    private static string MaskCard(string raw)
+    private OracleDynamicParameters CreateParams(long userId)
     {
-        if (string.IsNullOrWhiteSpace(raw) || raw.Length < 4) return "****";
-        var last4 = raw[^4..];
-        return $"**** **** **** {last4}";
+        var p = new OracleDynamicParameters();
+        p.Add("p_user_id", userId);
+        p.Add("o_cursor", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
+        return p;
     }
 
-    // --- Oracle row types (DB kolon isimleri ile birebir) ---
+    private string Mask(string s)
+        => string.IsNullOrWhiteSpace(s) || s.Length < 4
+            ? "****"
+            : $"**** **** **** {s[^4..]}";
+
+    // DB Modelleri (Oracle Kolon İsimlerine Uygun)
     private sealed class UserSummaryRow
     {
         public long USER_ID { get; set; }
@@ -126,6 +116,15 @@ public sealed class DashboardRepository : IDashboardRepository
     private sealed class TotalWealthRow
     {
         public decimal TOTAL_WEALTH { get; set; }
+    }
+
+    private sealed class AccountRow
+    {
+        public long ACCOUNT_ID { get; set; }
+        public string TYPE { get; set; } = "";
+        public string IBAN { get; set; } = "";
+        public decimal BALANCE { get; set; }
+        public string STATUS { get; set; } = "";
     }
 
     private sealed class CardRow

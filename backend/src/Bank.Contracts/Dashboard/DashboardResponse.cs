@@ -5,14 +5,11 @@ public sealed record DashboardResponse(
     decimal TotalWealth,
     decimal WealthChangeRate,
     IReadOnlyList<CardItem> Cards,
-    IReadOnlyList<TransactionItem> RecentTransactions
+    IReadOnlyList<TransactionItem> RecentTransactions,
+    IReadOnlyList<AccountItem> Accounts
 );
 
-public sealed record UserSummary(
-    long UserId,
-    string FirstName,
-    string Membership
-);
+public sealed record UserSummary(long UserId, string FirstName, string Membership);
 
 public sealed record CardItem(
     long CardId,
@@ -35,4 +32,15 @@ public sealed record TransactionItem(
     decimal Amount,
     string Direction,
     DateTime CreatedAt
+);
+
+// Contracts tarafındaki AccountItem (kalacaksa)
+public sealed record AccountItem(
+    long AccountId,
+    string AccountName,
+    string AccountNo,
+    decimal Balance,
+    string Status,
+    string? Subtitle,
+    string IconType
 );

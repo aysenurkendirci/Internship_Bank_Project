@@ -1,10 +1,10 @@
-// src/app/data-access/models/dashboard.models.ts
 export interface DashboardResponse {
   user: UserSummary;
   totalWealth: number;
   wealthChangeRate: number;
   cards: CardItem[];
-  recentTransactions: TransactionItem[]; // Backend'deki IReadOnlyList ile uyumlu
+  recentTransactions: TransactionItem[];
+  accounts: AccountItem[]; // Tasarımdaki sağ sütun için gerekli
 }
 
 export interface UserSummary {
@@ -19,16 +19,26 @@ export interface CardItem {
   cardType: string;
   isVirtual: boolean;
   status: string;
-  balance: number; // Backend CardItem.Balance property'si
-  settings: { contactless: boolean; onlineUse: boolean };
-  limits: { dailyLimit: number; monthlyLimit: number };
+  balance: number;
+  settings?: { contactless: boolean; onlineUse: boolean };
+  limits?: { dailyLimit: number; monthlyLimit: number };
 }
 
 export interface TransactionItem {
   txId: number;
-  title: string; // Backend TransactionItem.Title (t.DESCRIPTION'dan maplendi)
+  title: string;
   category: string;
   amount: number;
-  direction: 'Inbound' | 'Outbound'; // Backend Direction string'i
+  direction: 'Inbound' | 'Outbound';
   createdAt: string;
+}
+
+export interface AccountItem {
+  accountId: number;
+  accountName: string;
+  accountNo: string;
+  balance: number;
+  status: string;
+  subtitle?: string; // Örn: "%32 Faiz" veya "Aktif"
+  iconType: 'bank' | 'trend' | 'wallet';
 }

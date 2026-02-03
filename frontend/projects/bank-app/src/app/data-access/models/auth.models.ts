@@ -19,3 +19,4 @@ export interface AuthResponse {
   fullName: string;
   token: string;
 }
+
