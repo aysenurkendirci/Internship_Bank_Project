@@ -1,33 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-import { AuthApi } from '../../data-access/api/auth.api';
-import { LoginRequest, RegisterRequest } from '../../data-access/models/auth.models';
-import { TokenStorage } from './token.storage';
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthService {
-  private api = inject(AuthApi);
-  private token = inject(TokenStorage);
+  private http = inject(HttpClient);
 
-  login(req: LoginRequest) {
-    return this.api.login(req).pipe(
-      tap((res: any) => {
-        const token = res?.token;
-        if (token) this.token.set(token);
-      })
-    );
+  private baseUrl = 'http://localhost:5164/api/auth';
+
+  login(payload: { email: string; password: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/login`, payload);
   }
 
-  register(req: RegisterRequest) {
-    return this.api.register(req);
-  }
-
-  logout() {
-    this.token.clear();
-  }
-
-  isLoggedIn() {
-    return !!this.token.get();
+  register(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/register`, payload);
   }
 }

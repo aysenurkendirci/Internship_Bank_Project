@@ -5,7 +5,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   selector: 'app-dashboard-layout',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
-  templateUrl: './dashboard-layout.component.html', // ✅ Düzeltildi: dashboard.component.html değil
+  templateUrl: './dashboard-layout.component.html', 
   styleUrl: './dashboard-layout.component.scss',
 })
 export class DashboardLayoutComponent {}

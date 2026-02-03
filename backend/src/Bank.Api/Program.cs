@@ -1,22 +1,25 @@
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Bank.Infrastructure.Oracle;
+
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Abstractions.Services;
 using Bank.Application.Abstractions.Repositories;
+
 using Bank.Application.Services;
 using Bank.Infrastructure.Repositories;
 using Bank.Infrastructure.Security;
+
+using Bank.Api.Security; 
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Json; // JSON ayarları için gerekli
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1) SERVICES (SERVİSLER) ---
+// --- 1) SERVICES ---
 
-// ✅ JSON Opsiyonları ile Controller Ekleme (camelCase yapılandırması)
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -26,7 +29,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-// ✅ GÜNCEL SWAGGER (JWT Destekli)
+// ✅ Swagger (JWT)
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bank API", Version = "v1" });
@@ -38,7 +41,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "JWT Authorization header. Sadece token'ı yapıştırmanız yeterlidir. Örn: 'abc123...'"
+        Description = "JWT Authorization header. Token'ı yapıştırın. Örn: 'abc123...'"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -57,7 +60,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ CORS (Angular için)
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -68,20 +71,25 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Oracle Config & DB Connection
+// ✅ Oracle
 builder.Services.Configure<OracleOptions>(builder.Configuration.GetSection("Oracle"));
 builder.Services.AddSingleton<OracleConnectionFactory>();
 builder.Services.AddScoped<OracleExecutor>();
 
-// ✅ Dependency Injection (DI) Kayıtları
+// ✅ CurrentUser için gerekli
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
+// ✅ DI
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+
 builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
-// ✅ Authentication & Authorization (JWT Yapılandırması)
+// ✅ JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing");
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience is missing");
@@ -98,27 +106,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            ClockSkew = TimeSpan.Zero 
+            ClockSkew = TimeSpan.Zero
         };
     });
 
 builder.Services.AddAuthorization();
 
-// --- 2) MIDDLEWARE (ARA KATMANLAR) ---
-
+// --- 2) MIDDLEWARE ---
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bank API V1");
-    });
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bank API V1"); });
 }
 
-// Önemli Sıralama: CORS -> Auth -> Map
+// sıra: CORS -> Auth -> Controllers
 app.UseCors("AllowAngular");
-
 app.UseAuthentication();
 app.UseAuthorization();
 

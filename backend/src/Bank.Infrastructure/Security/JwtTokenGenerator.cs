@@ -18,19 +18,21 @@ public sealed class JwtTokenGenerator : ITokenGenerator
 
     public string Generate(long userId, string? email)
     {
-        var issuer = _config["Jwt:Issuer"]!;
-        var audience = _config["Jwt:Audience"]!;
-        var key = _config["Jwt:Key"]!; // Program.cs ile aynı!
+        var key = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
+        var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing");
+        var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience is missing");
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+            // ✅ Dashboard bununla userId okuyacak
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
         };
 
         if (!string.IsNullOrWhiteSpace(email))
+        {
+            claims.Add(new Claim(ClaimTypes.Email, email));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, email));
+        }
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
@@ -39,7 +41,8 @@ public sealed class JwtTokenGenerator : ITokenGenerator
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            notBefore: DateTime.UtcNow,
+            expires: DateTime.UtcNow.AddHours(6),
             signingCredentials: creds
         );
 

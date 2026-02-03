@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { ButtonComponent } from '../../../../shared/button/button.component';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -50,7 +50,18 @@ export class LoginComponent {
       .login(this.form.getRawValue() as any)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigateByUrl('/dashboard'),
+        next: (res: any) => {
+          // Token kontrolü ve saklanması
+          const token = res?.token ?? res?.jwt;
+
+          if (token) {
+            localStorage.setItem('token', token);
+          } else {
+            console.warn('Login response içinde token/jwt bulunamadı:', res);
+          }
+
+          this.router.navigateByUrl('/dashboard');
+        },
         error: (err: any) => {
           this.error = err?.error?.message ?? err?.message ?? 'Giriş başarısız';
         },
