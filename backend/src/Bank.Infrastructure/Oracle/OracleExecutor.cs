@@ -11,8 +11,6 @@ public sealed class OracleExecutor
     public OracleExecutor(OracleConnectionFactory factory)
     {
         _factory = factory;
-        
-        // ✅ 1. ÇÖZÜM: Veritabanındaki USER_ID kolonunu C# tarafındaki UserId ile otomatik eşler.
         DefaultTypeMap.MatchNamesWithUnderscores = true;
     }
 
@@ -21,15 +19,11 @@ public sealed class OracleExecutor
         using var conn = _factory.CreateConnection();
         await conn.OpenAsync();
     }
-
-    // REF CURSOR dönen prosedürler için güvenli okuma
     public async Task<T?> QuerySingleAsync<T>(string procName, object? param = null)
     {
         using var conn = _factory.CreateConnection();
         await conn.OpenAsync();
 
-        // ✅ 2. ÇÖZÜM: Oracle bazen RefCursor verisini tam eşleyemez, 
-        // QueryAsync yerine QueryFirstOrDefaultAsync kullanmak daha performanslıdır.
         return await conn.QueryFirstOrDefaultAsync<T>(
             procName,
             param,

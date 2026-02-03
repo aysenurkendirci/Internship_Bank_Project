@@ -3,7 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../../core/auth/auth.service';
+import { AuthService } from '../../../../core 2/auth/auth.service';
 
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';

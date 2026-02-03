@@ -1,9 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../../core/auth/auth.service';
+import { AuthService } from '../../../../core 2/auth/auth.service';
 
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';
@@ -14,7 +14,7 @@ import { ButtonComponent } from '../../../../shared/button/button.component';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -32,7 +32,8 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
       if (params.get('registered') === '1') {
-        this.success = params.get('message') ?? 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!';
+        this.success =
+          params.get('message') ?? 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!';
       }
       const tcNo = params.get('tcNo');
       if (tcNo) this.form.controls.tcNo.setValue(tcNo);
@@ -40,8 +41,8 @@ export class LoginComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid || this.loading) return;
     this.form.markAllAsTouched();
+    if (this.form.invalid || this.loading) return;
 
     this.loading = true;
     this.error = undefined;
@@ -51,14 +52,17 @@ export class LoginComponent implements OnInit {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
-          // Token kontrolü ve saklanması
-          const token = res?.token ?? res?.jwt;
-
-          if (token) {
-            localStorage.setItem('token', token);
-          } else {
-            console.warn('Login response içinde token/jwt bulunamadı:', res);
+          const token = res?.token ?? res?.jwt ?? res?.accessToken;
+          if (!token) {
+            console.error('Login başarılı ama token dönmedi:', res);
+            this.error = 'Giriş başarılı ama token alınamadı.';
+            return;
           }
+
+          localStorage.setItem('token', token);
+
+          // İstersen fullName'i de tut:
+          if (res?.fullName) localStorage.setItem('fullName', res.fullName);
 
           this.router.navigateByUrl('/dashboard');
         },

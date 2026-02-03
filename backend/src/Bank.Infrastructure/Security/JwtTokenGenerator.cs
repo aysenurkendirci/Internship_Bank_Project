@@ -24,7 +24,6 @@ public sealed class JwtTokenGenerator : ITokenGenerator
 
         var claims = new List<Claim>
         {
-            // ✅ Dashboard bununla userId okuyacak
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
         };
 

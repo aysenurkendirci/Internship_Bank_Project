@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DashboardApi } from '../../data-access/api/dashboard.api';
 
-type DashboardVm = {
+type DashboardResponse = {
   user: { userId: number; firstName: string; membership: string };
   totalWealth: number;
   wealthChangeRate: number;
@@ -19,14 +20,8 @@ type DashboardVm = {
     title: string;
     category: string;
     amount: number;
-    direction: 'IN' | 'OUT' | string;
-    createdAt: string; // backend DateTime -> ISO
-  }>;
-  accounts: Array<{
-    title: string;
-    subtitle: string;
-    balance: number;
-    statusText: string;
+    direction: string;
+    createdAt: string;
   }>;
 };
 
@@ -39,47 +34,43 @@ type DashboardVm = {
 })
 export class DashboardComponent implements OnInit {
   private api = inject(DashboardApi);
+  private router = inject(Router);
 
-  vm: DashboardVm = {
-    user: { userId: 0, firstName: '', membership: '' },
-    totalWealth: 0,
-    wealthChangeRate: 0,
-    cards: [],
-    recentTransactions: [],
-    accounts: [],
-  };
+  loading = false;
+  error?: string;
+
+  // Mentör stili: Başlangıçta değer atamıyoruz (undefined)
+  vm?: DashboardResponse; 
 
   ngOnInit(): void {
+    this.loadDashboardData();
+  }
+
+  private loadDashboardData(): void {
+    this.loading = true;
+    this.error = undefined;
+
     this.api.getDashboard().subscribe({
-      next: (res: any) => {
-        // backend artık camelCase dönecek (Program.cs fix’i ile)
-        const data = res as Omit<DashboardVm, 'accounts'>;
-
-        const accounts = (data.cards ?? []).slice(0, 3).map((c, i) => ({
-          title: c.cardType || (c.isVirtual ? 'Sanal Kart' : 'Kart'),
-          subtitle: `**** ${c.cardNoMasked?.slice(-4) ?? ''}`,
-          balance: c.balance ?? 0,
-          statusText: (c.status || 'Aktif'),
-        }));
-
-        this.vm = { ...data, accounts };
+      next: (res: DashboardResponse) => {
+        // Veri geldiği an vm dolar ve HTML tetiklenir
+        this.vm = res;
+        this.loading = false;
       },
       error: (err) => {
-        console.error('Dashboard API hatası:', err);
+        this.loading = false;
+        if ((err as any)?.status === 401) {
+          localStorage.removeItem('token');
+          this.router.navigateByUrl('/auth/login');
+          return;
+        }
+        this.error = 'Dashboard verileri alınamadı.';
       },
     });
   }
 
+  // [ngClass] için köşeli parantez bağlaması
   cardGradient(i: number): string {
-    const gradients = ['elegant-gradient-1', 'elegant-gradient-2', 'elegant-gradient-3'];
+    const gradients = ['bg-slate-900', 'bg-blue-600', 'bg-indigo-500'];
     return gradients[i % gradients.length];
-  }
-
-  txAmountClass(tx: any) {
-    return tx.direction === 'IN' ? 'text-emerald-600' : 'text-slate-900';
-  }
-
-  txSign(tx: any) {
-    return tx.direction === 'IN' ? '+' : '-';
   }
 }

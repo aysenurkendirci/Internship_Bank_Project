@@ -1,108 +1,82 @@
-<header class="flex justify-between items-center mb-10">
-  <div>
-    <h1 class="text-3xl font-black text-slate-900">Selam, {{ vm.user.firstName || 'Kullanıcı' }}! 👋</h1>
-    <p class="text-slate-400 font-bold">Panelinize tekrar hoş geldiniz.</p>
-  </div>
-  <div class="flex items-center gap-4">
-    <div class="bg-white px-6 py-3 rounded-full flex items-center gap-3 border border-slate-100 shadow-sm">
-      <span class="material-symbols-outlined text-slate-400">search</span>
-      <input type="text" placeholder="İşlem ara..." class="outline-none bg-transparent font-semibold text-sm">
-    </div>
-  </div>
-</header>
-
-<section class="bg-white p-12 rounded-[48px] shadow-sm border border-slate-100 flex justify-between items-center mb-12">
-  <div>
-    <p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em] mb-3">TOPLAM VARLIĞIM</p>
-    <div class="flex items-center gap-4">
-      <span class="text-6xl font-black text-slate-900 tracking-tighter">₺{{ vm.totalWealth | number:'1.2-2' }}</span>
-      <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-black border border-emerald-100">+2.4%</span>
-    </div>
-  </div>
-  <div class="flex gap-4">
-    <button class="bg-blue-600 text-white px-10 py-4 rounded-full font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">+ Para Yükle</button>
-    <button class="bg-white border border-slate-200 px-10 py-4 rounded-full font-black text-slate-900 shadow-sm hover:bg-slate-50 transition-all">Para Gönder</button>
-  </div>
-</section>
-
-<div class="grid grid-cols-12 gap-8">
-  <div class="col-span-12">
-     <h3 class="text-xl font-black text-slate-900 mb-6">Kartlarım</h3>
-     <div class="flex gap-6 overflow-x-auto no-scrollbar pb-6">
-        <div *ngFor="let card of vm.cards; let i = index" 
-             [ngClass]="cardGradient(i)"
-             class="min-w-[400px] h-[240px] rounded-[40px] p-10 text-white flex flex-col justify-between shadow-2xl relative overflow-hidden">
-          <div class="flex justify-between items-start">
-             <span class="text-2xl font-black italic opacity-90 tracking-tighter">NEO</span>
-             <span class="material-symbols-outlined opacity-50">contactless</span>
-          </div>
-          <div class="text-2xl font-bold tracking-[0.3em] opacity-90">{{ card.cardNoMasked }}</div>
-          <div class="flex justify-between items-end">
-             <div>
-                <p class="text-[10px] font-black uppercase opacity-60">BAKİYE</p>
-                <p class="text-2xl font-black">₺{{ card.balance | number:'1.2-2' }}</p>
-             </div>
-             <span class="px-4 py-1.5 bg-white/10 rounded-full text-[10px] font-black uppercase border border-white/20">SANAL</span>
-          </div>
-        </div>
-     </div>
-  </div>
+<div *ngIf="loading" class="p-6 text-center font-bold text-slate-500">
+  Veriler hazırlanıyor...
 </div>
 
-<div class="grid grid-cols-12 gap-8 mt-10">
-  <div class="col-span-12 lg:col-span-8">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-xl font-black text-slate-900">Son İşlemler</h3>
-      <button class="text-sm font-black text-slate-400 hover:text-slate-700">Tümünü Gör</button>
+<div *ngIf="error" class="m-4 p-4 rounded-xl bg-red-50 text-red-700 border border-red-100">
+  {{ error }}
+</div>
+
+<ng-container *ngIf="vm as data">
+  
+  <header class="flex justify-between items-center mb-10 px-4 lg:px-0">
+    <div>
+      <h1 class="text-3xl font-black text-slate-900">
+        Selam, {{ data.user.firstName }}! 👋
+      </h1>
+      <p class="text-slate-400 font-bold">Panelinize tekrar hoş geldiniz.</p>
     </div>
 
-    <div class="space-y-4">
-      <div *ngFor="let tx of vm.recentTransactions"
-           class="bg-white border border-slate-100 rounded-[28px] px-6 py-5 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-slate-500">receipt_long</span>
-          </div>
-          <div>
-            <p class="font-black text-slate-900">{{ tx.title }}</p>
-            <p class="text-xs text-slate-400 font-bold">{{ tx.category }}</p>
-          </div>
+    <div class="hidden md:flex items-center bg-white px-5 py-2.5 rounded-full border border-slate-100 shadow-sm w-72">
+      <span class="material-symbols-outlined text-slate-400 mr-2">search</span>
+      <input type="text" placeholder="İşlem ara..." class="outline-none bg-transparent text-sm font-semibold" />
+    </div>
+  </header>
+
+  <section class="bg-white p-8 md:p-12 rounded-[48px] shadow-sm border border-slate-50 flex flex-col md:flex-row justify-between items-center mb-12">
+    <div>
+      <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">TOPLAM VARLIĞIM</p>
+      <div class="flex items-center gap-4">
+        <span class="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter">
+          ₺{{ data.totalWealth | number: '1.2-2' }}
+        </span>
+        <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-black border border-emerald-100">
+          +{{ (data.wealthChangeRate * 100) | number: '1.1-1' }}%
+        </span>
+      </div>
+    </div>
+
+    <div class="flex gap-4 mt-8 md:mt-0">
+      <button class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg shadow-blue-200 transition-transform active:scale-95">
+        + Para Yükle
+      </button>
+      <button class="bg-slate-50 text-slate-900 px-10 py-4 rounded-2xl font-black hover:bg-slate-100">
+        Para Gönder
+      </button>
+    </div>
+  </section>
+
+  <div class="mb-12">
+    <div class="flex items-center justify-between mb-6 px-2">
+      <h3 class="text-xl font-black text-slate-900">Kartlarım</h3>
+      <button class="text-blue-600 font-bold text-sm hover:underline">Tümünü Gör</button>
+    </div>
+
+    <div class="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0">
+      <div
+        *ngFor="let card of data.cards; let i = index"
+        [ngClass]="cardGradient(i)" 
+        class="min-w-[340px] md:min-w-[400px] h-[230px] rounded-[40px] p-10 text-white flex flex-col justify-between shadow-xl flex-shrink-0"
+      >
+        <div class="flex justify-between items-start">
+          <span class="text-2xl font-black italic tracking-tighter opacity-90">NEO</span>
+          <span class="material-symbols-outlined opacity-50">contactless</span>
         </div>
 
-        <div class="font-black">
-          <span [ngClass]="txAmountClass(tx)">
-            {{ txSign(tx) }}₺{{ tx.amount | number:'1.2-2' }}
+        <div class="text-2xl font-bold tracking-[0.3em] opacity-90">
+          **** **** **** {{ card.cardNoMasked.slice(-4) }}
+        </div>
+
+        <div class="flex justify-between items-end">
+          <div>
+            <p class="text-[10px] font-black uppercase opacity-60 mb-1">BAKİYE</p>
+            <p class="text-2xl font-black">₺{{ card.balance | number: '1.2-2' }}</p>
+          </div>
+          <span class="px-4 py-1.5 bg-white/10 rounded-full text-[10px] font-black border border-white/20 uppercase">
+            {{ card.isVirtual ? 'SANAL' : 'FİZİKSEL' }}
           </span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="col-span-12 lg:col-span-4">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-xl font-black text-slate-900">Hesaplarım</h3>
-      <button class="text-sm font-black text-slate-400 hover:text-slate-700">Tümünü Gör</button>
-    </div>
-
-    <div class="space-y-4">
-      <div *ngFor="let acc of vm.accounts"
-           class="bg-white border border-slate-100 rounded-[28px] p-6 shadow-sm flex items-center justify-between hover:border-blue-100 transition-colors"
-      >
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-slate-500">account_balance</span>
-          </div>
-          <div>
-            <p class="font-black text-slate-900">{{ acc.title }}</p>
-            <p class="text-xs text-slate-400 font-bold">{{ acc.subtitle }}</p>
-          </div>
-        </div>
-
-        <div class="text-right">
-          <p class="font-black text-slate-900">₺{{ acc.balance | number:'1.2-2' }}</p>
-          <p class="text-xs font-black text-emerald-600">{{ acc.statusText }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+</ng-container>

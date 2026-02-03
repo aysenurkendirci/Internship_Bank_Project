@@ -1,1 +1,18 @@
-/* boş bırakabilirsin – Tailwind kullanıyoruz */
+// Kaydırma çubuğunu gizle ama kaydırma özelliğini koru
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Kartların konteyner içinde büzülmesini engellemek için
+.flex-shrink-0 {
+  flex-shrink: 0 !important;
+}
+
+// Kart geçiş efekti
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
+}
