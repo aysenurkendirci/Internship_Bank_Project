@@ -1,6 +1,5 @@
 using Dapper;
 using System.Data;
-using System.Linq;
 
 namespace Bank.Infrastructure.Oracle;
 
@@ -14,12 +13,7 @@ public sealed class OracleExecutor
         DefaultTypeMap.MatchNamesWithUnderscores = true;
     }
 
-    public async Task TestConnectionAsync()
-    {
-        using var conn = _factory.CreateConnection();
-        await conn.OpenAsync();
-    }
-    public async Task<T?> QuerySingleAsync<T>(string procName, object? param = null)
+    public async Task<T?> QuerySingleAsync<T>(string procName, SqlMapper.IDynamicParameters? param = null)
     {
         using var conn = _factory.CreateConnection();
         await conn.OpenAsync();
@@ -31,19 +25,7 @@ public sealed class OracleExecutor
         );
     }
 
-    public async Task<int> ExecuteAsync(string procName, object? param = null)
-    {
-        using var conn = _factory.CreateConnection();
-        await conn.OpenAsync();
-
-        return await conn.ExecuteAsync(
-            procName,
-            param,
-            commandType: CommandType.StoredProcedure
-        );
-    }
-
-    public async Task<IReadOnlyList<T>> QueryAsync<T>(string procName, object? param = null)
+    public async Task<IReadOnlyList<T>> QueryAsync<T>(string procName, SqlMapper.IDynamicParameters? param = null)
     {
         using var conn = _factory.CreateConnection();
         await conn.OpenAsync();
@@ -55,5 +37,17 @@ public sealed class OracleExecutor
         );
 
         return result.AsList();
+    }
+
+    public async Task<int> ExecuteAsync(string procName, SqlMapper.IDynamicParameters? param = null)
+    {
+        using var conn = _factory.CreateConnection();
+        await conn.OpenAsync();
+
+        return await conn.ExecuteAsync(
+            procName,
+            param,
+            commandType: CommandType.StoredProcedure
+        );
     }
 }

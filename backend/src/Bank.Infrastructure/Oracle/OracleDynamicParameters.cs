@@ -31,7 +31,7 @@ public class OracleDynamicParameters : SqlMapper.IDynamicParameters
 
         if (command is OracleCommand oracleCommand)
         {
-            oracleCommand.BindByName = true; // ✅ KRİTİK FIX
+            oracleCommand.BindByName = true; 
             oracleCommand.Parameters.AddRange(_oracleParameters.ToArray());
         }
     }

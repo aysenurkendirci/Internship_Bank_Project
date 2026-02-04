@@ -1,34 +1,39 @@
-<div class="min-h-screen flex">
-  <aside class="w-80 bg-white p-8 flex flex-col border-r border-slate-100 hidden lg:flex">
-    <div class="flex items-center gap-3 mb-12">
-      <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
-        <span class="material-symbols-outlined">bolt</span>
+<div class="min-h-screen flex bg-slate-50">
+
+  <!-- SOL PANEL -->
+  <aside class="w-72 bg-white border-r border-slate-100 px-6 py-6">
+    <!-- buraya senin gerçek sidebar kodun varsa onu yapıştır -->
+    <div class="flex items-center gap-3 mb-10">
+      <div class="w-10 h-10 rounded-2xl bg-blue-600"></div>
+      <div>
+        <p class="font-black text-slate-900 leading-tight">NeoBank</p>
+        <p class="text-xs text-slate-400 font-bold">Kurumsal Hesap</p>
       </div>
-      <span class="text-2xl font-black text-slate-900 tracking-tight">NeoBank</span>
     </div>
 
-    <nav class="space-y-2 flex-1">
-      <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-blue-600" class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50 transition-all">
-        <span class="material-symbols-outlined">grid_view</span> Ana Sayfa
+    <nav class="space-y-2">
+      <a routerLink="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-slate-50 text-slate-700 font-bold">
+        <span class="material-symbols-outlined text-slate-400">dashboard</span>
+        Panel
       </a>
-      <a class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50">
-        <span class="material-symbols-outlined">sync_alt</span> İşlemler
+
+      <a routerLink="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-slate-50 text-slate-700 font-bold">
+        <span class="material-symbols-outlined text-slate-400">account_balance</span>
+        Hesaplar
       </a>
-      <a class="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:bg-slate-50">
-        <span class="material-symbols-outlined">credit_card</span> Kartlarım
+
+      <a routerLink="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-slate-50 text-slate-700 font-bold">
+        <span class="material-symbols-outlined text-slate-400">credit_card</span>
+        Kartlarım
       </a>
     </nav>
-
-    <div class="mt-auto bg-slate-50 p-6 rounded-[32px] border border-slate-100">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">PRO PLAN</p>
-      <p class="text-sm font-black text-slate-900 mb-4">%2 Nakit İade Alın</p>
-      <button class="w-full py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm">Şimdi Yükselt</button>
-    </div>
   </aside>
 
-  <main class="flex-1 p-10 overflow-y-auto">
-    <div class="max-w-6xl mx-auto">
+  <!-- SAĞ İÇERİK -->
+  <main class="flex-1">
+    <div class="h-screen overflow-y-auto px-8 py-8">
       <router-outlet></router-outlet>
     </div>
   </main>
+
 </div>

@@ -1,17 +1,11 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
-
 export const routes: Routes = [
   {
     path: 'auth/login',
     loadComponent: () =>
       import('./features/auth/pages/login/login.component').then(m => m.LoginComponent),
-  },
-  {
-    path: 'auth/register',
-    loadComponent: () =>
-      import('./features/auth/pages/register/register.component').then(m => m.RegisterComponent),
   },
 
   {
@@ -24,6 +18,16 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'cards/:id',
+        loadComponent: () =>
+          import('./features/cards/card-detail/card-detail.component').then(m => m.CardDetailComponent),
+      },
+      {
+        path: 'accounts/:id',
+        loadComponent: () =>
+          import('./features/accounts/accounts-detail/accounts-detail.component').then(m => m.AccountsDetailComponent),
       },
     ],
   },
