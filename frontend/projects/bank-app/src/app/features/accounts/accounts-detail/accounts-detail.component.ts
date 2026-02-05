@@ -1,45 +1,53 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AccountsApi, AccountDetailResponse } from '../../../data-access/api/accounts.api'; // path'i senin projene göre gerekirse düzelt
-import { take } from 'rxjs/operators';
-
-type TxItem = {
-  category: string;
-  createdAt: string | Date;
-  direction: 'IN' | 'OUT';
-  amount: number;
-  description?: string | null;
-};
+import { AccountsApi } from '../../../data-access/api/accounts.api';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-accounts-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, RouterLink], // DatePipe uyarısı için buradan çıkarıldı
   templateUrl: './accounts-detail.component.html',
 })
-export class AccountsDetailComponent {
+export class AccountsDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private accountsApi = inject(AccountsApi);
+  private location = inject(Location);
+  private cdr = inject(ChangeDetectorRef);
 
-  id = Number(this.route.snapshot.paramMap.get('id') ?? 0);
-
-  // ✅ HTML’de bind edeceğimiz data
-  account?: AccountDetailResponse;
-
-  txs: TxItem[] = [];
+  id = 0;
+  account?: any;
+  txs: any[] = [];
 
   ngOnInit() {
-    if (!this.id) return;
-
-    this.accountsApi.getById(this.id).pipe(take(1)).subscribe({
-      next: (res) => {
-        console.log('Account detail response:', res);
-        this.account = res;
-      },
-      error: (err) => {
-        console.error('Account detail error:', err);
-      },
+    this.route.paramMap.subscribe((params) => {
+      this.id = Number(params.get('id') ?? 0);
+      if (this.id > 0) {
+        this.fetchAccountDetails(this.id);
+      }
     });
   }
+
+  private fetchAccountDetails(id: number) {
+    this.accountsApi.getById(id)
+      .pipe(finalize(() => {
+        this.cdr.detectChanges(); // Veri geldiğinde ekranı güncelle
+      }))
+      .subscribe({
+        next: (res) => {
+          this.account = res;
+          this.txs = (res as any).transactions || [];
+          console.log('Hesap Detay:', res);
+        },
+        error: (err) => console.error('Hesap hatası:', err)
+      });
+  }
+
+  get accountNameSafe(): string { return this.account?.type ?? '—'; }
+  get accountNoSafe(): string { return this.account?.iban ?? '—'; }
+  get accountStatusSafe(): string { return this.account?.status ?? '—'; }
+  get accountBalanceSafe(): number { return Number(this.account?.balance ?? 0); }
+
+  goBack() { this.location.back(); }
 }

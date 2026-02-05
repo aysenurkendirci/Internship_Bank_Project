@@ -25,23 +25,27 @@ public sealed class CardsRepository : ICardsRepository
         );
 
         if (row is null) return null;
+return new CardDetailResponse
+{
+    CardId = (long)row.CardId,
+    CardNo = row.CardNo,
+    CardType = row.CardType,
+    IsVirtual = row.IsVirtual == "Y",
+    Status = row.Status,
 
-        return new CardDetailResponse(
-            row.CardId,
-            row.CardNo,
-            row.CardType,
-            row.IsVirtual == "Y",
-            row.Status,
-            row.AccountId,
-            row.AccountType,
-            row.Iban,
-            row.AccountBalance,
-            row.Contactless == "Y",
-            row.OnlineUse == "Y",
-            row.DailyLimit,
-            row.MonthlyLimit,
-            row.OwnerFirstName,
-            row.Membership
-        );
+    AccountId = (long)row.AccountId,
+    AccountType = row.AccountType,
+    Iban = row.Iban,
+    AccountBalance = row.AccountBalance,
+
+    Contactless = row.Contactless == "Y",
+    OnlineUse = row.OnlineUse == "Y",
+    DailyLimit = row.DailyLimit,
+    MonthlyLimit = row.MonthlyLimit,
+
+    OwnerFirstName = row.OwnerFirstName,
+    Membership = row.Membership
+};
+
     }
 }

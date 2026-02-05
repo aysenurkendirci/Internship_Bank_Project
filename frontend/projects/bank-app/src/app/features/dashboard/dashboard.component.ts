@@ -1,8 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { filter, finalize } from 'rxjs'; 
 import { DashboardApi } from '../../data-access/api/dashboard.api';
-import { DashboardResponse } from '../../data-access/models/dashboard.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,30 +13,60 @@ import { DashboardResponse } from '../../data-access/models/dashboard.models';
 })
 export class DashboardComponent implements OnInit {
   private api = inject(DashboardApi);
-  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
-  loading = false;
-  error?: string;
-  vm?: DashboardResponse; 
+  loading = true; 
+  error: string | null = null;
+  vm?: any;
 
   ngOnInit(): void {
     this.loadDashboardData();
+
+    // Sayfa içindeyken fragment (#cards vb.) değişirse kaydır
+    this.route.fragment
+      .pipe(filter((f): f is string => !!f))
+      .subscribe((frag) => {
+        this.scrollToElement(frag);
+      });
   }
 
-private loadDashboardData(): void {
-  this.loading = true;
-  this.api.getDashboard().subscribe({
-    next: (res) => {
-      console.log('Gelen Dashboard Verisi:', res); 
-      this.vm = res;
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('Hata oluştu:', err);
-      this.loading = false;
-    }
-  });
-}
+  private loadDashboardData(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.api.getDashboard()
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+        
+        // Veri yüklendikten sonra URL'de fragment varsa kaydır
+        const currentFrag = this.route.snapshot.fragment;
+        if (currentFrag) {
+          this.scrollToElement(currentFrag);
+        }
+      }))
+      .subscribe({
+        next: (res) => {
+          this.vm = res;
+          console.log('Dashboard Verisi:', res);
+        },
+        error: (err) => { 
+          console.error('Dashboard hatası:', err);
+          this.error = 'Veriler yüklenirken bir hata oluştu.';
+          this.loading = false;
+        }
+      });
+  }
+
+  private scrollToElement(id: string): void {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 200);
+  }
 
   cardGradient(i: number): string {
     const gradients = ['bg-slate-900', 'bg-blue-600', 'bg-indigo-500'];

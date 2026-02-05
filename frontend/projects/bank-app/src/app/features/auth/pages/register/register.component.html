@@ -1,106 +1,129 @@
-<div class="shell">
-  <section class="hero">
-    <div class="hero__bg"></div>
-    <div class="hero__grid"></div>
-    <div class="hero__content">
-      <div class="brand">
-        <div class="brand__icon">🏦</div>
-        <div class="brand__text">NEO<span>Bank</span></div>
+<div class="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#070B17]">
+  <section class="relative hidden lg:block overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#0b1b3a] via-[#0a1530] to-[#060916]"></div>
+    <div class="absolute -right-40 -bottom-40 w-[520px] h-[520px] rounded-full blur-3xl opacity-40 bg-blue-600"></div>
+    <div class="absolute -left-40 -top-40 w-[520px] h-[520px] rounded-full blur-3xl opacity-25 bg-cyan-500"></div>
+
+    <div class="relative p-12">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-blue-600"></div>
+        <div class="text-white/90 font-semibold text-lg">NeoBank</div>
       </div>
 
-      <div class="hero__copy">
-        <h1>FİNANSIN <br><span>YENİ NESİL</span><br> MİMARİSİ.</h1>
-        <p>Kurumsal varlıklarınızı kuantum hızıyla yönetin, geleceğin bankacılık ekosisteminde yerinizi alın.</p>
-      </div>
+      <h1 class="mt-16 text-5xl font-extrabold text-white leading-tight">
+        Finansın <span class="text-blue-400">yeni nesil</span><br />
+        mimarisi
+      </h1>
 
-      <div class="hero__meta">
-        <span>EST. 2024</span><i></i><span>NEXT-GEN PROTOCOL</span>
-      </div>
+      <p class="mt-6 text-white/70 max-w-xl">
+        Kurumsal varlıklarınızı güvenle yönetin. Hesaplar, kartlar ve işlemler tek ekranda.
+      </p>
+
+      <div class="mt-20 text-white/40 text-xs">EST. 2024 • NEXT-GEN PORTAL</div>
     </div>
   </section>
 
-  <section class="auth">
-    <div class="auth__wrap">
-      <div class="card">
-        <div class="card__head">
-          <h2>Kayıt Ol</h2>
-          <p>NeoBank hesabınızı oluşturun.</p>
+  <section class="flex items-center justify-center p-6">
+    <div class="w-full max-w-[520px]">
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,.35)]">
+        <h2 class="text-4xl font-extrabold text-white">Kayıt Ol</h2>
+        <p class="mt-2 text-white/60">NeoBank hesabınızı oluşturun.</p>
+
+        <div *ngIf="error" class="mt-4 rounded-xl border border-rose-200/30 bg-rose-500/10 p-3 text-rose-200 text-sm">
+          {{ error }}
         </div>
 
-        <div class="notice notice--error" *ngIf="error">{{ error }}</div>
-
-        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-          <div class="row2">
+        <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <lib-input
-              label="Ad"
-              placeholder="Adınız"
+              [label]="'Ad'"
+              [placeholder]="'Adınız'"
               [control]="form.controls.firstName"
-              [showError]="form.controls.firstName.touched && form.controls.firstName.invalid"
-              errorText="Ad en az 2 karakter olmalı">
-            </lib-input>
+              [showError]="isInvalid('firstName')"
+              [errorText]="'Ad zorunlu'"
+            ></lib-input>
 
             <lib-input
-              label="Soyad"
-              placeholder="Soyadınız"
+              [label]="'Soyad'"
+              [placeholder]="'Soyadınız'"
               [control]="form.controls.lastName"
-              [showError]="form.controls.lastName.touched && form.controls.lastName.invalid"
-              errorText="Soyad en az 2 karakter olmalı">
-            </lib-input>
+              [showError]="isInvalid('lastName')"
+              [errorText]="'Soyad zorunlu'"
+            ></lib-input>
           </div>
 
           <lib-input
-            label="T.C. Kimlik No"
-            placeholder="11 haneli"
+            [label]="'T.C. Kimlik No'"
+            [placeholder]="'11 haneli'"
             [control]="form.controls.tcNo"
-            [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
-            errorText="TC No 11 haneli olmalı">
-          </lib-input>
+            [showError]="isInvalid('tcNo')"
+            [errorText]="'Geçerli bir TCKN girin'"
+          ></lib-input>
 
           <lib-input
-            label="E-Posta"
-            placeholder="ornek@mail.com"
-            type="email"
+            [label]="'E-Posta'"
+            [type]="'email'"
+            [placeholder]="'ornek@mail.com'"
             [control]="form.controls.email"
-            [showError]="form.controls.email.touched && form.controls.email.invalid"
-            errorText="Geçerli bir e-posta girin">
-          </lib-input>
+            [showError]="isInvalid('email')"
+            [errorText]="'Geçerli bir e-posta girin'"
+          ></lib-input>
 
           <lib-input
-            label="Telefon"
-            placeholder="05xx..."
-            type="tel"
-            [control]="form.controls.phone">
-          </lib-input>
+            [label]="'Telefon'"
+            [type]="'tel'"
+            [placeholder]="'05xx...'"
+            [control]="form.controls.phone"
+            [showError]="isInvalid('phone')"
+            [errorText]="'Telefon zorunlu'"
+          ></lib-input>
 
           <lib-input
-            label="Şifre"
-            type="password"
-            placeholder="••••••••"
+            [label]="'Şifre'"
+            [type]="'password'"
+            [placeholder]="'••••••••'"
             [control]="form.controls.password"
-            [showError]="form.controls.password.touched && form.controls.password.invalid"
-            errorText="Şifre en az 6 karakter olmalı">
-          </lib-input>
+            [showError]="isInvalid('password')"
+            [errorText]="'Şifre en az 6 karakter olmalı'"
+          ></lib-input>
 
-          <div class="membership">
-            <div class="label">Üyelik Tipi</div>
-            <div class="seg">
-              <button type="button" class="seg-btn"
-                [class.active]="form.controls.membership.value === 'Personal'"
-                (click)="setMembership('Personal')">Bireysel</button>
+          <div class="pt-2">
+            <div class="text-xs font-extrabold text-white/60 mb-2">Üyelik Tipi</div>
 
-              <button type="button" class="seg-btn"
-                [class.active]="form.controls.membership.value === 'Corporate'"
-                (click)="setMembership('Corporate')">Kurumsal</button>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                (click)="setMembership('Bireysel')"
+                class="px-4 py-3 rounded-2xl border text-sm font-bold transition"
+                [ngClass]="form.value.membership === 'Bireysel'
+                  ? 'border-cyan-300/40 bg-cyan-500/10 text-cyan-200'
+                  : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'"
+              >
+                Bireysel
+              </button>
+
+              <button
+                type="button"
+                (click)="setMembership('Kurumsal')"
+                class="px-4 py-3 rounded-2xl border text-sm font-bold transition"
+                [ngClass]="form.value.membership === 'Kurumsal'
+                  ? 'border-cyan-300/40 bg-cyan-500/10 text-cyan-200'
+                  : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'"
+              >
+                Kurumsal
+              </button>
             </div>
           </div>
 
-          <lib-button type="submit" [disabled]="loading || form.invalid">
-            {{ loading ? 'Hesap oluşturuluyor...' : 'KAYIT OL' }}
-          </lib-button>
+          <div class="pt-3">
+            <lib-button type="submit" [disabled]="loading || form.invalid">
+              {{ loading ? 'Kayıt oluşturuluyor...' : 'KAYIT OL' }}
+            </lib-button>
+          </div>
 
-          <div class="footer">
-            <span>Zaten hesabın var mı?</span>
-            <a routerLink="/auth/login">Giriş Yap</a>
+          <div class="pt-3 text-center text-sm text-white/70">
+            Zaten hesabın var mı?
+            <a routerLink="/auth/login" class="text-cyan-300 font-extrabold hover:text-cyan-200">Giriş Yap</a>
           </div>
         </form>
       </div>

@@ -1,35 +1,54 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, Location, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CardsApi } from '../../../data-access/api/cards.api';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-card-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, DatePipe],
   templateUrl: './card-detail.component.html',
 })
-export class CardDetailComponent {
+export class CardDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private location = inject(Location);
+  private cardsApi = inject(CardsApi);
+  private cdr = inject(ChangeDetectorRef);
 
-  id = Number(this.route.snapshot.paramMap.get('id'));
+  id = 0;
   isLoading = true;
+  card?: any;
+  txs: any[] = [];
 
-  // HTML’de card?. diye kullandığın için field şart
-  card?: {
-    cardId: number;
-    cardNoMasked?: string;
-    cardType?: string;
-    isVirtual?: boolean;
-    status?: string;
-    balance?: number;
-    settings?: { contactless: boolean; onlineUse: boolean };
-    limits?: { dailyLimit: number; monthlyLimit: number };
-  };
+  ngOnInit() {
+    this.route.paramMap.subscribe((params) => {
+      this.id = Number(params.get('id') ?? 0);
+      if (this.id > 0) this.loadCardDetails(this.id);
+    });
+  }
 
-  txs: Array<{
-    category: string;
-    createdAt: string | Date;
-    direction: 'IN' | 'OUT';
-    amount: number;
-  }> = [];
+  loadCardDetails(cardId: number) {
+    this.isLoading = true;
+    this.cardsApi.getById(cardId)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Veri geldiğinde HTML'i güncelle
+      }))
+      .subscribe({
+        next: (res: any) => {
+          this.card = res;
+          // API'den gelen işlem listesini bağla
+          this.txs = res?.transactions || [];
+          console.log('Kart Detay Yüklendi:', res);
+          this.cdr.detectChanges(); 
+        },
+        error: (err) => {
+          console.error('Kart hatası:', err);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  goBack() { this.location.back(); }
 }

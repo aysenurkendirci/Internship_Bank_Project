@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
+
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
-
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';
 
@@ -14,7 +14,7 @@ import { ButtonComponent } from '../../../../shared/button/button.component';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -32,8 +32,7 @@ export class LoginComponent {
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
       if (params.get('registered') === '1') {
-        this.success =
-          params.get('message') ?? 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!';
+        this.success = params.get('message') ?? 'Başarıyla hesabınız oluşturuldu.';
       }
       const tcNo = params.get('tcNo');
       if (tcNo) this.form.controls.tcNo.setValue(tcNo);
@@ -41,34 +40,36 @@ export class LoginComponent {
   }
 
   submit() {
-    this.form.markAllAsTouched();
-    if (this.form.invalid || this.loading) return;
+    if (this.form.invalid || this.loading) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading = true;
     this.error = undefined;
 
-    this.auth
-      .login(this.form.getRawValue() as any)
-      .pipe(finalize(() => (this.loading = false)))
+    this.auth.login(this.form.getRawValue() as any)
+      .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (res: any) => {
           const token = res?.token ?? res?.jwt ?? res?.accessToken;
           if (!token) {
-            console.error('Login başarılı ama token dönmedi:', res);
-            this.error = 'Giriş başarılı ama token alınamadı.';
+            this.error = 'Token alınamadı.';
             return;
           }
 
           localStorage.setItem('token', token);
+          localStorage.setItem('fullName', res?.fullName || (res?.user?.firstName ? `${res.user.firstName} ${res.user.lastName}` : 'Kullanıcı'));
 
-          // İstersen fullName'i de tut:
-          if (res?.fullName) localStorage.setItem('fullName', res.fullName);
-
-          this.router.navigateByUrl('/dashboard');
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']).then(() => {
+              window.location.reload();
+            });
+          }, 100);
         },
-        error: (err: any) => {
-          this.error = err?.error?.message ?? err?.message ?? 'Giriş başarısız';
-        },
+        error: (err) => {
+          this.error = err?.error?.message ?? 'Giriş başarısız.';
+        }
       });
   }
 }

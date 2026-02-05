@@ -1,63 +1,57 @@
-<div class="shell">
-  <section class="hero">
-    <div class="hero__bg"></div>
-    <div class="hero__grid"></div>
-    <div class="hero__content">
-      <div class="brand">
-        <div class="brand__icon">🏦</div>
-        <div class="brand__text">NEO<span>Bank</span></div>
-      </div>
+<div class="auth">
+  <div class="left">
+    <div class="brand">
+      <div class="dot"></div>
+      <div class="name">NeoBank</div>
+    </div>
 
-      <div class="hero__copy">
-        <h1>FİNANSIN <br><span>YENİ NESİL</span><br> MİMARİSİ.</h1>
-        <p>Kurumsal portalınıza güvenli erişim sağlayın. İşlemleriniz uçtan uca güvence altında.</p>
-      </div>
+    <h1>Finansın <span>yeni nesil</span><br />mimarisi</h1>
+    <p>
+      Kurumsal portalınıza güvenli erişim sağlayın. Hesaplarınızı, kartlarınızı ve işlemlerinizi tek ekranda yönetin.
+    </p>
 
-      <div class="hero__meta">
-        <span>EST. 2024</span><i></i><span>NEXT-GEN PROTOCOL</span>
+    <div class="foot">EST. 2024 • NEXT-GEN PORTAL</div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <h2>Giriş Yap</h2>
+      <p class="sub">Kurumsal portalınıza güvenli erişim.</p>
+
+      <div class="alert success" *ngIf="success">{{ success }}</div>
+      <div class="alert error" *ngIf="error">{{ error }}</div>
+
+      <form (ngSubmit)="submit()" [formGroup]="form" class="form">
+        <lib-input
+          label="T.C. Kimlik No"
+          placeholder="11 haneli"
+          type="text"
+          [control]="form.controls.tcNo"
+          [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
+          errorText="T.C. Kimlik No 11 haneli olmalı"
+        ></lib-input>
+
+        <lib-input
+          label="Şifre"
+          placeholder="••••••"
+          type="password"
+          [control]="form.controls.password"
+          [showError]="form.controls.password.touched && form.controls.password.invalid"
+          errorText="Şifre en az 6 karakter olmalı"
+        ></lib-input>
+
+        <lib-button
+          type="submit"
+          [disabled]="loading || form.invalid"
+        >
+          {{ loading ? 'Giriş yapılıyor…' : 'GİRİŞ YAP' }}
+        </lib-button>
+      </form>
+
+      <div class="bottom">
+        Hesabın yok mu?
+        <a routerLink="/auth/register">Kayıt Ol</a>
       </div>
     </div>
-  </section>
-
-  <section class="auth">
-    <div class="auth__wrap">
-      <div class="card">
-        <div class="card__head">
-          <h2>Giriş Yap</h2>
-          <p>Kurumsal portalınıza güvenli erişim.</p>
-        </div>
-
-        <div class="notice notice--success" *ngIf="success">{{ success }}</div>
-        <div class="notice notice--error" *ngIf="error">{{ error }}</div>
-
-        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-          <lib-input
-            label="T.C. Kimlik No"
-            placeholder="11 haneli"
-            [control]="form.controls.tcNo"
-            [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
-            errorText="TC No 11 haneli olmalı">
-          </lib-input>
-
-          <lib-input
-            label="Şifre"
-            type="password"
-            placeholder="••••••••"
-            [control]="form.controls.password"
-            [showError]="form.controls.password.touched && form.controls.password.invalid"
-            errorText="Şifre en az 6 karakter">
-          </lib-input>
-
-          <lib-button type="submit" [disabled]="loading || form.invalid">
-            {{ loading ? 'Giriş yapılıyor...' : 'GİRİŞ YAP' }}
-          </lib-button>
-
-          <div class="footer">
-            <span>Hesabın yok mu?</span>
-            <a routerLink="/auth/register">Kayıt Ol</a>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
+  </div>
 </div>

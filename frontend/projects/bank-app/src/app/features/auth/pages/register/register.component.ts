@@ -1,18 +1,17 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../../core/auth/auth.service';
-
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
+  styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
@@ -22,47 +21,51 @@ export class RegisterComponent {
   loading = false;
   error?: string;
 
+  // UI’daki alanlara göre
   form = this.fb.group({
-    tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
+    tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     email: ['', [Validators.required, Validators.email]],
-    phone: [''],
+    phone: ['', [Validators.required, Validators.minLength(10)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    membership: ['Personal' as 'Personal' | 'Corporate'],
+    membership: ['Bireysel', [Validators.required]], // Bireysel | Kurumsal
   });
 
-  setMembership(v: 'Personal' | 'Corporate') {
-    this.form.controls.membership.setValue(v);
-  }
-
   submit() {
-    if (this.form.invalid || this.loading) return;
-
-    // tüm hataları göstermek için
     this.form.markAllAsTouched();
+    if (this.form.invalid || this.loading) return;
 
     this.loading = true;
     this.error = undefined;
 
-    const payload = this.form.getRawValue() as any;
+    // 🔧 Backend endpoint’in: auth.register(...) gibi ise onu çağır
+    // Burada varsayım: auth.register(payload) var.
+    const payload = this.form.getRawValue();
 
     this.auth
-      .register(payload)
+      .register(payload as any)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
+          // Kayıt sonrası login’e success param ile dön
           this.router.navigate(['/auth/login'], {
-            queryParams: {
-              registered: '1',
-              message: 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!',
-              tcNo: payload.tcNo, // login formuna otomatik basmak istersen
-            },
+            queryParams: { registered: '1', tcNo: payload.tcNo },
           });
         },
         error: (err: any) => {
-          this.error = err?.error?.message ?? err?.message ?? 'Kayıt başarısız.';
+          this.error = err?.error?.message ?? err?.message ?? 'Kayıt başarısız';
         },
       });
+  }
+
+  setMembership(type: 'Bireysel' | 'Kurumsal') {
+    this.form.controls.membership.setValue(type);
+  }
+
+  // UI error helpers
+  isInvalid(name: keyof typeof this.form.controls) {
+    const c = this.form.controls[name];
+    return c.touched && c.invalid;
   }
 }
