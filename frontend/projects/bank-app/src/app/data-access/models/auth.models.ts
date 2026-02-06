@@ -1,4 +1,3 @@
-// projects/data-access/src/lib/models/auth.models.ts
 export interface LoginRequest {
   identifier: string; // email veya tcNo
   password: string;

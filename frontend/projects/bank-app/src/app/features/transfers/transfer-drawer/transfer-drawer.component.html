@@ -1,0 +1,94 @@
+<div *ngIf="open" class="fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/30" (click)="close()"></div>
+  <div class="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-2xl border-l border-slate-100">
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <div class="text-lg font-extrabold text-slate-900">
+          <ng-container [ngSwitch]="mode">
+            <span *ngSwitchCase="'between-accounts'">Hesaplar Arası Transfer</span>
+            <span *ngSwitchCase="'account-to-card'">Hesaptan Karta</span>
+            <span *ngSwitchCase="'external-iban'">Dış Transfer (IBAN)</span>
+          </ng-container>
+        </div>
+        <div class="text-xs text-slate-500">Hızlı işlem paneli</div>
+      </div>
+
+      <button class="h-10 w-10 rounded-xl border border-slate-200 grid place-items-center hover:bg-slate-50"
+              (click)="close()">✕</button>
+    </div>
+
+    <div class="p-6 space-y-5">
+      <div *ngIf="isLoading" class="text-sm text-slate-500">Yükleniyor...</div>
+
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Gönderen Hesap</div>
+        <select class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none"
+                [(ngModel)]="fromAccountId">
+          <option [ngValue]="null">Seç...</option>
+          <option *ngFor="let a of accounts" [ngValue]="a.accountId">
+            {{ a.accountName || a.type }} • {{ a.accountNo || a.iban }} • ₺{{ a.balance }}
+          </option>
+        </select>
+      </div>
+
+      <ng-container [ngSwitch]="mode">
+        <div *ngSwitchCase="'between-accounts'">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Hedef Hesap</div>
+          <select class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none"
+                  [(ngModel)]="toAccountId">
+            <option [ngValue]="null">Seç...</option>
+            <option *ngFor="let a of accounts" [ngValue]="a.accountId">
+              {{ a.accountName || a.type }} • {{ a.accountNo || a.iban }}
+            </option>
+          </select>
+        </div>
+
+        <div *ngSwitchCase="'account-to-card'">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Hedef Kart</div>
+          <select class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none"
+                  [(ngModel)]="toCardId">
+            <option [ngValue]="null">Seç...</option>
+            <option *ngFor="let c of cards" [ngValue]="c.cardId">
+              {{ c.cardNoMasked || c.cardNo }} • {{ c.cardType }} • {{ c.status }}
+            </option>
+          </select>
+        </div>
+
+        <div *ngSwitchCase="'external-iban'" class="space-y-4">
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Alıcı Ad Soyad</div>
+            <input class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none"
+                   [(ngModel)]="receiverFullName" placeholder="Örn: Ayşe Yılmaz" />
+          </div>
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">IBAN</div>
+            <input class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none font-mono"
+                   [(ngModel)]="receiverIban" placeholder="TR00 0000 0000 0000 0000 0000 00" />
+          </div>
+        </div>
+      </ng-container>
+
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Tutar</div>
+        <input type="number"
+               class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none font-extrabold"
+               [(ngModel)]="amount" placeholder="0.00" />
+      </div>
+
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-2">Açıklama</div>
+        <input class="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none"
+               [(ngModel)]="note" placeholder="Örn: Kira / Birikim / Ödeme" />
+      </div>
+
+      <button class="w-full rounded-2xl bg-blue-600 text-white py-4 font-extrabold hover:bg-blue-700 active:scale-[0.99]"
+              (click)="submit()">
+        Gönder
+      </button>
+
+      <div *ngIf="status" class="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+        {{ status }}
+      </div>
+    </div>
+  </div>
+</div>

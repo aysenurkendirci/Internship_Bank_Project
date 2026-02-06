@@ -1,5 +1,5 @@
 using Bank.Application.Abstractions.Services;
-using Bank.Contracts.Dashboard;   // ✅ TransactionItem burada
+using Bank.Contracts.Dashboard;   
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +20,6 @@ public sealed class TransactionsController : ControllerBase
     [HttpGet("recent")]
     public async Task<ActionResult<IReadOnlyList<TransactionItem>>> GetRecent(CancellationToken ct)
     {
-        // DashboardService içine yazdığımız metodu kullanacağız (aşağıda veriyorum)
         var items = await _dashboard.GetRecentTransactionsAsync(ct);
         return Ok(items);
     }

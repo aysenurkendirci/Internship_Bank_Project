@@ -16,7 +16,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((err) => {
       if (err?.status === 401) {
-        // token geçersiz/expired ise temizle ve login'e dön
         localStorage.removeItem('token');
         localStorage.removeItem('fullName');
         router.navigateByUrl('/auth/login');

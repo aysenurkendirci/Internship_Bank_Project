@@ -1,13 +1,15 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AccountsApi } from '../../../data-access/api/accounts.api';
 import { finalize } from 'rxjs';
+import { TransferDrawerComponent } from '../../transfers/transfer-drawer/transfer-drawer.component';
 
 @Component({
   selector: 'app-accounts-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink], // DatePipe uyarısı için buradan çıkarıldı
+  imports: [CommonModule, RouterLink, FormsModule, TransferDrawerComponent], 
   templateUrl: './accounts-detail.component.html',
 })
 export class AccountsDetailComponent implements OnInit {
@@ -20,6 +22,10 @@ export class AccountsDetailComponent implements OnInit {
   account?: any;
   txs: any[] = [];
 
+  // Drawer State
+  drawerOpen = false;
+  drawerMode: 'between-accounts' | 'account-to-card' | 'external-iban' = 'between-accounts';
+
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.id = Number(params.get('id') ?? 0);
@@ -29,19 +35,29 @@ export class AccountsDetailComponent implements OnInit {
     });
   }
 
-  private fetchAccountDetails(id: number) {
+  fetchAccountDetails(id: number) {
     this.accountsApi.getById(id)
-      .pipe(finalize(() => {
-        this.cdr.detectChanges(); // Veri geldiğinde ekranı güncelle
-      }))
+      .pipe(finalize(() => this.cdr.detectChanges()))
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.account = res;
-          this.txs = (res as any).transactions || [];
-          console.log('Hesap Detay:', res);
+          this.txs = res.transactions || [];
         },
-        error: (err) => console.error('Hesap hatası:', err)
+        error: (err) => console.error('Veri çekme hatası:', err)
       });
+  }
+
+  openTransfer(mode: 'between-accounts' | 'account-to-card' | 'external-iban') {
+    this.drawerMode = mode;
+    this.drawerOpen = true;
+  }
+
+  closeDrawer() {
+    this.drawerOpen = false;
+  }
+
+  onTransferSuccess() {
+    this.fetchAccountDetails(this.id);
   }
 
   get accountNameSafe(): string { return this.account?.type ?? '—'; }

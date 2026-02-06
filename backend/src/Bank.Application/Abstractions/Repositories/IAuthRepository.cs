@@ -1,7 +1,7 @@
 using Bank.Contracts.Auth;
 using System.Threading.Tasks;
 
-namespace Bank.Application.Abstractions.Repositories; // Namespace bu olmalı
+namespace Bank.Application.Abstractions.Repositories; 
 
 public interface IAuthRepository
 {
@@ -12,7 +12,7 @@ public interface IAuthRepository
     Task<CredentialRow> GetCredentialsAsync(long userId);
 }
 
-public sealed class UserRow // Burayı record'dan class'a çevirmiştik
+public sealed class UserRow 
 {
     public UserRow() { }
     public long UserId { get; set; }

@@ -1,13 +1,14 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, Location, DatePipe } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CardsApi } from '../../../data-access/api/cards.api';
 import { finalize } from 'rxjs';
+import { TransferDrawerComponent } from '../../transfers/transfer-drawer/transfer-drawer.component';
 
 @Component({
   selector: 'app-card-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, RouterLink, TransferDrawerComponent],
   templateUrl: './card-detail.component.html',
 })
 export class CardDetailComponent implements OnInit {
@@ -21,6 +22,10 @@ export class CardDetailComponent implements OnInit {
   card?: any;
   txs: any[] = [];
 
+  // Drawer State
+  drawerOpen = false;
+  drawerMode: 'between-accounts' | 'account-to-card' | 'external-iban' = 'account-to-card';
+
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.id = Number(params.get('id') ?? 0);
@@ -33,14 +38,12 @@ export class CardDetailComponent implements OnInit {
     this.cardsApi.getById(cardId)
       .pipe(finalize(() => {
         this.isLoading = false;
-        this.cdr.detectChanges(); // Veri geldiğinde HTML'i güncelle
+        this.cdr.detectChanges();
       }))
       .subscribe({
         next: (res: any) => {
           this.card = res;
-          // API'den gelen işlem listesini bağla
           this.txs = res?.transactions || [];
-          console.log('Kart Detay Yüklendi:', res);
           this.cdr.detectChanges(); 
         },
         error: (err) => {
@@ -48,6 +51,19 @@ export class CardDetailComponent implements OnInit {
           this.isLoading = false;
         }
       });
+  }
+
+  openDrawer(mode: 'between-accounts' | 'account-to-card' | 'external-iban') {
+    this.drawerMode = mode;
+    this.drawerOpen = true;
+  }
+
+  closeDrawer() {
+    this.drawerOpen = false;
+  }
+
+  onTransferSuccess() {
+    this.loadCardDetails(this.id);
   }
 
   goBack() { this.location.back(); }

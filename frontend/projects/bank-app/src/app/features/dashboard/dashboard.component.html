@@ -1,5 +1,4 @@
 <div class="p-6">
-  <!-- Header -->
   <div class="flex items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-bold text-slate-900">
@@ -17,7 +16,6 @@
     </div>
   </div>
 
-  <!-- Loading / Error -->
   <div *ngIf="loading" class="mt-10 text-slate-500 text-center">
     Veriler hazırlanıyor...
   </div>
@@ -26,10 +24,8 @@
     {{ error }}
   </div>
 
-  <!-- CONTENT -->
   <div *ngIf="!loading && vm" class="mt-6 space-y-8">
 
-    <!-- Summary -->
     <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -123,7 +119,6 @@
               </div>
             </div>
 
-            <!-- ✅ warning yok: ?. kaldırıldı -->
             <div *ngIf="vm.recentTransactions.length === 0" class="text-center text-slate-500 py-8">
               Henüz işlem bulunamadı.
             </div>
@@ -170,7 +165,6 @@
               </div>
             </a>
 
-            <!-- ✅ warning yok: ?. kaldırıldı -->
             <div *ngIf="vm.accounts.length === 0" class="text-center text-slate-500 py-8">
               Hesap bulunamadı.
             </div>

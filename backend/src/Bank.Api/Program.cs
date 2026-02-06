@@ -90,6 +90,7 @@ builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
 builder.Services.AddScoped<ICardsRepository, CardsRepository>();
+builder.Services.AddScoped<ITransfersRepository, TransfersRepository>();
 
 // ✅ JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");

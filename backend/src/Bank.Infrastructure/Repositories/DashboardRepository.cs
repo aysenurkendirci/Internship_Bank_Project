@@ -4,7 +4,6 @@ using Bank.Infrastructure.Oracle;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
 
-// ✅ AccountItem çakışmasını bitirir (Domain vs Contracts)
 using ContractsAccountItem = Bank.Contracts.Dashboard.AccountItem;
 
 namespace Bank.Infrastructure.Repositories;
@@ -17,7 +16,6 @@ public sealed class DashboardRepository : IDashboardRepository
 
     public async Task<DashboardResponse> GetDashboardAsync(long userId, CancellationToken ct = default)
     {
-        // 1) Kullanıcı Özeti ve Null Güvenliği
         var user = await _db.QuerySingleAsync<UserSummaryRow>(
             "PKG_DASHBOARD.GET_USER_SUMMARY",
             CreateParams(userId)
@@ -26,19 +24,16 @@ public sealed class DashboardRepository : IDashboardRepository
         if (user is null)
             throw new KeyNotFoundException($"Kullanıcı bulunamadı. ID: {userId}");
 
-        // 2) Toplam Varlık
         var wealth = await _db.QuerySingleAsync<TotalWealthRow>(
             "PKG_DASHBOARD.GET_TOTAL_WEALTH",
             CreateParams(userId)
         );
 
-        // 3) Kartlar
         var cardRows = await _db.QueryAsync<CardRow>(
             "PKG_DASHBOARD.GET_CARDS",
             CreateParams(userId)
         );
 
-        // 4) Son İşlemler
         var txParams = CreateParams(userId);
         txParams.Add("p_take", 5);
 
@@ -47,13 +42,11 @@ public sealed class DashboardRepository : IDashboardRepository
             txParams
         );
 
-        // 5) Hesaplar Listesi
         var accRows = await _db.QueryAsync<AccountRow>(
             "PKG_DASHBOARD.GET_ACCOUNTS",
             CreateParams(userId)
         );
 
-        // ✅ Domain.AccountItem ile çakışmayı bitiren mapping (tam isim / alias)
         var accounts = accRows.Select(a => new ContractsAccountItem(
             a.ACCOUNT_ID,
             a.TYPE == "VADESIZ" ? "Vadesiz TL"
@@ -105,7 +98,6 @@ public sealed class DashboardRepository : IDashboardRepository
             ? "****"
             : $"**** **** **** {s[^4..]}";
 
-    // DB Modelleri (Oracle Kolon İsimlerine Uygun)
     private sealed class UserSummaryRow
     {
         public long USER_ID { get; set; }

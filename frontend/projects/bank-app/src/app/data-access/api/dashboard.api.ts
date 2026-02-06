@@ -10,7 +10,6 @@ export class DashboardApi {
   private baseUrl = inject(API_BASE_URL);
 
   getDashboard(): Observable<DashboardResponse> {
-    // Merkezi modeli kullanarak tip güvenliğini sağlıyoruz
     return this.http.get<DashboardResponse>(`${this.baseUrl}/api/dashboard`);
   }
 }

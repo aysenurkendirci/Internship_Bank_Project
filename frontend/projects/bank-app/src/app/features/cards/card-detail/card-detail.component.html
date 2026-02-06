@@ -1,60 +1,84 @@
 <div class="p-6">
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <button type="button" (click)="goBack()" class="h-10 w-10 rounded-xl bg-white border border-slate-100 grid place-items-center hover:bg-slate-50"> ← </button>
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <button (click)="goBack()" class="h-10 w-10 rounded-xl bg-white border border-slate-100 grid place-items-center hover:bg-slate-50 transition-all shadow-sm active:scale-90"> ← </button>
       <div>
-        <div class="text-lg font-bold text-slate-900">Kart Detayları</div>
-        <div class="text-xs text-slate-500">Card ID: {{ id }}</div>
+        <h1 class="text-xl font-bold text-slate-900 leading-none">Kart Detayları</h1>
+        <span class="text-xs text-slate-400 font-medium">Card ID: {{ id }}</span>
       </div>
     </div>
+    <a routerLink="/dashboard" class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">Panel’e dön</a>
   </div>
 
-  <div class="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-     <div class="h-44 rounded-2xl bg-slate-900 text-white p-6 flex flex-col justify-between">
-  <div class="text-xs opacity-70">BAKİYE</div>
-  <div class="text-3xl font-extrabold">
-    ₺{{ (card?.accountBalance ?? card?.balance ?? 0) | number:'1.2-2' }}
-  </div>
-  <div class="text-sm tracking-widest">
-    {{ card?.cardNo || '**** **** **** ****' }}
-
-  </div>
-  <div class="text-xs opacity-70">
-    {{ card?.isVirtual ? 'SANAL' : 'FİZİKSEL' }} • {{ card?.status || 'AKTİF' }}
-  </div>
-</div>
-      <div class="mt-5 grid grid-cols-4 gap-3">
-        <button class="rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold hover:bg-slate-50">Dondur</button>
-        <button class="rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold hover:bg-slate-50">PIN</button>
-        <button class="rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold hover:bg-slate-50">Limit</button>
-        <button class="rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold hover:bg-slate-50">Yükle</button>
-      </div>
-    </div>
-
-    <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-bold text-slate-900">Hesap Hareketleri</div>
-        <a routerLink="/dashboard" fragment="cards" class="text-sm font-semibold text-blue-700 hover:text-blue-800">Panel’e dön</a>
-      </div>
-
-      <div class="mt-4" *ngIf="txs.length === 0">
-        <div class="rounded-xl border border-slate-100 bg-slate-50 p-6 text-center">
-          <div class="text-slate-700 font-semibold">Bu karta ait işlem bulunamadı.</div>
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
+      <div class="h-52 rounded-[1.5rem] bg-gradient-to-br from-slate-800 to-slate-950 text-white p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden mb-8">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-6xl font-black italic">VISA</div>
+        <div>
+          <div class="text-[10px] font-bold opacity-50 uppercase tracking-[0.2em] mb-1">Bakiye</div>
+          <div class="text-3xl font-black tracking-tight">₺{{ (card?.accountBalance ?? card?.balance ?? 0) | number:'1.2-2' }}</div>
         </div>
-      </div>
-
-      <div class="mt-4 space-y-3" *ngIf="txs.length">
-        <div *ngFor="let t of txs" class="flex items-center justify-between rounded-xl border border-slate-100 p-4 hover:bg-slate-50">
-          <div>
-            <div class="font-semibold text-slate-900">{{ t.description || t.category }}</div>
-            <div class="text-xs text-slate-500">{{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
-          </div>
-          <div class="font-extrabold" [ngClass]="t.direction === 'IN' ? 'text-emerald-700' : 'text-rose-700'">
-            {{ t.direction === 'IN' ? '+' : '-' }}₺{{ t.amount | number:'1.2-2' }}
+        <div class="flex items-end justify-between">
+          <div class="text-lg font-medium tracking-[0.15em] font-mono">{{ card?.cardNo || '**** **** **** ****' }}</div>
+          <div class="text-[10px] font-bold bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md uppercase">
+            {{ card?.isVirtual ? 'Sanal' : 'Fiziksel' }}
           </div>
         </div>
       </div>
+
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-4">Hızlı İşlemler</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button class="group flex flex-col items-start gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-md active:scale-[0.95]">
+            <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 grid place-items-center text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">🧊</div>
+            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Dondur</div><div class="text-[9px] font-bold text-slate-400 uppercase mt-1">Kart</div></div>
+          </button>
+          
+          <button class="group flex flex-col items-start gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-indigo-100 hover:shadow-md active:scale-[0.95]">
+            <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 grid place-items-center text-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">🔢</div>
+            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">PIN</div><div class="text-[9px] font-bold text-slate-400 uppercase mt-1">Güvenlik</div></div>
+          </button>
+
+          <button class="group flex flex-col items-start gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-amber-100 hover:shadow-md active:scale-[0.95]">
+            <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 grid place-items-center text-lg group-hover:bg-amber-600 group-hover:text-white transition-colors">📈</div>
+            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Limit</div><div class="text-[9px] font-bold text-slate-400 uppercase mt-1">Ayarlar</div></div>
+          </button>
+
+          <button (click)="openDrawer('account-to-card')" class="group flex flex-col items-start gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.95]">
+            <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center text-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">➕</div>
+            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Yükle</div><div class="text-[9px] font-bold text-slate-400 uppercase mt-1">Top-up</div></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+       <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-bold text-slate-900">Hesap Hareketleri</h2>
+          <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg">{{ txs.length }} İşlem</span>
+       </div>
+       <div *ngIf="txs.length === 0" class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-8 text-center">
+          <div class="text-sm font-bold text-slate-400">Bu karta ait işlem bulunamadı.</div>
+       </div>
+       <div class="space-y-4" *ngIf="txs.length > 0">
+          <div *ngFor="let t of txs" class="flex items-center justify-between p-4 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-colors">
+            <div>
+              <div class="text-sm font-bold text-slate-900">{{ t.description || t.category }}</div>
+              <div class="text-[10px] text-slate-400 font-medium">{{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
+            </div>
+            <div class="font-black text-rose-600">
+              -₺{{ t.amount | number:'1.2-2' }}
+            </div>
+          </div>
+       </div>
     </div>
   </div>
 </div>
+
+<app-transfer-drawer
+  [open]="drawerOpen"
+  [mode]="drawerMode"
+  [defaultFromAccountId]="null"
+  (closed)="closeDrawer()"
+  (success)="onTransferSuccess()">
+</app-transfer-drawer>
