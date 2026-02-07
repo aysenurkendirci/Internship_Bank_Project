@@ -47,17 +47,16 @@ public sealed class DashboardRepository : IDashboardRepository
             CreateParams(userId)
         );
 
-        var accounts = accRows.Select(a => new ContractsAccountItem(
-            a.ACCOUNT_ID,
-            a.TYPE == "VADESIZ" ? "Vadesiz TL"
-              : (a.TYPE == "VADELI" ? "Vadeli Mevduat" : "Dolar Hesabı"),
-            a.IBAN,
-            a.BALANCE,
-            a.STATUS,
-            a.TYPE == "VADELI" ? "%32 Faiz" : "Aktif",
-            a.TYPE == "VADESIZ" ? "bank"
-              : (a.TYPE == "VADELI" ? "trend" : "wallet")
-        )).ToList();
+       var accounts = accRows.Select(a => new ContractsAccountItem(
+    a.ACCOUNT_ID,
+    a.TYPE,          // ✅ AccountName = TYPE (direkt)
+    a.IBAN,
+    a.BALANCE,
+    a.STATUS,
+    a.STATUS,        // subtitle istersen status
+    "bank"           // icon sabit (istersen TYPE’a göre sonra güzelleştiririz)
+)).ToList();
+
 
         return new DashboardResponse(
             new UserSummary(user.USER_ID, user.FIRST_NAME, user.MEMBERSHIP),

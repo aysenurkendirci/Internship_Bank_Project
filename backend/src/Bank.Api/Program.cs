@@ -16,9 +16,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1) SERVICES ---
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -29,7 +29,6 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-// ✅ Swagger (JWT)
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bank API", Version = "v1" });
@@ -60,7 +59,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -71,16 +69,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Oracle
 builder.Services.Configure<OracleOptions>(builder.Configuration.GetSection("Oracle"));
 builder.Services.AddSingleton<OracleConnectionFactory>();
 builder.Services.AddScoped<OracleExecutor>();
 
-// ✅ CurrentUser için gerekli
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
-// ✅ DI
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -91,8 +86,10 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
 builder.Services.AddScoped<ICardsRepository, CardsRepository>();
 builder.Services.AddScoped<ITransfersRepository, TransfersRepository>();
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 
-// ✅ JWT Auth
+
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing");
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience is missing");

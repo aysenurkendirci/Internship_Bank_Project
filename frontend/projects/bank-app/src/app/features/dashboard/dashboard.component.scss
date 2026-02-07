@@ -6,14 +6,27 @@
   }
 }
 
-.transition-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  }
+.bg-slate-900 {
+  background: linear-gradient(135deg, #1e293b 0%, #020617 100%);
+}
+
+.bg-blue-600 {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.bg-indigo-500 {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
 }
 
 .flex-shrink-0 {
   flex-shrink: 0 !important;
+}
+
+.animate-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -1,30 +1,60 @@
-using Bank.Application.Abstractions.Repositories;
-using Bank.Contracts.Transfers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Data;
+using Oracle.ManagedDataAccess.Client;
+using Bank.Infrastructure.Oracle; // OracleExecutor ve OracleDynamicParameters burada tanımlı
 
 namespace Bank.Api.Controllers;
 
 [ApiController]
 [Route("api/transfers")]
-[Authorize]
 public sealed class TransfersController : ControllerBase
 {
-    private readonly ITransfersRepository _repo;
-    public TransfersController(ITransfersRepository repo) => _repo = repo;
+    private readonly OracleExecutor _db;
+
+    public TransfersController(OracleExecutor db)
+    {
+        _db = db;
+    }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTransferRequest req, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] TransferRequest req)
     {
-        if (req.Amount <= 0) return BadRequest("Amount must be > 0.");
+        // Kullanıcı ID'sini claim'lerden güvenli bir şekilde alıyoruz
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
+                        User.FindFirstValue("userId");
 
-        var toAccount = req.ToAccountId is not null;
-        var toCard = req.ToCardId is not null;
+        if (!long.TryParse(userIdStr, out var userId))
+            return Unauthorized(new { Message = "Kullanıcı kimliği bulunamadı." });
 
-        if (toAccount == toCard)
-            return BadRequest("Provide either ToAccountId or ToCardId.");
+        var p = new OracleDynamicParameters();
+        p.Add("p_from_account_id", req.FromAccountId, OracleDbType.Int64, ParameterDirection.Input);
+        p.Add("p_to_account_id", req.ToAccountId, OracleDbType.Int64, ParameterDirection.Input);
+        p.Add("p_to_card_id", req.ToCardId, OracleDbType.Int64, ParameterDirection.Input);
+        p.Add("p_amount", req.Amount, OracleDbType.Decimal, ParameterDirection.Input);
+        p.Add("p_note", req.Note, OracleDbType.Varchar2, ParameterDirection.Input);
+        p.Add("o_status", dbType: OracleDbType.Varchar2, direction: ParameterDirection.Output, size: 50);
 
-        var res = await _repo.CreateAsync(req, ct);
-        return Ok(res);
+        // Paket içindeki prosedürü çağır
+        await _db.ExecuteAsync("GENCBANK.PKG_TRANSFERS.CREATE_TRANSFER", p);
+
+        // OUT parametresini yakala
+        var status = p.GetValue("o_status")?.ToString();
+
+        return status switch
+        {
+            "SUCCESS" => Ok(new { Message = "İşlem başarıyla tamamlandı." }),
+            "INSUFFICIENT_FUNDS" => BadRequest(new { Message = "Bakiye yetersiz." }),
+            "NOT_FOUND" => NotFound(new { Message = "Hesap veya kart bulunamadı." }),
+            _ => StatusCode(500, new { Message = "Bir hata oluştu: " + status })
+        };
     }
 }
+
+public record TransferRequest(
+    long FromAccountId, 
+    long? ToAccountId, 
+    long? ToCardId, 
+    decimal Amount, 
+    string? Note
+);

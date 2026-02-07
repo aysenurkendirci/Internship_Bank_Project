@@ -1,177 +1,123 @@
-<div class="p-6">
-  <div class="flex items-center justify-between gap-4">
+<div class="p-6 max-w-[1600px] mx-auto min-h-screen bg-[#f8fafc]">
+  <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900">
-        Selam, {{ vm?.user?.firstName || 'Kullanıcı' }} 👋
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+        Selam, {{ vm?.user?.firstName || 'ays' }} 👋
       </h1>
-      <p class="text-slate-500 mt-1">Panelinize tekrar hoş geldiniz.</p>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <div class="hidden md:flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-2">
-        <span class="text-slate-400">🔎</span>
-        <input class="outline-none text-sm w-56" placeholder="İşlem ara..." />
-      </div>
-      <button class="h-11 w-11 rounded-xl bg-white border border-slate-100 grid place-items-center">🔔</button>
+      <p class="text-slate-500 font-medium">Panelinize tekrar hoş geldiniz.</p>
     </div>
   </div>
 
-  <div *ngIf="loading" class="mt-10 text-slate-500 text-center">
-    Veriler hazırlanıyor...
+  <div *ngIf="loading" class="mt-20 text-center">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+    <p class="mt-4 text-slate-500 font-medium">Veriler hazırlanıyor...</p>
   </div>
 
-  <div *ngIf="error" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-700">
-    {{ error }}
-  </div>
-
-  <div *ngIf="!loading && vm" class="mt-6 space-y-8">
-
-    <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-xs font-semibold text-slate-500 tracking-wider">TOPLAM VARLIĞIM</div>
-          <div class="mt-2 text-4xl font-extrabold text-slate-900">
+  <div *ngIf="!loading && vm" class="space-y-10 animate-in fade-in duration-700">
+    
+    <div class="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden">
+      <div class="relative z-10">
+        <div class="text-xs font-bold text-slate-400 tracking-[0.2em] uppercase">TOPLAM VARLIĞIM</div>
+        <div class="mt-3 flex items-center gap-6">
+          <div class="text-5xl font-black text-slate-900 tracking-tighter">
             ₺{{ vm.totalWealth | number:'1.2-2' }}
-            <span
-              class="ml-3 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1"
-            >
-              {{ vm.wealthChangeRate }}%
-            </span>
           </div>
+          <span class="text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-4 py-1.5">
+            {{ vm.wealthChangeRate }}%
+          </span>
         </div>
+      </div>
+      <div class="absolute -right-10 -top-10 w-64 h-64 bg-slate-50 rounded-full opacity-50"></div>
+    </div>
 
-        <div class="flex gap-3">
-          <button class="px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
-            + Para Yükle
-          </button>
-          <button class="px-5 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 font-semibold hover:bg-slate-50">
-            Para Gönder
-          </button>
-        </div>
+    <div id="cards" class="scroll-mt-6">
+      <div class="flex items-center justify-between mb-6 px-2">
+        <h2 class="text-xl font-bold text-slate-900">Kartlarım</h2>
+        <button class="text-sm font-bold text-blue-600 hover:text-blue-700 transition">Tümünü Gör ></button>
+      </div>
+
+      <div class="flex flex-nowrap gap-8 overflow-x-auto pb-8 no-scrollbar snap-x snap-mandatory">
+        <a
+          *ngFor="let c of vm.cards; let i = index"
+          [routerLink]="['/dashboard/cards', c.cardId]"
+          class="flex-shrink-0 w-[340px] md:w-[400px] group rounded-[2.5rem] p-8 text-white shadow-xl transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl snap-start border border-white/10 relative overflow-hidden"
+          [ngClass]="cardGradient(i)"
+        >
+          <div class="absolute top-0 right-0 p-6 opacity-20 pointer-events-none">
+            <span class="text-5xl italic font-black tracking-tighter">NEO</span>
+          </div>
+
+          <div class="flex items-center justify-between relative z-10">
+            <div class="text-[11px] font-black opacity-80 uppercase tracking-[0.15em]">{{ c.cardType || 'MAAŞ' }}</div>
+            <div class="text-[10px] bg-white/20 backdrop-blur-lg rounded-full px-4 py-1.5 uppercase font-extrabold tracking-wider">
+              {{ c.isVirtual ? 'SANAL' : 'FİZİKSEL' }}
+            </div>
+          </div>
+
+          <div class="mt-14 text-2xl font-medium tracking-[0.25em] relative z-10">
+            {{ c.cardNoMasked }}
+          </div>
+
+          <div class="mt-14 flex items-end justify-between relative z-10">
+            <div>
+              <div class="text-[10px] font-bold opacity-70 uppercase tracking-widest mb-1">Bakiye</div>
+              <div class="text-3xl font-black">₺{{ c.balance | number:'1.2-2' }}</div>
+            </div>
+            <div class="w-12 h-9 bg-gradient-to-br from-yellow-200/40 to-yellow-500/20 rounded-lg border border-white/20 backdrop-blur-sm"></div>
+          </div>
+        </a>
       </div>
     </div>
 
-    <!-- Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      <!-- Left col -->
-      <div class="xl:col-span-2 space-y-8">
-        <!-- Cards -->
-        <div id="cards" class="scroll-mt-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-slate-900">Kartlarım</h2>
-          </div>
-
-          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a
-              *ngFor="let c of vm.cards; let i = index"
-              [routerLink]="['/dashboard/cards', c.cardId]"
-              class="group rounded-2xl p-5 text-white shadow-sm hover:shadow-md transition border border-white/10"
-              [ngClass]="cardGradient(i)"
-            >
-              <div class="flex items-center justify-between">
-                <div class="text-sm opacity-80">{{ c.cardType || 'KART' }}</div>
-                <div class="text-xs bg-white/10 rounded-full px-3 py-1">
-                  {{ c.isVirtual ? 'SANAL' : 'FİZİKSEL' }}
-                </div>
-              </div>
-
-              <div class="mt-6 text-lg font-semibold tracking-widest">
-                {{ c.cardNoMasked || '**** **** **** ****' }}
-              </div>
-
-              <div class="mt-6 flex items-end justify-between">
-                <div>
-                  <div class="text-xs opacity-75">Bakiye</div>
-                  <div class="text-2xl font-extrabold">₺{{ c.balance | number:'1.2-2' }}</div>
-                </div>
-
-                <div class="text-sm font-semibold opacity-90 group-hover:opacity-100">
-                  Detay →
-                </div>
-              </div>
-            </a>
-          </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      
+      <div class="lg:col-span-2 space-y-6">
+        <div class="flex items-center justify-between px-2">
+          <h2 class="text-xl font-bold text-slate-900">Son İşlemler</h2>
+          <button class="text-sm font-bold text-slate-400 hover:text-slate-600">Tümünü Gör</button>
         </div>
-
-        <!-- Recent Transactions -->
-        <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-slate-900">Son İşlemler</h2>
-          </div>
-
-          <div class="mt-4 space-y-3">
-            <div
-              *ngFor="let t of vm.recentTransactions"
-              class="flex items-center justify-between rounded-xl border border-slate-100 p-4 hover:bg-slate-50"
-            >
+        
+        <div class="bg-white border border-slate-100 rounded-[2.5rem] p-4 shadow-sm">
+          <div *ngFor="let t of vm.recentTransactions" 
+               class="flex items-center justify-between p-5 hover:bg-slate-50 rounded-3xl transition-all group">
+            <div class="flex items-center gap-5">
+              <div class="w-14 h-14 rounded-[1.25rem] bg-slate-100 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                {{ t.direction === 'Inbound' ? '💰' : '🛒' }}
+              </div>
               <div>
-                <div class="font-semibold text-slate-900">{{ t.title }}</div>
-                <div class="text-xs text-slate-500">
-                  {{ t.category }} • {{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}
-                </div>
-              </div>
-
-              <div
-                class="font-extrabold"
-                [ngClass]="t.direction === 'Inbound' ? 'text-emerald-700' : 'text-rose-700'"
-              >
-                {{ t.direction === 'Inbound' ? '+' : '-' }}₺{{ t.amount | number:'1.2-2' }}
+                <div class="font-bold text-slate-900 text-lg">{{ t.title }}</div>
+                <div class="text-sm text-slate-400 font-medium">{{ t.category }} • {{ t.createdAt | date:'dd MMM, HH:mm' }}</div>
               </div>
             </div>
-
-            <div *ngIf="vm.recentTransactions.length === 0" class="text-center text-slate-500 py-8">
-              Henüz işlem bulunamadı.
+            <div class="font-black text-xl" [ngClass]="t.direction === 'Inbound' ? 'text-emerald-500' : 'text-slate-900'">
+              {{ t.direction === 'Inbound' ? '+' : '-' }}₺{{ t.amount | number:'1.2-2' }}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right col: Accounts -->
-      <div id="accounts" class="scroll-mt-6">
-        <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-slate-900">Hesaplarım</h2>
-          </div>
-
-          <div class="mt-4 space-y-3">
-            <a
-              *ngFor="let a of vm.accounts"
-              [routerLink]="['/dashboard/accounts', a.accountId]"
-              class="block rounded-xl border border-slate-100 p-4 hover:bg-slate-50 transition"
-            >
-              <div class="flex items-center justify-between">
-                <div class="font-semibold text-slate-900">{{ a.accountName }}</div>
-                <span
-                  class="text-xs rounded-full px-3 py-1 border"
-                  [ngClass]="a.status === 'Aktif'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                    : 'border-slate-200 bg-slate-50 text-slate-600'"
-                >
-                  {{ a.status }}
-                </span>
+      <div class="space-y-6">
+        <h2 class="text-xl font-bold text-slate-900 px-2">Hesaplarım</h2>
+        <div class="space-y-5">
+          <a *ngFor="let a of vm.accounts" 
+             [routerLink]="['/dashboard/accounts', a.accountId]"
+             class="block bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-black text-slate-900 text-lg tracking-tight">{{ a.accountName }}</div>
+                <div class="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">{{ a.accountNo }}</div>
               </div>
-
-              <div class="mt-1 text-xs text-slate-500">{{ a.accountNo }}</div>
-
-              <div class="mt-3 flex items-end justify-between">
-                <div class="text-2xl font-extrabold text-slate-900">
-                  ₺{{ a.balance | number:'1.2-2' }}
-                </div>
-                <div class="text-sm text-blue-700 font-semibold">Detay →</div>
-              </div>
-
-              <div *ngIf="a.subtitle" class="mt-2 text-xs text-slate-500">
-                {{ a.subtitle }}
-              </div>
-            </a>
-
-            <div *ngIf="vm.accounts.length === 0" class="text-center text-slate-500 py-8">
-              Hesap bulunamadı.
+              <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">AKTİF</span>
             </div>
-          </div>
+            <div class="mt-6 flex justify-between items-end">
+              <div class="text-2xl font-black text-slate-900 tracking-tighter">₺{{ a.balance | number:'1.2-2' }}</div>
+              <div class="text-blue-600 text-sm font-bold flex items-center gap-1">
+                Detay <span class="text-lg">→</span>
+              </div>
+            </div>
+          </a>
         </div>
       </div>
-
     </div>
   </div>
 </div>

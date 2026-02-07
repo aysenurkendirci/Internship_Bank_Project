@@ -1,8 +1,13 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CardsApi } from '../../../data-access/api/cards.api';
 import { finalize } from 'rxjs';
+
+// Servisler ve Tipler
+import { CardsApi } from '../../../data-access/api/cards.api';
+import { TransactionsApi, TransactionItem } from '../../../data-access/api/transactions.api';
+
+// Bileşenler
 import { TransferDrawerComponent } from '../../transfers/transfer-drawer/transfer-drawer.component';
 
 @Component({
@@ -15,12 +20,13 @@ export class CardDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   private cardsApi = inject(CardsApi);
+  private txApi = inject(TransactionsApi); // ✅ TransactionsApi inject edildi
   private cdr = inject(ChangeDetectorRef);
 
   id = 0;
   isLoading = true;
   card?: any;
-  txs: any[] = [];
+  txs: TransactionItem[] = []; // ✅ Tip güvenliği için TransactionItem[] kullanıldı
 
   // Drawer State
   drawerOpen = false;
@@ -29,7 +35,10 @@ export class CardDetailComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.id = Number(params.get('id') ?? 0);
-      if (this.id > 0) this.loadCardDetails(this.id);
+      console.log('[CardDetail] id:', this.id);
+      if (this.id > 0) {
+        this.loadCardDetails(this.id);
+      }
     });
   }
 
@@ -43,7 +52,10 @@ export class CardDetailComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.card = res;
-          this.txs = res?.transactions || [];
+          
+          // ✅ Kart verisi gelince işlemleri bağımsız olarak çekiyoruz
+          this.fetchRecentTxByCard(cardId);
+          
           this.cdr.detectChanges(); 
         },
         error: (err) => {
@@ -51,6 +63,17 @@ export class CardDetailComponent implements OnInit {
           this.isLoading = false;
         }
       });
+  }
+
+  // ✅ Kart işlemlerini getiren yeni metod
+  private fetchRecentTxByCard(cardId: number) {
+    this.txApi.recentByCard(cardId, 20).subscribe({
+      next: (txs) => {
+        this.txs = txs ?? [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Card tx çekme hatası:', err)
+    });
   }
 
   openDrawer(mode: 'between-accounts' | 'account-to-card' | 'external-iban') {
@@ -63,6 +86,7 @@ export class CardDetailComponent implements OnInit {
   }
 
   onTransferSuccess() {
+    // Transfer başarılı olduğunda hem kart limit/borç bilgisini hem işlemleri yeniler
     this.loadCardDetails(this.id);
   }
 

@@ -31,6 +31,9 @@ export interface TransactionItem {
   amount: number;
   direction: 'Inbound' | 'Outbound';
   createdAt: string;
+
+  accountId?: number; // ✅ ekle
+  cardId?: number;    // ✅ ekle
 }
 
 export interface AccountItem {

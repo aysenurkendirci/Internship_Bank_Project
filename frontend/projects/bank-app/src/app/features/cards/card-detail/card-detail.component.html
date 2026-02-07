@@ -1,3 +1,4 @@
+
 <div class="p-6">
   <div class="flex items-center justify-between mb-8">
     <div class="flex items-center gap-4">
@@ -63,7 +64,7 @@
        <div class="space-y-4" *ngIf="txs.length > 0">
           <div *ngFor="let t of txs" class="flex items-center justify-between p-4 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-colors">
             <div>
-              <div class="text-sm font-bold text-slate-900">{{ t.description || t.category }}</div>
+              <div class="text-sm font-bold text-slate-900">{{ t.title || t.category }}</div>
               <div class="text-[10px] text-slate-400 font-medium">{{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
             </div>
             <div class="font-black text-rose-600">

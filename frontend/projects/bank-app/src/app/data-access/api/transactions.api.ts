@@ -12,20 +12,27 @@ export type TransactionItem = {
   createdAt: string;
 };
 
+
 @Injectable({ providedIn: 'root' })
 export class TransactionsApi {
   private http = inject(HttpClient);
   private base = inject(API_BASE_URL);
 
-  recentByAccount(accountId: number): Observable<TransactionItem[]> {
+  recent(take: number = 20): Observable<TransactionItem[]> {
     return this.http.get<TransactionItem[]>(
-      `${this.base}/api/transactions/recent?accountId=${accountId}`
+      `${this.base}/api/transactions/recent?take=${take}`
     );
   }
 
-  recentByCard(cardId: number): Observable<TransactionItem[]> {
+  recentByAccount(accountId: number, take: number = 20): Observable<TransactionItem[]> {
     return this.http.get<TransactionItem[]>(
-      `${this.base}/api/transactions/recent?cardId=${cardId}`
+      `${this.base}/api/transactions/recent?accountId=${accountId}&take=${take}`
+    );
+  }
+
+  recentByCard(cardId: number, take: number = 20): Observable<TransactionItem[]> {
+    return this.http.get<TransactionItem[]>(
+      `${this.base}/api/transactions/recent?cardId=${cardId}&take=${take}`
     );
   }
 }

@@ -23,7 +23,6 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadDashboardData();
 
-    // Sayfa içindeyken fragment (#cards vb.) değişirse kaydır
     this.route.fragment
       .pipe(filter((f): f is string => !!f))
       .subscribe((frag) => {
