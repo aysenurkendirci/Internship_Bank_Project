@@ -23,6 +23,7 @@
           <div class="text-xs text-slate-500">Özet görünüm</div>
         </div>
       </a>
+      
       <a
         [routerLink]="['/dashboard']"
         fragment="accounts"
@@ -34,6 +35,7 @@
           <div class="text-xs text-slate-500">Bakiyeler ve detaylar</div>
         </div>
       </a>
+
       <a
         [routerLink]="['/dashboard']"
         fragment="cards"
@@ -43,6 +45,18 @@
         <div>
           <div class="font-medium">Kartlarım</div>
           <div class="text-xs text-slate-500">Kart yönetimi</div>
+        </div>
+      </a>
+
+      <a
+        routerLink="/dashboard/savings-goals"
+        routerLinkActive="bg-blue-50 text-blue-700 border-blue-100"
+        class="flex items-center gap-3 px-3 py-2 rounded-xl border border-transparent text-slate-700 hover:bg-slate-50"
+      >
+        <span class="h-9 w-9 grid place-items-center rounded-lg bg-slate-100 text-slate-700">🎯</span>
+        <div>
+          <div class="font-medium">Birikim Hedefleri</div>
+          <div class="text-xs text-slate-500">Hedeflerini yönet</div>
         </div>
       </a>
     </nav>

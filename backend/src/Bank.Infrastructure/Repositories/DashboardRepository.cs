@@ -47,16 +47,40 @@ public sealed class DashboardRepository : IDashboardRepository
             CreateParams(userId)
         );
 
-       var accounts = accRows.Select(a => new ContractsAccountItem(
-    a.ACCOUNT_ID,
-    a.TYPE,          // ✅ AccountName = TYPE (direkt)
-    a.IBAN,
-    a.BALANCE,
-    a.STATUS,
-    a.STATUS,        // subtitle istersen status
-    "bank"           // icon sabit (istersen TYPE’a göre sonra güzelleştiririz)
-)).ToList();
+        var accounts = accRows.Select(a => {
+    var type = (a.TYPE ?? "").Trim().ToUpperInvariant();
 
+    string accountName = type switch
+    {
+        "VADESIZ" => "Vadesiz TL",
+        "VADELI" => "Vadeli Mevduat",
+        "TRY" or "TL" => "TL Hesabı",
+        "USD" or "DOLLAR" or "DOLAR" => "Dolar Hesabı",
+        "EUR" or "EURO" => "Euro Hesabı",
+        "YATIRIM" or "INVESTMENT" => "Yatırım Hesabı",
+        _ => string.IsNullOrWhiteSpace(a.TYPE) ? "Banka Hesabı" : a.TYPE // Fallback: DB'deki orijinal değeri bas
+    };
+
+    string subtitle = type == "VADELI" ? "%32 Faiz" : "Aktif";
+
+    string icon = type switch
+    {
+        "VADESIZ" or "TRY" or "TL" => "bank",
+        "VADELI" => "trend",
+        "USD" or "EUR" or "EURO" => "wallet",
+        _ => "payments"
+    };
+
+    return new ContractsAccountItem(
+        a.ACCOUNT_ID,
+        accountName,
+        a.IBAN,
+        a.BALANCE,
+        a.STATUS,
+        subtitle,
+        icon
+    );
+}).ToList();
 
         return new DashboardResponse(
             new UserSummary(user.USER_ID, user.FIRST_NAME, user.MEMBERSHIP),
@@ -84,6 +108,30 @@ public sealed class DashboardRepository : IDashboardRepository
         );
     }
 
+    public async Task<IReadOnlyList<SavingsGoalRow>> GetSavingsGoalsAsync(long userId, CancellationToken ct = default)
+    {
+        var rows = await _db.QueryAsync<SavingsGoalRow>(
+            "PKG_DASHBOARD.GET_SAVINGS_GOALS",
+            CreateParams(userId)
+        );
+
+        return rows.ToList();
+    }
+
+    public async Task CreateSavingsGoalAsync(long userId, CreateSavingsGoalRequest req, CancellationToken ct = default)
+    {
+        var p = new OracleDynamicParameters();
+        p.Add("p_user_id", userId);
+        p.Add("p_title", req.Title);
+        p.Add("p_target_amount", req.TargetAmount);
+
+        await _db.ExecuteAsync(
+            "PKG_DASHBOARD.CREATE_SAVINGS_GOAL",
+            p
+        );
+    }
+
+
     private OracleDynamicParameters CreateParams(long userId)
     {
         var p = new OracleDynamicParameters();
@@ -96,6 +144,7 @@ public sealed class DashboardRepository : IDashboardRepository
         => string.IsNullOrWhiteSpace(s) || s.Length < 4
             ? "****"
             : $"**** **** **** {s[^4..]}";
+
 
     private sealed class UserSummaryRow
     {

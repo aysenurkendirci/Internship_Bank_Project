@@ -26,7 +26,6 @@ public sealed class TransfersRepository : ITransfersRepository
 
         p.Add("p_note", req.Note, OracleDbType.Varchar2, ParameterDirection.Input, size: 200);
 
-        // OUT buffer size şart
         p.Add("o_status", null, OracleDbType.Varchar2, ParameterDirection.Output, size: 50);
 
         await _db.ExecuteAsync("GENCBANK.PKG_TRANSFERS.CREATE_TRANSFER", p);

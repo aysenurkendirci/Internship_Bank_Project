@@ -81,12 +81,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
 
-builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+
+//builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
 builder.Services.AddScoped<ICardsRepository, CardsRepository>();
 builder.Services.AddScoped<ITransfersRepository, TransfersRepository>();
-builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 
 

@@ -18,7 +18,6 @@ public sealed class AuthRepository : IAuthRepository
         _db = db;
     }
 
-    // ✅ exception fırlatan (login için kullanıyorsun)
     public async Task<UserRow> GetUserByTcAsync(string tcNo)
     {
         var p = new OracleDynamicParameters();
@@ -61,8 +60,6 @@ public sealed class AuthRepository : IAuthRepository
 
     public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash)
     {
-        // Burayı istersen OracleDynamicParameters'a da çevirebiliriz ama şart değil.
-        // Şu an çalışıyorsa dokunmadan bırakabilirsin.
         var p = new DynamicParameters();
 
         p.Add("P_TC_NO", req.TcNo, DbType.String, ParameterDirection.Input);
