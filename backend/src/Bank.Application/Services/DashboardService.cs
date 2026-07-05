@@ -49,4 +49,10 @@ public sealed class DashboardService : IDashboardService
 
         await _repo.CreateSavingsGoalAsync(_currentUser.UserId, req, ct);
     }
+
+    public async Task AddGoalContributionAsync(long goalId, decimal amount, CancellationToken ct)
+        => await _repo.AddGoalContributionAsync(goalId, amount, ct);
+
+    public async Task DeleteSavingsGoalAsync(long goalId, CancellationToken ct)
+        => await _repo.DeleteSavingsGoalAsync(goalId, ct);
 }

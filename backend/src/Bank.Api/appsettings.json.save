@@ -1,0 +1,24 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Oracle": {
+    "ConnectionString": ""
+  },
+  "Jwt": {
+    "Key": "",
+    "Issuer": "BankApi",
+    "Audience": "BankClient",
+    "ExpiresMinutes": 60
+  },
+  "AllowedHosts": "*"
+}
+"Key": "CHANGE_ME_USE_USER_SECRETS_OR_ENVIRONMENT_VARIABLE"
+
+cat backend/src/Bank.Api/appsettings.json
+
+
+

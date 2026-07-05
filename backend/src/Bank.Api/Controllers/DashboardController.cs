@@ -28,4 +28,27 @@ public sealed class DashboardController : ControllerBase
         await _service.CreateSavingsGoalAsync(req, ct);
         return NoContent();
     }
+
+    // ✅ Hedefe para ekleme (Add Contribution)
+    [HttpPost("savings-goals/{goalId:long}/contributions")]
+    public async Task<IActionResult> AddGoalContribution(
+        [FromRoute] long goalId,
+        [FromBody] AddGoalContributionRequest req,
+        CancellationToken ct)
+    {
+        if (req.Amount <= 0)
+            return BadRequest(new { Message = "Tutar 0'dan büyük olmalı." });
+
+        await _service.AddGoalContributionAsync(goalId, req.Amount, ct);
+        return NoContent();
+    }
+
+    [HttpDelete("savings-goals/{goalId:long}")]
+    public async Task<IActionResult> DeleteSavingsGoal([FromRoute] long goalId, CancellationToken ct)
+    {
+        await _service.DeleteSavingsGoalAsync(goalId, ct);
+        return NoContent();
+    }
 }
+
+public sealed record AddGoalContributionRequest(decimal Amount);

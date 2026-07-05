@@ -1,9 +1,9 @@
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../core/api/api-base-url.token';
 
-export interface SavingsGoalResponse {
+export type SavingsGoalItem = {
   goalId: number;
   title: string;
   targetAmount: number;
@@ -11,28 +11,31 @@ export interface SavingsGoalResponse {
   progressPercent: number;
   status: string;
   createdAt: string;
-}
+};
 
-export interface CreateSavingsGoalRequest {
+export type CreateSavingsGoalRequest = {
   title: string;
   targetAmount: number;
-}
+};
 
 @Injectable({ providedIn: 'root' })
 export class SavingsGoalsApi {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = inject(API_BASE_URL);
+  private http = inject(HttpClient);
+  private base = inject(API_BASE_URL);
 
-  getMyGoals(): Observable<readonly SavingsGoalResponse[]> {
-    return this.http.get<readonly SavingsGoalResponse[]>(
-      `${this.baseUrl}/api/dashboard/savings-goals`
-    );
+  list(): Observable<SavingsGoalItem[]> {
+    return this.http.get<SavingsGoalItem[]>(`${this.base}/api/dashboard/savings-goals`);
   }
 
-  createGoal(req: CreateSavingsGoalRequest): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}/api/dashboard/savings-goals`,
-      req
-    );
+  create(req: CreateSavingsGoalRequest): Observable<any> {
+    return this.http.post(`${this.base}/api/dashboard/savings-goals`, req);
+  }
+
+  addContribution(goalId: number, amount: number): Observable<any> {
+    return this.http.post(`${this.base}/api/dashboard/savings-goals/${goalId}/contributions`, { amount });
+  }
+
+  delete(goalId: number): Observable<any> {
+    return this.http.delete(`${this.base}/api/dashboard/savings-goals/${goalId}`);
   }
 }

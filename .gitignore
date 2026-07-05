@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# .NET
+**/bin/
+**/obj/
+*.dll
+*.pdb
+*.cache
+*.sourcelink.json
+*.AssemblyInfo.cs
+
+# Secrets / local config
+**/appsettings.Development.json
+.env
+*.backup
+*.icloud
+
+# Angular
+**/node_modules/
+**/dist/
+**/.angular/

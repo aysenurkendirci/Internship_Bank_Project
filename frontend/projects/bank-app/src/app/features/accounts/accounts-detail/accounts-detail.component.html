@@ -1,82 +1,206 @@
-
-<div class="p-6">
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
   <div class="flex items-center justify-between mb-8">
-    <div class="flex items-center gap-4">
-      <button (click)="goBack()" class="h-10 w-10 rounded-xl bg-white border border-slate-100 grid place-items-center hover:bg-slate-50 transition-all shadow-sm active:scale-90"> ← </button>
-      <div>
-        <h1 class="text-xl font-bold text-slate-900 leading-none">Hesap Detayları</h1>
+    <div class="flex items-center gap-4 min-w-0">
+      <button
+        (click)="goBack()"
+        class="h-10 w-10 rounded-xl bg-white border border-slate-100 grid place-items-center hover:bg-slate-50 transition-all shadow-sm active:scale-90"
+      >
+        ←
+      </button>
+
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold text-slate-900 leading-none truncate">Hesap Detayları</h1>
         <span class="text-xs text-slate-400 font-medium">Hesap ID: {{ id }}</span>
       </div>
     </div>
-    <a routerLink="/dashboard" class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">Panel’e dön</a>
+
+    <a
+      routerLink="/dashboard"
+      class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+    >
+      Panel’e dön
+    </a>
   </div>
 
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+    <!-- LEFT: Account summary (aynen) -->
     <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
       <div class="mb-8">
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Hesap Özeti</span>
-        <div class="text-4xl font-black text-slate-900 mt-2">₺{{ accountBalanceSafe | number:'1.2-2' }}</div>
+        <div class="text-4xl font-black text-slate-900 mt-2">
+          ₺{{ accountBalanceSafe | number:'1.2-2' }}
+        </div>
       </div>
 
       <div class="space-y-4 mb-10">
-        <div class="flex justify-between border-b border-slate-50 pb-3">
-          <span class="text-sm text-slate-500 font-medium">Hesap Tipi</span>
-          <span class="text-sm font-bold text-slate-900">{{ accountNameSafe }}</span>
+        <div class="flex justify-between gap-6 border-b border-slate-50 pb-3">
+          <span class="text-sm text-slate-500 font-medium shrink-0">Hesap Tipi</span>
+          <span class="text-sm font-bold text-slate-900 min-w-0 truncate">
+            {{ accountTypeLabel }}
+          </span>
         </div>
-        <div class="flex justify-between border-b border-slate-50 pb-3">
-          <span class="text-sm text-slate-500 font-medium">IBAN</span>
-          <span class="text-sm font-bold text-slate-900 tracking-tight">{{ accountNoSafe }}</span>
+
+        <div class="flex justify-between gap-6 border-b border-slate-50 pb-3">
+          <span class="text-sm text-slate-500 font-medium shrink-0">IBAN</span>
+
+          <div class="min-w-0 flex items-center gap-2">
+            <span class="text-sm font-bold text-slate-900 break-all text-right">
+              {{ accountNoSafe }}
+            </span>
+
+            <button
+              type="button"
+              (click)="copyIban()"
+              class="shrink-0 text-[10px] font-bold px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 active:scale-95"
+              [disabled]="!accountNoSafe || accountNoSafe === '—'"
+              title="IBAN kopyala"
+            >
+              Kopyala
+            </button>
+          </div>
         </div>
-        <div class="flex justify-between">
-          <span class="text-sm text-slate-500 font-medium">Durum</span>
-          <span class="text-[10px] font-black px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full uppercase tracking-wider">
+
+        <div class="flex justify-between items-center gap-6">
+          <span class="text-sm text-slate-500 font-medium shrink-0">Durum</span>
+          <span
+            class="text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-wider"
+            [ngClass]="accountStatusSafe === 'ACTIVE'
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'bg-slate-100 text-slate-500'"
+          >
             {{ accountStatusSafe }}
           </span>
         </div>
       </div>
 
+      <!-- Mini chart: Son 7 gün harcama -->
+      <div class="mb-10">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
+            Son 7 Gün Harcama
+          </div>
+          <div class="text-[10px] font-bold text-slate-400">
+            Toplam: ₺{{ last7DaysTotalOut | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-7 gap-3 items-end h-28" *ngIf="weeklySpendBars.length > 0">
+          <div *ngFor="let b of weeklySpendBars" class="flex flex-col items-center gap-2">
+            <div
+              class="w-8 h-20 rounded-2xl bg-slate-100 overflow-hidden flex items-end"
+              [title]="'₺' + (b.amount | number:'1.2-2')"
+            >
+              <div
+                class="w-full rounded-2xl"
+                [ngClass]="b.amount > 0 ? 'bg-rose-500/80' : 'bg-slate-300/70'"
+                [style.height.%]="b.height"
+              ></div>
+            </div>
+            <div class="text-[10px] text-slate-400 font-bold">{{ b.label }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="weeklySpendBars.length === 0" class="text-xs text-slate-400 font-medium">
+          Grafik için yeterli veri yok.
+        </div>
+      </div>
+
+      <!-- Quick actions -->
       <div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-4">Hızlı İşlemler</div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button (click)="openTransfer('between-accounts')" class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-md active:scale-[0.97]">
+          <button
+            (click)="openTransfer('between-accounts')"
+            class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-md active:scale-[0.97]"
+          >
             <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 grid place-items-center text-xl transition-colors group-hover:bg-blue-600 group-hover:text-white">⇄</div>
-            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Hesaplar Arası</div><div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Transfer</div></div>
-          </button>
-          
-          <button (click)="openTransfer('account-to-card')" class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-indigo-100 hover:shadow-md active:scale-[0.97]">
-            <div class="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 grid place-items-center text-xl transition-colors group-hover:bg-indigo-600 group-hover:text-white">💳</div>
-            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Kartlarım Arası</div><div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Transfer</div></div>
+            <div class="text-left min-w-0">
+              <div class="text-sm font-bold text-slate-900 leading-none truncate">Hesaplar Arası</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Transfer</div>
+            </div>
           </button>
 
-          <button (click)="openTransfer('external-iban')" class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.97]">
+          <button
+            (click)="openTransfer('account-to-card')"
+            class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-indigo-100 hover:shadow-md active:scale-[0.97]"
+          >
+            <div class="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 grid place-items-center text-xl transition-colors group-hover:bg-indigo-600 group-hover:text-white">💳</div>
+            <div class="text-left min-w-0">
+              <div class="text-sm font-bold text-slate-900 leading-none truncate">Kartlarım Arası</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Transfer</div>
+            </div>
+          </button>
+
+          <button
+            (click)="openTransfer('external-iban')"
+            class="group flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white transition-all hover:border-emerald-100 hover:shadow-md active:scale-[0.97]"
+          >
             <div class="h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center text-xl transition-colors group-hover:bg-emerald-600 group-hover:text-white">▶</div>
-            <div class="text-left"><div class="text-sm font-bold text-slate-900 leading-none">Para Gönder</div><div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Dış Transfer</div></div>
+            <div class="text-left min-w-0">
+              <div class="text-sm font-bold text-slate-900 leading-none truncate">Para Gönder</div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">Dış Transfer</div>
+            </div>
           </button>
         </div>
       </div>
     </div>
 
+    <!-- RIGHT: Transactions (Tümünü gör) -->
     <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
-       <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-bold text-slate-900">Son İşlemler</h2>
-          <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg">{{ txs.length }} İşlem</span>
-       </div>
-       <div *ngIf="txs.length === 0" class="flex-1 flex flex-col items-center justify-center text-center opacity-50">
-          <div class="text-4xl mb-2">📥</div>
-          <div class="text-sm font-bold text-slate-400">Henüz işlem bulunamadı.</div>
-       </div>
-       <div class="space-y-4" *ngIf="txs.length > 0">
-          <div *ngFor="let t of txs" class="flex items-center justify-between p-4 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-colors">
-            <div>
-            <div class="text-sm font-bold text-slate-900">{{ t.title || t.category }}</div>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold text-slate-900">Son İşlemler</h2>
 
-              <div class="text-[10px] text-slate-400 font-medium">{{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg">
+            {{ totalTxCount }} İşlem
+          </span>
+
+          <button
+            type="button"
+            (click)="showAllTx = !showAllTx"
+            class="px-3 py-1 border border-slate-200 text-slate-600 text-[10px] font-bold rounded-lg hover:bg-slate-50 active:scale-95"
+            *ngIf="txs.length > previewLimit"
+          >
+            {{ showAllTx ? 'Kapat' : 'Tümünü gör' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="txs.length === 0" class="flex-1 flex flex-col items-center justify-center text-center opacity-50">
+        <div class="text-4xl mb-2">📥</div>
+        <div class="text-sm font-bold text-slate-400">Henüz işlem bulunamadı.</div>
+      </div>
+
+      <div class="space-y-4" *ngIf="txs.length > 0">
+        <div
+          *ngFor="let t of visibleTxs"
+          class="flex items-center justify-between gap-4 p-4 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-colors"
+        >
+          <div class="min-w-0">
+            <div class="text-sm font-bold text-slate-900 truncate">
+              {{ t.title || t.category }}
             </div>
-            <div class="font-black" [ngClass]="t.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
-              {{ t.direction === 'IN' ? '+' : '-' }}₺{{ t.amount | number:'1.2-2' }}
+            <div class="text-[10px] text-slate-400 font-medium">
+              {{ t.createdAt | date:'dd MMM yyyy, HH:mm' }}
             </div>
           </div>
-       </div>
+
+          <div class="font-black shrink-0" [ngClass]="t.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+            {{ t.direction === 'IN' ? '+' : '-' }}₺{{ t.amount | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="showAllTx = true"
+          class="w-full mt-2 py-3 rounded-2xl border border-slate-100 text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.99]"
+          *ngIf="!showAllTx && txs.length > previewLimit"
+        >
+          Tümünü gör ({{ txs.length - previewLimit }} daha)
+        </button>
+      </div>
     </div>
   </div>
 </div>

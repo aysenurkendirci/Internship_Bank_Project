@@ -1,16 +1,9 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BehaviorSubject, EMPTY, Observable, combineLatest } from 'rxjs';
-import { catchError, map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, map, switchMap } from 'rxjs';
 
-import {
-  SavingsGoalsApi,
-  SavingsGoalResponse,
-  CreateSavingsGoalRequest,
-} from '../../data-access/api/savings-goals.api';
-
-import { DashboardApi } from '../../data-access/api/dashboard.api';
+import { SavingsGoalsApi, SavingsGoalItem } from '../../data-access/api/savings-goals.api';
 
 @Component({
   selector: 'app-savings-goals',
@@ -19,107 +12,142 @@ import { DashboardApi } from '../../data-access/api/dashboard.api';
   templateUrl: './savings-goals.component.html',
 })
 export class SavingsGoalsComponent {
-  private readonly goalsApi = inject(SavingsGoalsApi);
-  private readonly dashboardApi = inject(DashboardApi);
-  private readonly fb = inject(FormBuilder);
+  private api = inject(SavingsGoalsApi);
+  private fb = inject(FormBuilder);
 
-  // ✅ modal state
+  private refresh$ = new BehaviorSubject<void>(undefined);
+
+  goals$ = this.refresh$.pipe(
+    switchMap(() => this.api.list())
+  );
+
+  totalSaved$ = this.goals$.pipe(
+    map(goals => goals.reduce((sum, g) => sum + (g.currentAmount ?? 0), 0))
+  );
+
+  activeGoalsCount$ = this.goals$.pipe(
+    map(goals => goals.filter(g => (g.status ?? 'ACTIVE') !== 'DELETED').length)
+  );
+
+  // create modal
   isCreateOpen = false;
   isSaving = false;
 
-  // ✅ form
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
     targetAmount: [null as number | null, [Validators.required, Validators.min(1)]],
   });
 
-  // ✅ refresh trigger
-  private readonly refresh$ = new BehaviorSubject<void>(undefined);
+  // contribute modal
+  isContributeOpen = false;
+  isContributing = false;
+  selectedGoal: SavingsGoalItem | null = null;
 
-  // ✅ goals list (refreshable)
-  goals$: Observable<readonly SavingsGoalResponse[]> = this.refresh$.pipe(
-    switchMap(() =>
-      this.goalsApi.getMyGoals().pipe(
-        catchError((err) => {
-          console.error('getMyGoals error:', err);
-          return EMPTY; // UI boş kalsın, crash olmasın
-        })
-      )
-    ),
-    shareReplay(1)
-  );
+  contributeForm = this.fb.group({
+    amount: [null as number | null, [Validators.required, Validators.min(1)]],
+  });
 
-  // ✅ Dashboard total wealth -> "Toplam Birikim"
-  // (Dashboard endpoint'in totalWealth dönüyor varsayımı)
-  totalSaved$: Observable<number> = this.dashboardApi.getDashboard().pipe(
-    map((d) => d?.totalWealth ?? 0),
-    catchError((err) => {
-      console.error('getDashboard error:', err);
-      // fallback: goals üzerinden topla
-      return this.goals$.pipe(
-        map((goals) => goals.reduce((sum, g) => sum + (g.currentAmount ?? 0), 0))
-      );
-    }),
-    shareReplay(1)
-  );
-
-  activeGoalsCount$ = this.goals$.pipe(
-    map(
-      (goals) =>
-        goals.filter((g) => (g.status ?? '').toUpperCase() !== 'COMPLETED').length
-    ),
-    shareReplay(1)
-  );
-
-  // ✅ UI helpers
-  openCreate(): void {
+  openCreate() {
+    this.form.reset();
     this.isCreateOpen = true;
-    this.form.reset({ title: '', targetAmount: null });
   }
 
-  closeCreate(): void {
+  closeCreate() {
     this.isCreateOpen = false;
   }
 
-  submitCreate(): void {
-    if (this.form.invalid || this.isSaving) return;
-
-    const title = (this.form.value.title ?? '').trim();
-    const targetAmount = Number(this.form.value.targetAmount);
-
-    const req: CreateSavingsGoalRequest = { title, targetAmount };
+  submitCreate() {
+    if (this.form.invalid) return;
 
     this.isSaving = true;
+    const v = this.form.value;
 
-    this.goalsApi.createGoal(req).pipe(
-      tap(() => {
-        // ✅ başarı -> modal kapat + liste refresh
-        this.closeCreate();
-        this.refresh$.next();
-      }),
-      catchError((err) => {
-        console.error('createGoal error:', err);
-        alert('Hedef oluşturulamadı. Backend loglarını kontrol et.');
-        return EMPTY;
-      }),
-      tap(() => (this.isSaving = false))
-    ).subscribe();
+    this.api.create({
+      title: v.title!,
+      targetAmount: Number(v.targetAmount),
+    }).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.isCreateOpen = false;
+        this.refresh();
+      },
+      error: (e) => {
+        console.error(e);
+        this.isSaving = false;
+        alert('Hedef oluşturulamadı.');
+      },
+    });
   }
 
-  progressPercent(goal: SavingsGoalResponse): number {
-    return Number(goal.progressPercent ?? 0);
+  // ✅ contribute
+  openContribute(goal: SavingsGoalItem) {
+    this.selectedGoal = goal;
+    this.contributeForm.reset();
+    this.isContributeOpen = true;
   }
 
-  remainingAmount(goal: SavingsGoalResponse): number {
-    const remaining = (goal.targetAmount ?? 0) - (goal.currentAmount ?? 0);
-    return remaining > 0 ? remaining : 0;
+  closeContribute() {
+    this.isContributeOpen = false;
+    this.selectedGoal = null;
   }
 
-  formatTRY(value: number): string {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-      maximumFractionDigits: 2,
-    }).format(value ?? 0);
+  submitContribute() {
+    if (!this.selectedGoal) return;
+    if (this.contributeForm.invalid) return;
+
+    const amount = Number(this.contributeForm.value.amount);
+    this.isContributing = true;
+
+    this.api.addContribution(this.selectedGoal.goalId, amount).subscribe({
+      next: () => {
+        this.isContributing = false;
+        this.isContributeOpen = false;
+        this.selectedGoal = null;
+        this.refresh();
+      },
+      error: (e) => {
+        console.error(e);
+        this.isContributing = false;
+        alert('Para eklenemedi.');
+      },
+    });
+  }
+
+  // ✅ delete goal
+  deleteGoal(goal: SavingsGoalItem) {
+    const ok = confirm(`"${goal.title}" hedefini silmek istiyor musun?`);
+    if (!ok) return;
+
+    this.api.delete(goal.goalId).subscribe({
+      next: () => this.refresh(),
+      error: (e) => {
+        console.error(e);
+        alert('Hedef silinemedi.');
+      },
+    });
+  }
+
+  refresh() {
+    this.refresh$.next();
+  }
+
+  // helpers (HTML zaten bunları çağırıyor)
+  formatTRY(value: number) {
+    try {
+      return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value ?? 0);
+    } catch {
+      return `₺${(value ?? 0).toFixed(2)}`;
+    }
+  }
+
+  remainingAmount(goal: SavingsGoalItem) {
+    const target = goal.targetAmount ?? 0;
+    const current = goal.currentAmount ?? 0;
+    return Math.max(target - current, 0);
+  }
+
+  progressPercent(goal: SavingsGoalItem) {
+    const p = goal.progressPercent ?? 0;
+    return Math.max(0, Math.min(100, Number(p)));
   }
 }

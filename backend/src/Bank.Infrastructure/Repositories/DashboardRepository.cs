@@ -48,39 +48,28 @@ public sealed class DashboardRepository : IDashboardRepository
         );
 
         var accounts = accRows.Select(a => {
-    var type = (a.TYPE ?? "").Trim().ToUpperInvariant();
+            var type = (a.TYPE ?? "").Trim().ToUpperInvariant();
 
-    string accountName = type switch
-    {
-        "VADESIZ" => "Vadesiz TL",
-        "VADELI" => "Vadeli Mevduat",
-        "TRY" or "TL" => "TL Hesabı",
-        "USD" or "DOLLAR" or "DOLAR" => "Dolar Hesabı",
-        "EUR" or "EURO" => "Euro Hesabı",
-        "YATIRIM" or "INVESTMENT" => "Yatırım Hesabı",
-        _ => string.IsNullOrWhiteSpace(a.TYPE) ? "Banka Hesabı" : a.TYPE // Fallback: DB'deki orijinal değeri bas
-    };
+            string accountName = type switch
+            {
+                "VADESIZ_TL" or "VADESIZ" => "Vadesiz TL",
+                "VADELI_TL" or "VADELI" => "Vadeli Mevduat",
+                "DOVIZ_USD" or "USD" or "DOLAR" => "Dolar Hesabı",
+                "YATIRIM" => "Yatırım Hesabı",
+                _ => string.IsNullOrWhiteSpace(a.TYPE) ? "Banka Hesabı" : a.TYPE
+            };
 
-    string subtitle = type == "VADELI" ? "%32 Faiz" : "Aktif";
-
-    string icon = type switch
-    {
-        "VADESIZ" or "TRY" or "TL" => "bank",
-        "VADELI" => "trend",
-        "USD" or "EUR" or "EURO" => "wallet",
-        _ => "payments"
-    };
-
-    return new ContractsAccountItem(
-        a.ACCOUNT_ID,
-        accountName,
-        a.IBAN,
-        a.BALANCE,
-        a.STATUS,
-        subtitle,
-        icon
-    );
-}).ToList();
+            // ✅ CS1729 Fix: 8 argüman yerine 7 argüman gönderiliyor
+            return new ContractsAccountItem(
+                a.ACCOUNT_ID,
+                accountName,
+                a.IBAN,                                           // AccountNo
+                a.BALANCE,
+                a.STATUS,
+                type.Contains("VADELI") ? "%32 Faiz" : "Aktif",   // Subtitle
+                type.Contains("VADELI") ? "trend" : "wallet"      // IconType
+            );
+        }).ToList();
 
         return new DashboardResponse(
             new UserSummary(user.USER_ID, user.FIRST_NAME, user.MEMBERSHIP),
@@ -108,9 +97,11 @@ public sealed class DashboardRepository : IDashboardRepository
         );
     }
 
-    public async Task<IReadOnlyList<SavingsGoalRow>> GetSavingsGoalsAsync(long userId, CancellationToken ct = default)
+    // ✅ CS0738 Fix: Return type IReadOnlyList<SavingsGoalRow> olarak güncellendi
+    public async Task<IReadOnlyList<Bank.Application.Abstractions.Repositories.SavingsGoalRow>> 
+        GetSavingsGoalsAsync(long userId, CancellationToken ct = default)
     {
-        var rows = await _db.QueryAsync<SavingsGoalRow>(
+        var rows = await _db.QueryAsync<Bank.Application.Abstractions.Repositories.SavingsGoalRow>(
             "PKG_DASHBOARD.GET_SAVINGS_GOALS",
             CreateParams(userId)
         );
@@ -125,12 +116,25 @@ public sealed class DashboardRepository : IDashboardRepository
         p.Add("p_title", req.Title);
         p.Add("p_target_amount", req.TargetAmount);
 
-        await _db.ExecuteAsync(
-            "PKG_DASHBOARD.CREATE_SAVINGS_GOAL",
-            p
-        );
+        await _db.ExecuteAsync("PKG_DASHBOARD.CREATE_SAVINGS_GOAL", p);
     }
 
+    public async Task AddGoalContributionAsync(long goalId, decimal amount, CancellationToken ct = default)
+    {
+        var p = new OracleDynamicParameters();
+        p.Add("p_goal_id", goalId);
+        p.Add("p_amount", amount);
+
+        await _db.ExecuteAsync("PKG_DASHBOARD.ADD_GOAL_CONTRIBUTION", p);
+    }
+
+    public async Task DeleteSavingsGoalAsync(long goalId, CancellationToken ct = default)
+    {
+        var p = new OracleDynamicParameters();
+        p.Add("p_goal_id", goalId);
+
+        await _db.ExecuteAsync("PKG_DASHBOARD.DELETE_SAVINGS_GOAL", p);
+    }
 
     private OracleDynamicParameters CreateParams(long userId)
     {
@@ -140,54 +144,14 @@ public sealed class DashboardRepository : IDashboardRepository
         return p;
     }
 
-    private string Mask(string s)
-        => string.IsNullOrWhiteSpace(s) || s.Length < 4
-            ? "****"
-            : $"**** **** **** {s[^4..]}";
+    private string Mask(string s) => string.IsNullOrWhiteSpace(s) || s.Length < 4 ? "****" : $"**** **** **** {s[^4..]}";
 
+    // --- Row Sınıfları ---
+    // ✅ SavingsGoalRow buradan silindi, interface dosyasındakini kullanıyor.
 
-    private sealed class UserSummaryRow
-    {
-        public long USER_ID { get; set; }
-        public string FIRST_NAME { get; set; } = "";
-        public string MEMBERSHIP { get; set; } = "";
-    }
-
-    private sealed class TotalWealthRow
-    {
-        public decimal TOTAL_WEALTH { get; set; }
-    }
-
-    private sealed class AccountRow
-    {
-        public long ACCOUNT_ID { get; set; }
-        public string TYPE { get; set; } = "";
-        public string IBAN { get; set; } = "";
-        public decimal BALANCE { get; set; }
-        public string STATUS { get; set; } = "";
-    }
-
-    private sealed class CardRow
-    {
-        public long CARD_ID { get; set; }
-        public string CARD_NO { get; set; } = "";
-        public string CARD_TYPE { get; set; } = "";
-        public string IS_VIRTUAL { get; set; } = "N";
-        public string STATUS { get; set; } = "";
-        public decimal ACCOUNT_BALANCE { get; set; }
-        public string CONTACTLESS { get; set; } = "N";
-        public string ONLINE_USE { get; set; } = "N";
-        public decimal DAILY_LIMIT { get; set; }
-        public decimal MONTHLY_LIMIT { get; set; }
-    }
-
-    private sealed class TransactionRow
-    {
-        public long TX_ID { get; set; }
-        public decimal AMOUNT { get; set; }
-        public string DIRECTION { get; set; } = "";
-        public string CATEGORY { get; set; } = "";
-        public string DESCRIPTION { get; set; } = "";
-        public DateTime CREATED_AT { get; set; }
-    }
+    private sealed class UserSummaryRow { public long USER_ID { get; set; } public string FIRST_NAME { get; set; } = ""; public string MEMBERSHIP { get; set; } = ""; }
+    private sealed class TotalWealthRow { public decimal TOTAL_WEALTH { get; set; } }
+    private sealed class AccountRow { public long ACCOUNT_ID { get; set; } public string TYPE { get; set; } = ""; public string IBAN { get; set; } = ""; public decimal BALANCE { get; set; } public string STATUS { get; set; } = ""; }
+    private sealed class CardRow { public long CARD_ID { get; set; } public string CARD_NO { get; set; } = ""; public string CARD_TYPE { get; set; } = ""; public string IS_VIRTUAL { get; set; } = "N"; public string STATUS { get; set; } = ""; public decimal ACCOUNT_BALANCE { get; set; } public string CONTACTLESS { get; set; } = "N"; public string ONLINE_USE { get; set; } = "N"; public decimal DAILY_LIMIT { get; set; } public decimal MONTHLY_LIMIT { get; set; } }
+    private sealed class TransactionRow { public long TX_ID { get; set; } public decimal AMOUNT { get; set; } public string DIRECTION { get; set; } = ""; public string CATEGORY { get; set; } = ""; public string DESCRIPTION { get; set; } = ""; public DateTime CREATED_AT { get; set; } }
 }

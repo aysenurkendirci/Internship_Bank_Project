@@ -11,7 +11,8 @@
     <a routerLink="/dashboard" class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">Panel’e dön</a>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+
     <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
       <div class="h-52 rounded-[1.5rem] bg-gradient-to-br from-slate-800 to-slate-950 text-white p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden mb-8">
         <div class="absolute top-0 right-0 p-8 opacity-10 text-6xl font-black italic">VISA</div>
@@ -53,7 +54,7 @@
       </div>
     </div>
 
-    <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+   <div class="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col max-h-[720px]">
        <div class="flex justify-between items-center mb-6">
           <h2 class="text-lg font-bold text-slate-900">Hesap Hareketleri</h2>
           <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-lg">{{ txs.length }} İşlem</span>
@@ -61,7 +62,7 @@
        <div *ngIf="txs.length === 0" class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-8 text-center">
           <div class="text-sm font-bold text-slate-400">Bu karta ait işlem bulunamadı.</div>
        </div>
-       <div class="space-y-4" *ngIf="txs.length > 0">
+      <div class="space-y-4 overflow-auto pr-2" *ngIf="txs.length > 0">
           <div *ngFor="let t of txs" class="flex items-center justify-between p-4 border border-slate-50 rounded-2xl hover:bg-slate-50 transition-colors">
             <div>
               <div class="text-sm font-bold text-slate-900">{{ t.title || t.category }}</div>

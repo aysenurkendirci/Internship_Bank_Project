@@ -10,6 +10,7 @@ export type AccountDetailResponse = {
   balance: number;
   status: string;
   createdAt: string;
+
   ownerFirstName: string;
   membership: string;
 };

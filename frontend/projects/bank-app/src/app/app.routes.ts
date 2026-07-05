@@ -37,12 +37,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/accounts/accounts-detail/accounts-detail.component').then(m => m.AccountsDetailComponent),
       },
-      // DOĞRU YER: Children dizisinin içinde olmalı
       {
         path: 'savings-goals',
         loadComponent: () =>
           import('./features/savings-goals/savings-goals.component').then(m => m.SavingsGoalsComponent),
       },
+
+{
+  path: 'investments',
+  loadComponent: () =>
+    import('./features/investments/investments.component')
+      .then(m => m.InvestmentsComponent),
+},
+
+
     ],
   },
 

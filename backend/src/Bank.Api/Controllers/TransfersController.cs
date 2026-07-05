@@ -20,7 +20,6 @@ public sealed class TransfersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TransferRequest req)
     {
-        // Kullanıcı ID'sini claim'lerden güvenli bir şekilde alıyoruz
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
                         User.FindFirstValue("userId");
 

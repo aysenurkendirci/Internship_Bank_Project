@@ -44,3 +44,4 @@ public sealed record AccountItem(
     string? Subtitle,
     string IconType
 );
+
