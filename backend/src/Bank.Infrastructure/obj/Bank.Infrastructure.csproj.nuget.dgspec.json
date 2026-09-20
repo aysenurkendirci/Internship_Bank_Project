@@ -1,36 +1,43 @@
 {
   "format": 1,
   "restore": {
-    "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/Bank.Infrastructure.csproj": {}
+    "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Infrastructure\\Bank.Infrastructure.csproj": {}
   },
   "projects": {
-    "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/Bank.Application.csproj": {
+    "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\Bank.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/Bank.Application.csproj",
+        "projectUniqueName": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\Bank.Application.csproj",
         "projectName": "Bank.Application",
-        "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/Bank.Application.csproj",
-        "packagesPath": "/Users/kubrakendirci/.nuget/packages/",
-        "outputPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/obj/",
+        "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\Bank.Application.csproj",
+        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/kubrakendirci/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj": {
-                "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj"
+              "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj": {
+                "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj"
               },
-              "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj": {
-                "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj"
+              "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj": {
+                "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj"
               }
             }
           }
@@ -45,7 +52,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -66,7 +73,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -344,22 +351,29 @@
         }
       }
     },
-    "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj": {
+    "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj",
+        "projectUniqueName": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj",
         "projectName": "Bank.Contracts",
-        "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj",
-        "packagesPath": "/Users/kubrakendirci/.nuget/packages/",
-        "outputPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/obj/",
+        "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj",
+        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/kubrakendirci/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -378,7 +392,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -399,7 +413,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -677,22 +691,29 @@
         }
       }
     },
-    "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj": {
+    "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj",
         "projectName": "Bank.Domain",
-        "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj",
-        "packagesPath": "/Users/kubrakendirci/.nuget/packages/",
-        "outputPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/obj/",
+        "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj",
+        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/kubrakendirci/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -711,7 +732,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -732,7 +753,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1010,36 +1031,43 @@
         }
       }
     },
-    "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/Bank.Infrastructure.csproj": {
+    "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Infrastructure\\Bank.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/Bank.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Infrastructure\\Bank.Infrastructure.csproj",
         "projectName": "Bank.Infrastructure",
-        "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/Bank.Infrastructure.csproj",
-        "packagesPath": "/Users/kubrakendirci/.nuget/packages/",
-        "outputPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Infrastructure/obj/",
+        "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Infrastructure\\Bank.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/kubrakendirci/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/Bank.Application.csproj": {
-                "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Application/Bank.Application.csproj"
+              "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\Bank.Application.csproj": {
+                "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Application\\Bank.Application.csproj"
               },
-              "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj": {
-                "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Contracts/Bank.Contracts.csproj"
+              "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj": {
+                "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Contracts\\Bank.Contracts.csproj"
               },
-              "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj": {
-                "projectPath": "/Users/kubrakendirci/Desktop/wintern_internship/BankaProject/backend/src/Bank.Domain/Bank.Domain.csproj"
+              "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj": {
+                "projectPath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Domain\\Bank.Domain.csproj"
               }
             }
           }
@@ -1054,7 +1082,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -1064,25 +1092,21 @@
               "target": "Package",
               "version": "[2.1.66, )"
             },
-            "Dapper.Oracle": {
+            "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[2.0.2, )"
+              "version": "[10.0.12, )"
             },
             "Microsoft.Extensions.Options": {
               "target": "Package",
-              "version": "[10.0.2, )"
+              "version": "[10.0.12, )"
             },
             "Microsoft.Extensions.Options.ConfigurationExtensions": {
               "target": "Package",
-              "version": "[10.0.2, )"
+              "version": "[10.0.12, )"
             },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
               "version": "[8.15.0, )"
-            },
-            "Oracle.ManagedDataAccess.Core": {
-              "target": "Package",
-              "version": "[23.26.100, )"
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
@@ -1105,7 +1129,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

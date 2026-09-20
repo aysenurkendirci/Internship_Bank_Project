@@ -1,12 +1,6 @@
 using Microsoft.OpenApi.Models;
-using Bank.Infrastructure.Oracle;
-
 using Bank.Application.Abstractions.Security;
-using Bank.Application.Abstractions.Services;
-using Bank.Application.Abstractions.Repositories;
-
-using Bank.Application.Services;
-using Bank.Infrastructure.Repositories;
+using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure.Security;
 
 using Bank.Api.Security; 
@@ -30,11 +24,11 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 // ✅ Swagger (JWT)
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(swagger =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bank API", Version = "v1" });
+    swagger.SwaggerDoc("v1", new OpenApiInfo { Title = "Bank API", Version = "v1" });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
@@ -44,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "JWT Authorization header. Token'ı yapıştırın. Örn: 'abc123...'"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -71,23 +65,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Oracle
-builder.Services.Configure<OracleOptions>(builder.Configuration.GetSection("Oracle"));
-builder.Services.AddSingleton<OracleConnectionFactory>();
-builder.Services.AddScoped<OracleExecutor>();
+// ✅ EF Core & SQLite
+builder.Services.AddDbContext<Bank.Infrastructure.Persistence.BankDbContext>(options =>
+    Microsoft.EntityFrameworkCore.SqliteDbContextOptionsBuilderExtensions.UseSqlite(
+        options, builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=Bank.db"));
 
 // ✅ CurrentUser için gerekli
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
-// ✅ DI
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
-
-builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
+// ✅ DI (Bağımlılık Enjeksiyonu - CQRS MediatR ile doldurulacak)
+// builder.Services.AddScoped<IAuthRepository, AuthRepository>(); silindi.
+// Yeni yapıda sadece MediatR kaydı yapılacak (Faz 2).
 
 // ✅ JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
@@ -118,7 +107,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bank API V1"); });
+    app.UseSwaggerUI(swagger => { swagger.SwaggerEndpoint("/swagger/v1/swagger.json", "Bank API V1"); });
 }
 
 // sıra: CORS -> Auth -> Controllers
