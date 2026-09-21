@@ -27,21 +27,21 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        // 1. Email'i Domain objesine dönüştür (Validasyon)
-        var email = Email.Create(request.Email);
+        // 1. TcNo'yu Domain objesine dönüştür (Validasyon)
+        var tcNo = TcNo.Create(request.TcNo);
 
         // 2. Veritabanından kullanıcıyı bul
-        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        var user = await _userRepository.GetByTcNoAsync(tcNo, cancellationToken);
         if (user is null)
         {
-            throw new DomainException("Geçersiz e-posta veya şifre."); // Güvenlik: Hangisinin yanlış olduğunu söylemiyoruz
+            throw new DomainException("Geçersiz TC Kimlik No veya şifre."); // Güvenlik: Hangisinin yanlış olduğunu söylemiyoruz
         }
 
         // 3. Şifreyi doğrula
         bool isPasswordValid = _passwordHasher.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
-            throw new DomainException("Geçersiz e-posta veya şifre.");
+            throw new DomainException("Geçersiz TC Kimlik No veya şifre.");
         }
 
         // 4. Token üret ve dön

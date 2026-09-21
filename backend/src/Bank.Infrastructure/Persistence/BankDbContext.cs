@@ -17,6 +17,7 @@ public sealed class BankDbContext : DbContext
     public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
     public DbSet<SavingsGoal> SavingsGoals => Set<SavingsGoal>();
 
+//override ederek ef core override mantığını,özel kurallara göre değiştirdik
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
