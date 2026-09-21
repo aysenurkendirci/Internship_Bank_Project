@@ -1,6 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Bank.Application.Abstractions.Security;
-using Bank.Application.Abstractions.Security;
+using Bank.Application;
 using Bank.Infrastructure.Security;
 
 using Bank.Api.Security; 
@@ -74,9 +74,8 @@ builder.Services.AddDbContext<Bank.Infrastructure.Persistence.BankDbContext>(opt
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
-// ✅ DI (Bağımlılık Enjeksiyonu - CQRS MediatR ile doldurulacak)
-// builder.Services.AddScoped<IAuthRepository, AuthRepository>(); silindi.
-// Yeni yapıda sadece MediatR kaydı yapılacak (Faz 2).
+// ✅ DI (Bağımlılık Enjeksiyonu - CQRS MediatR)
+builder.Services.AddApplication();
 
 // ✅ JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
