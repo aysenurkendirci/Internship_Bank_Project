@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "bGQv8WcjqbI=",
+  "dgSpecHash": "hosRJOxiBmw=",
   "success": true,
   "projectFilePath": "C:\\Users\\Asus\\Internship_Bank_Project\\backend\\src\\Bank.Api\\Bank.Api.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Asus\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\dapper\\2.1.66\\dapper.2.1.66.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\dapper.oracle\\2.0.2\\dapper.oracle.2.0.2.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",

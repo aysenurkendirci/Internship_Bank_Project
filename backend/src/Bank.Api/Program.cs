@@ -1,6 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Bank.Application.Abstractions.Security;
 using Bank.Application;
+using Bank.Infrastructure;
 using Bank.Infrastructure.Security;
 
 using Bank.Api.Security; 
@@ -65,10 +66,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ EF Core & SQLite
-builder.Services.AddDbContext<Bank.Infrastructure.Persistence.BankDbContext>(options =>
-    Microsoft.EntityFrameworkCore.SqliteDbContextOptionsBuilderExtensions.UseSqlite(
-        options, builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=Bank.db"));
+// ✅ DI (Bağımlılık Enjeksiyonu - Infrastructure & Repositories)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // ✅ CurrentUser için gerekli
 builder.Services.AddHttpContextAccessor();
