@@ -33,4 +33,15 @@ public sealed class UserRepository : IUserRepository
         return await _context.Users
             .FirstOrDefaultAsync(u => u.TcNo.Value == tcNo.Value, cancellationToken);
     }
+
+    public async Task<User?> GetByIdWithDetailsAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.Accounts)
+                .ThenInclude(a => a.LedgerEntries.OrderByDescending(t => t.CreatedAt).Take(5)) // Sadece son 5 işlem
+                .ThenInclude(le => le.Transaction) // Ledger'dan asıl işleme git
+            .Include(u => u.Accounts)
+                .ThenInclude(a => a.Cards) // Hesaplara bağlı kartlar
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
 }
