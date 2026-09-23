@@ -1,3 +1,4 @@
+using Bank.Application.Abstractions.Data;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure.Persistence;
@@ -17,8 +18,10 @@ public static class DependencyInjection
         services.AddDbContext<BankDbContext>(options =>
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
-        // Repositories
+        // Repositories & Data
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Güvenlik (Security)
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
