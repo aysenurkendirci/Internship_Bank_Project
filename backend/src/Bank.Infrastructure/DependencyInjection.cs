@@ -21,6 +21,7 @@ public static class DependencyInjection
         // Repositories & Data
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<ICardRepository, CardRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Güvenlik (Security)
