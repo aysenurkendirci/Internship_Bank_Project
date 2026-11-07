@@ -2,18 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* senin global stilin devam edebilir */
 body {
   background-color: #f6f8fc;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Kart gradient classların */
-.elegant-gradient-1 { background: linear-gradient(135deg, #2d3436, #0f172a); }
-.elegant-gradient-2 { background: linear-gradient(135deg, #2563eb, #3b82f6); }
-.elegant-gradient-3 { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
-
-/* no-scrollbar */
+// Horizontal card and menu strips scroll by touch or trackpad without a visible scrollbar.
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+// Shared building blocks, so every page uses the same panels, buttons and form fields.
+@layer components {
+  .panel { @apply bg-white rounded-[24px] border border-slate-100 shadow-sm p-6; }
+  .page-title { @apply text-3xl font-black text-slate-900; }
+  .page-subtitle { @apply text-slate-400 font-bold mt-1; }
+  .section-title { @apply text-xl font-black text-slate-900; }
+
+  .btn { @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-blue-600 text-white hover:bg-blue-700; }
+  .btn-secondary { @apply btn bg-slate-100 text-slate-700 hover:bg-slate-200; }
+  .btn-danger { @apply btn bg-red-50 text-red-600 hover:bg-red-100; }
+  .btn-link { @apply text-sm font-bold text-blue-600 hover:underline disabled:opacity-50; }
+
+  .field { @apply flex flex-col gap-1; }
+  .field-label { @apply text-xs font-black text-slate-500 uppercase tracking-wide; }
+  .input { @apply px-4 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100; }
+  .field-error { @apply text-xs font-bold text-red-600; }
+
+  .notice-error { @apply p-4 rounded-xl bg-red-50 text-red-700 border border-red-100 font-semibold; }
+  .notice-info { @apply p-4 rounded-xl bg-blue-50 text-blue-800 border border-blue-100 font-semibold; }
+  .badge { @apply inline-block text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide; }
+}

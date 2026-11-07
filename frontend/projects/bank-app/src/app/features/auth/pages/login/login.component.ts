@@ -1,74 +1,64 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../../core/auth/auth.service';
 
-import { InputComponent } from '../../../../shared/input/input.component';
+import { SessionService } from '../../../../core/auth/session.service';
+import { problemMessage } from '../../../../core/http/problem-details';
+import { AuthApi } from '../../../../data-access/api/auth.api';
 import { ButtonComponent } from '../../../../shared/button/button.component';
+import { InputComponent } from '../../../../shared/input/input.component';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
+  imports: [ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthApi);
+  private readonly session = inject(SessionService);
+  private readonly router = inject(Router);
+  private readonly params = inject(ActivatedRoute).snapshot.queryParamMap;
 
-  loading = false;
-  error?: string;
-  success?: string;
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly notice = signal<string | null>(this.initialNotice());
 
-  form = this.fb.group({
-    tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+  // Only presence is checked: the API deliberately does not say which part of a login was wrong.
+  protected readonly form = this.fb.nonNullable.group({
+    tcNo: [this.params.get('tcNo') ?? '', Validators.required],
+    password: ['', Validators.required],
   });
 
-  ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
-      if (params.get('registered') === '1') {
-        this.success =
-          params.get('message') ?? 'Başarıyla hesabınız oluşturuldu. VBank’a hoş geldiniz!';
-      }
-      const tcNo = params.get('tcNo');
-      if (tcNo) this.form.controls.tcNo.setValue(tcNo);
-    });
-  }
-
-  submit() {
+  submit(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.loading) return;
+    if (this.form.invalid || this.loading()) return;
 
-    this.loading = true;
-    this.error = undefined;
+    this.loading.set(true);
+    this.error.set(null);
 
     this.auth
-      .login(this.form.getRawValue() as any)
-      .pipe(finalize(() => (this.loading = false)))
+      .login(this.form.getRawValue())
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (res: any) => {
-          const token = res?.token ?? res?.jwt ?? res?.accessToken;
-          if (!token) {
-            console.error('Login başarılı ama token dönmedi:', res);
-            this.error = 'Giriş başarılı ama token alınamadı.';
-            return;
-          }
-
-          localStorage.setItem('token', token);
-
-          // İstersen fullName'i de tut:
-          if (res?.fullName) localStorage.setItem('fullName', res.fullName);
-
-          this.router.navigateByUrl('/dashboard');
+        next: (response) => {
+          this.session.start(response);
+          this.router.navigateByUrl(this.safeReturnUrl());
         },
-        error: (err: any) => {
-          this.error = err?.error?.message ?? err?.message ?? 'Giriş başarısız';
-        },
+        error: (err) => this.error.set(problemMessage(err, 'Giriş yapılamadı.')),
       });
+  }
+
+  private initialNotice(): string | null {
+    if (this.params.get('registered') === '1') return 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.';
+    if (this.params.get('expired') === '1') return 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.';
+    return null;
+  }
+
+  // Only in-app paths are followed, so a crafted link cannot send the user to another site after login.
+  private safeReturnUrl(): string {
+    const url = this.params.get('returnUrl');
+    return url && url.startsWith('/') && !url.startsWith('//') ? url : '/dashboard';
   }
 }

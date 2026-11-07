@@ -1,0 +1,41 @@
+<app-page-header title="Nakit akışı" subtitle="Bilinen gelir, gider, abonelik ve kart ekstrelerinizden yarından itibaren hesaplanır.">
+  <div class="flex gap-2" role="group" aria-label="Projeksiyon süresi">
+    @for (h of horizons; track h) {
+      <button type="button" [ngClass]="months() === h ? 'btn-primary' : 'btn-secondary'" [attr.aria-pressed]="months() === h"
+              (click)="selectHorizon(h)">{{ h }} ay</button>
+    }
+  </div>
+</app-page-header>
+
+@if (error(); as message) {
+  <app-notice class="mb-6" [message]="message" />
+}
+
+@if (projection(); as p) {
+  @if (p.excludedItems.length > 0) {
+    <app-notice class="mb-6" kind="info" [message]="'Para birimi TL olmadığı için hesaba katılmayanlar: ' + p.excludedItems.join(', ') + '.'" />
+  }
+
+  <app-projection-summary class="mb-8" [projection]="p" />
+
+  <section class="panel mb-8">
+    <h2 class="section-title mb-1">Tahmini bakiye</h2>
+    <p class="text-sm font-semibold text-slate-400 mb-4">Kırmızı çizgi sıfır. Altına inen her gün hesap eksidedir.</p>
+    <app-balance-chart [projection]="p" />
+  </section>
+
+  <section class="panel mb-8">
+    <h2 class="section-title mb-4">Aylık gelir ve çıkış</h2>
+    <app-monthly-flow-chart [months]="p.months" />
+  </section>
+
+  <section class="panel mb-8">
+    <h2 class="section-title mb-4">Aylık özet</h2>
+    <app-monthly-summary-table [months]="p.months" />
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title mb-4">Hareketler</h2>
+    <app-projection-movements [entries]="p.entries" />
+  </section>
+}

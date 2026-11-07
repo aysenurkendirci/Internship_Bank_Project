@@ -6,58 +6,6 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "ui": {
-      "projectType": "library",
-      "root": "projects/ui",
-      "sourceRoot": "projects/ui/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/ui/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/ui/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "projects/ui/tsconfig.spec.json"
-          }
-        }
-      }
-    },
-    "data-access": {
-      "projectType": "library",
-      "root": "projects/data-access",
-      "sourceRoot": "projects/data-access/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/data-access/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/data-access/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "projects/data-access/tsconfig.spec.json"
-          }
-        }
-      }
-    },
     "bank-app": {
       "projectType": "application",
       "schematics": {
@@ -116,7 +64,8 @@
               "buildTarget": "bank-app:build:production"
             },
             "development": {
-              "buildTarget": "bank-app:build:development"
+              "buildTarget": "bank-app:build:development",
+              "proxyConfig": "projects/bank-app/src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

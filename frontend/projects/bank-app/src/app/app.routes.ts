@@ -25,6 +25,38 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
+      {
+        path: 'cash-flow',
+        title: 'Nakit akışı',
+        loadComponent: () => import('./features/cash-flow/cash-flow-page.component').then((m) => m.CashFlowPageComponent),
+      },
+      {
+        path: 'scenarios',
+        title: 'Taksit senaryosu',
+        loadComponent: () => import('./features/scenarios/scenarios-page.component').then((m) => m.ScenariosPageComponent),
+      },
+      {
+        path: 'cards',
+        title: 'Kartlar ve taksitler',
+        loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),
+      },
+      {
+        path: 'analytics',
+        title: 'Analiz',
+        loadComponent: () => import('./features/analytics/analytics-page.component').then((m) => m.AnalyticsPageComponent),
+      },
+      {
+        path: 'transactions',
+        title: 'İşlem geçmişi',
+        loadComponent: () =>
+          import('./features/transactions/transactions-page.component').then((m) => m.TransactionsPageComponent),
+      },
+      {
+        path: 'recurring',
+        title: 'Düzenli gelir ve giderler',
+        loadComponent: () =>
+          import('./features/recurring/recurring-page.component').then((m) => m.RecurringPageComponent),
+      },
     ],
   },
 

@@ -1,0 +1,35 @@
+<app-page-header
+  title="Taksit senaryosu"
+  subtitle="Bir alışverişi yapmadan önce, farklı taksit seçeneklerinin önümüzdeki aylara etkisini görün."
+/>
+
+@if (error(); as message) {
+  <app-notice class="mb-6" [message]="message" />
+}
+
+@if (cards().length === 0) {
+  <app-empty-state class="mb-6">Senaryo için önce TL cinsinden bir kredi kartı ekleyin.</app-empty-state>
+}
+
+<app-scenario-form class="block mb-8" [cards]="cards()" [busy]="busy()" (compare)="compare($event)" />
+
+@if (comparison(); as result) {
+  <section class="panel mb-8">
+    <h2 class="section-title mb-1">Karşılaştırma</h2>
+    <p class="text-sm font-semibold text-slate-400 mb-4">
+      {{ result.from | date: 'MMMM y' }} – {{ result.to | date: 'MMMM y' }} arası; en uzun seçeneğin son taksitine kadar.
+    </p>
+    <app-scenario-comparison-table [rows]="rows()" />
+  </section>
+
+  <section class="panel mb-6">
+    <h2 class="section-title mb-1">Aylara göre en düşük bakiye</h2>
+    <p class="text-sm font-semibold text-slate-400 mb-4">Her ayın içinde görülen en düşük bakiye. Kırmızı çizgi sıfır.</p>
+    <app-scenario-chart [rows]="rows()" />
+  </section>
+
+  <app-notice
+    kind="info"
+    message="Bu karşılaştırma bir öneri değildir. Seçenekleri sıralamaz; kararı sizin bilgilerinizle yine siz verirsiniz. Hesaplama ekstrenin her ay tamamının ödendiğini varsayar."
+  />
+}

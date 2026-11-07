@@ -1,77 +1,96 @@
-using Bank.Domain.Exceptions;
+using System.Globalization;
+using Bank.Domain.Common;
 
 namespace Bank.Domain.ValueObjects;
 
 /// <summary>
-/// Domain-Driven Design (DDD) Value Object: Money (Para)
-/// Bir değer nesnesidir (Value Object): Değiştirilemez (Immutable), 
-/// İki Money nesnesi ancak Tutar ve Para Birimi eşitse eşittir.
+/// An amount bound to its currency. Arithmetic and comparison between different
+/// currencies is rejected instead of silently producing a meaningless number.
 /// </summary>
-public sealed record Money
+/// <remarks>
+/// Amounts keep full decimal precision during calculations; <see cref="Round"/> brings them
+/// to cents. Midpoints round away from zero (2.345 → 2.35), the convention customers expect
+/// on statements, rather than .NET's default banker's rounding (2.345 → 2.34).
+/// </remarks>
+public sealed record Money : IComparable<Money>
 {
+    private const int MinorUnitDigits = 2;
+
     public decimal Amount { get; }
-    public string Currency { get; }
+    public Currency Currency { get; }
 
-    private Money(decimal amount, string currency)
+    public Money(decimal amount, Currency currency)
     {
-        if (string.IsNullOrWhiteSpace(currency))
-            throw new DomainException("Para birimi boş olamaz.");
-
-        Amount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
-        Currency = currency.ToUpperInvariant();
+        ArgumentNullException.ThrowIfNull(currency);
+        Amount = amount;
+        Currency = currency;
     }
 
-    public static Money Create(decimal amount, string currency = "TRY")
+    public static Money Zero(Currency currency) => new(0m, currency);
+
+    public bool IsZero => Amount == 0m;
+    public bool IsNegative => Amount < 0m;
+    public bool IsPositive => Amount > 0m;
+
+    public Money Round()
+        => new(Math.Round(Amount, MinorUnitDigits, MidpointRounding.AwayFromZero), Currency);
+
+    /// <summary>
+    /// Splits the amount into <paramref name="parts"/> cent-exact shares whose sum equals the
+    /// rounded total. Dividing naively loses cents (1000 / 3 = 333.33 × 3 = 999.99); the
+    /// remainder is added to the first share so that every later installment is identical.
+    /// </summary>
+    public IReadOnlyList<Money> Allocate(int parts)
     {
-        return new Money(amount, currency);
+        if (parts < 1)
+            throw new DomainException("Tutar en az bir parçaya bölünmelidir.");
+
+        var total = Round().Amount;
+        var share = Math.Round(total / parts, MinorUnitDigits, MidpointRounding.ToZero);
+        var remainder = total - share * parts;
+
+        var shares = new Money[parts];
+        shares[0] = new Money(share + remainder, Currency);
+        for (var i = 1; i < parts; i++)
+            shares[i] = new Money(share, Currency);
+
+        return shares;
     }
 
-    public static Money Zero(string currency = "TRY") => new(0m, currency);
-
-    public Money Add(Money other)
+    public static Money operator +(Money left, Money right)
     {
-        EnsureSameCurrency(other);
-        return new Money(Amount + other.Amount, Currency);
+        EnsureSameCurrency(left, right);
+        return new Money(left.Amount + right.Amount, left.Currency);
     }
 
-    public Money Subtract(Money other)
+    public static Money operator -(Money left, Money right)
     {
-        EnsureSameCurrency(other);
-        return new Money(Amount - other.Amount, Currency);
+        EnsureSameCurrency(left, right);
+        return new Money(left.Amount - right.Amount, left.Currency);
     }
 
-    public static Money operator +(Money left, Money right) => left.Add(right);
-    public static Money operator -(Money left, Money right) => left.Subtract(right);
+    public static Money operator -(Money money) => new(-money.Amount, money.Currency);
 
-    public static bool operator >(Money left, Money right)
+    public static Money operator *(Money money, decimal factor) => new(money.Amount * factor, money.Currency);
+
+    public static bool operator <(Money left, Money right) => left.CompareTo(right) < 0;
+    public static bool operator >(Money left, Money right) => left.CompareTo(right) > 0;
+    public static bool operator <=(Money left, Money right) => left.CompareTo(right) <= 0;
+    public static bool operator >=(Money left, Money right) => left.CompareTo(right) >= 0;
+
+    public int CompareTo(Money? other)
     {
-        left.EnsureSameCurrency(right);
-        return left.Amount > right.Amount;
+        ArgumentNullException.ThrowIfNull(other);
+        EnsureSameCurrency(this, other);
+        return Amount.CompareTo(other.Amount);
     }
 
-    public static bool operator <(Money left, Money right)
-    {
-        left.EnsureSameCurrency(right);
-        return left.Amount < right.Amount;
-    }
+    public override string ToString()
+        => $"{Amount.ToString("0.00", CultureInfo.InvariantCulture)} {Currency}";
 
-    public static bool operator >=(Money left, Money right)
+    private static void EnsureSameCurrency(Money left, Money right)
     {
-        left.EnsureSameCurrency(right);
-        return left.Amount >= right.Amount;
+        if (left.Currency != right.Currency)
+            throw new DomainException($"{left.Currency} ile {right.Currency} tutarları birlikte işlenemez.");
     }
-
-    public static bool operator <=(Money left, Money right)
-    {
-        left.EnsureSameCurrency(right);
-        return left.Amount <= right.Amount;
-    }
-
-    private void EnsureSameCurrency(Money other)
-    {
-        if (Currency != other.Currency)
-            throw new CurrencyMismatchException(Currency, other.Currency);
-    }
-
-    public override string ToString() => $"{Amount:N2} {Currency}";
 }

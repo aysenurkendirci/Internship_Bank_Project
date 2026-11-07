@@ -1,0 +1,78 @@
+# The whole system on one machine: database, broker, migrations, API and web app.
+#
+#   cp .env.example .env    # then put real values in .env (it is not committed)
+#   docker compose up --build
+#
+# Web app: http://localhost:8080   RabbitMQ console: http://localhost:15672
+
+name: neobank
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?set SQL_SA_PASSWORD in .env}
+    # 14333 on the host, so it does not clash with a locally installed SQL Server.
+    ports:
+      - "14333:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      # The default guest user only works from inside the container, so the API gets its own user.
+      RABBITMQ_DEFAULT_USER: bank
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrator:
+    build:
+      context: ./backend
+      target: migrator
+    environment:
+      ConnectionStrings__BankDb: "Server=sqlserver;Database=BankDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./backend
+      target: api
+    environment:
+      ConnectionStrings__BankDb: "Server=sqlserver;Database=BankDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True"
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+      # The API has no published port: only nginx can reach it, so forwarded headers can be trusted.
+      ReverseProxy__Enabled: "true"
+      Messaging__Enabled: "true"
+      Messaging__RabbitMq__Host: rabbitmq
+      Messaging__RabbitMq__UserName: bank
+      Messaging__RabbitMq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  sqldata:

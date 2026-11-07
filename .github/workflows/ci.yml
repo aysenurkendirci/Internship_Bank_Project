@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    # Integration tests run against a real SQL Server, as they do locally.
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          # Throwaway container that only lives for this job; not a secret worth protecting.
+          MSSQL_SA_PASSWORD: "Ci_Only_Passw0rd!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Ci_Only_Passw0rd!' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      # Only the publisher test needs it; without RABBITMQ_HOST that test is skipped.
+      rabbitmq:
+        image: rabbitmq:4-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RABBITMQ_HOST: localhost
+      INTEGRATION_TESTS_DB: "Server=localhost,1433;Database=BankDb_IntegrationTests;User Id=sa;Password=Ci_Only_Passw0rd!;TrustServerCertificate=True"
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        run: dotnet build Bank.slnx -c Release -warnaserror
+
+      - name: Check for vulnerable packages
+        run: |
+          dotnet list Bank.slnx package --vulnerable --include-transitive | tee vulnerable.txt
+          ! grep -q "has the following vulnerable packages" vulnerable.txt
+
+      - name: Unit tests
+        run: dotnet test tests/Bank.UnitTests -c Release --no-build
+
+      - name: Integration tests
+        run: dotnet test tests/Bank.IntegrationTests -c Release --no-build
+
+  # The images are not run here, but building them catches a broken Dockerfile before anyone needs it.
+  images:
+    runs-on: ubuntu-latest
+    env:
+      SQL_SA_PASSWORD: "Ci_Only_Passw0rd!"
+      JWT_KEY: "ci-only-signing-key-that-is-long-enough-123"
+      RABBITMQ_PASSWORD: "ci-only"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose build
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Production build
+        run: npx ng build bank-app
+
+      - name: Unit tests
+        run: npx ng test bank-app --watch=false

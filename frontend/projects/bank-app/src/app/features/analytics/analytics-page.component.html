@@ -1,0 +1,44 @@
+<app-page-header
+  title="Analiz"
+  subtitle="İşlem geçmişinizden çıkarılan desenler. Sistem öneri vermez; alışkanlıklarınızı görünür kılar."
+/>
+
+<section class="panel mb-8">
+  <h2 class="section-title mb-4">Kategorilere göre harcama (son 6 tamamlanmış ay)</h2>
+  @if (trends().error; as message) {
+    <app-notice [message]="message" />
+  } @else if (trends().data; as data) {
+    <app-category-trends [trends]="data" />
+  }
+</section>
+
+<section class="panel mb-8">
+  <h2 class="section-title mb-1">Düzenli ödemeler</h2>
+  <p class="text-sm font-semibold text-slate-400 mb-4">
+    Geçmişte her ay tekrar eden ödemeler. Takipte olmayanları nakit akışına eklemek için "Takibe al"ı kullanın.
+  </p>
+  @if (recurring().error; as message) {
+    <app-notice class="mb-4" [message]="message" />
+  }
+  @if (recurring().data; as data) {
+    <app-recurring-payments [payments]="data" [busyMerchant]="trackingMerchant()" (track)="track($event)" />
+  }
+</section>
+
+<section class="panel mb-8">
+  <h2 class="section-title mb-4">Olağandışı harcamalar (son 6 ay)</h2>
+  @if (anomalies().error; as message) {
+    <app-notice [message]="message" />
+  } @else if (anomalies().data; as data) {
+    <app-anomalies [anomalies]="data" />
+  }
+</section>
+
+<section class="panel">
+  <h2 class="section-title mb-4">Önümüzdeki 3 ayın günlük harcama tahmini</h2>
+  @if (forecast().error; as message) {
+    <app-notice kind="info" [message]="message" />
+  } @else if (forecast().data; as data) {
+    <app-spending-forecast [forecast]="data" />
+  }
+</section>

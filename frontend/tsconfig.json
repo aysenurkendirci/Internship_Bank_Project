@@ -11,11 +11,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve",
-    "paths": {
-      "data-access": ["./dist/data-access"],
-      "ui": ["./dist/ui"]
-    }
+    "module": "preserve"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

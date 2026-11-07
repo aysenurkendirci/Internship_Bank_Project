@@ -3,7 +3,6 @@ namespace Bank.Contracts.Dashboard;
 public sealed record DashboardResponse(
     UserSummary User,
     decimal TotalWealth,
-    decimal WealthChangeRate,
     IReadOnlyList<CardItem> Cards,
     IReadOnlyList<TransactionItem> RecentTransactions,
     IReadOnlyList<AccountItem> Accounts
@@ -34,13 +33,12 @@ public sealed record TransactionItem(
     DateTime CreatedAt
 );
 
-// Contracts tarafındaki AccountItem (kalacaksa)
+// Raw account data; display labels and icons are chosen by each client.
 public sealed record AccountItem(
     long AccountId,
-    string AccountName,
-    string AccountNo,
+    string AccountType,
+    string CurrencyCode,
+    string Iban,
     decimal Balance,
-    string Status,
-    string? Subtitle,
-    string IconType
+    string Status
 );

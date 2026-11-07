@@ -1,0 +1,46 @@
+<app-page-header
+  title="Kartlar ve taksitler"
+  subtitle="Kart harcamaları ekstre kesim gününde toplanır, son ödeme gününde hesaptan çıkar."
+/>
+
+@if (error(); as message) {
+  <app-notice class="mb-6" [message]="message" />
+}
+
+<section class="mb-10">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="section-title">Kartlarım</h2>
+    <button type="button" class="btn-primary" (click)="editing.set(null)">
+      <span class="material-symbols-outlined">add</span> Kart ekle
+    </button>
+  </div>
+
+  @if (editing() !== undefined) {
+    <app-card-form class="block mb-6" [card]="editing() ?? null" [busy]="busy()" (save)="saveCard($event)" (cancel)="editing.set(undefined)" />
+  }
+
+  @if (loaded() && cards().length === 0) {
+    <app-empty-state>Henüz kart eklemediniz. Taksit ve kartla ödenen abonelikleri takip etmek için bir kart ekleyin.</app-empty-state>
+  }
+
+  <app-card-list [cards]="cards()" [busy]="busy()" (edit)="editing.set($event)" (remove)="deleteCard($event)" />
+</section>
+
+<section>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="section-title">Taksitli alışverişler</h2>
+    <button type="button" class="btn-primary" (click)="addingPlan.set(true)" [disabled]="cards().length === 0">
+      <span class="material-symbols-outlined">add</span> Taksit ekle
+    </button>
+  </div>
+
+  @if (addingPlan()) {
+    <app-installment-plan-form class="block mb-6" [cards]="cards()" [busy]="busy()" (save)="savePlan($event)" (cancel)="addingPlan.set(false)" />
+  }
+
+  @if (loaded() && plans().length === 0) {
+    <app-empty-state>Kayıtlı taksitli alışveriş yok.</app-empty-state>
+  }
+
+  <app-installment-plan-list [plans]="plans()" [cards]="cards()" [busy]="busy()" (remove)="deletePlan($event)" />
+</section>

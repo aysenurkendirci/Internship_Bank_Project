@@ -3,7 +3,15 @@
     <Project Path="src/Bank.Api/Bank.Api.csproj" />
     <Project Path="src/Bank.Application/Bank.Application.csproj" />
     <Project Path="src/Bank.Contracts/Bank.Contracts.csproj" />
+    <Project Path="src/Bank.Database/Bank.Database.csproj" />
     <Project Path="src/Bank.Domain/Bank.Domain.csproj" />
     <Project Path="src/Bank.Infrastructure/Bank.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Bank.IntegrationTests/Bank.IntegrationTests.csproj" />
+    <Project Path="tests/Bank.UnitTests/Bank.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Bank.Evaluation/Bank.Evaluation.csproj" />
   </Folder>
 </Solution>

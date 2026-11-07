@@ -1,10 +1,9 @@
 export interface DashboardResponse {
   user: UserSummary;
   totalWealth: number;
-  wealthChangeRate: number;
   cards: CardItem[];
   recentTransactions: TransactionItem[];
-  accounts: AccountItem[]; // Tasarımdaki sağ sütun için gerekli
+  accounts: AccountItem[];
 }
 
 export interface UserSummary {
@@ -33,12 +32,14 @@ export interface TransactionItem {
   createdAt: string;
 }
 
+export type AccountType = 'Demand' | 'Time' | 'ForeignCurrency';
+export type AccountStatus = 'Active' | 'Frozen' | 'Closed';
+
 export interface AccountItem {
   accountId: number;
-  accountName: string;
-  accountNo: string;
+  accountType: AccountType;
+  currencyCode: string;
+  iban: string;
   balance: number;
-  status: string;
-  subtitle?: string; // Örn: "%32 Faiz" veya "Aktif"
-  iconType: 'bank' | 'trend' | 'wallet';
+  status: AccountStatus;
 }

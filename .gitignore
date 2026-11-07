@@ -1,0 +1,26 @@
+# .NET build output
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+# Local secrets and environment overrides
+appsettings.*.local.json
+*.env
+.env*
+!.env.example
+
+# OS / cloud sync artifacts
+.DS_Store
+Thumbs.db
+*.icloud
+
+# IDE: personal settings stay local; frontend/.vscode holds shared workspace settings
+/.vscode/
+.idea/
+
+# Personal AI assistant configuration
+**/.github/copilot-instructions.md
+**/.vscode/mcp.json

@@ -1,0 +1,44 @@
+<app-page-header
+  title="Düzenli gelir ve giderler"
+  subtitle="Maaş, kira, faturalar ve abonelikler. Nakit akışı projeksiyonu bunlardan hesaplanır."
+>
+  <button type="button" class="btn-primary" (click)="editing.set(null)">
+    <span class="material-symbols-outlined">add</span> Kalem ekle
+  </button>
+</app-page-header>
+
+@if (error(); as message) {
+  <app-notice class="mb-6" [message]="message" />
+}
+
+@if (editing() !== undefined) {
+  <app-recurring-item-form
+    class="block mb-6"
+    [item]="editing() ?? null"
+    [cards]="cards()"
+    [busy]="busy()"
+    (save)="save($event)"
+    (cancel)="editing.set(undefined)"
+  />
+}
+
+<div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar" role="tablist" aria-label="Türe göre filtre">
+  <button type="button" role="tab" [attr.aria-selected]="filter() === null"
+          [ngClass]="filter() === null ? 'btn-primary' : 'btn-secondary'" (click)="filter.set(null)">Tümü</button>
+  @for (kind of kinds; track kind) {
+    <button type="button" role="tab" [attr.aria-selected]="filter() === kind"
+            [ngClass]="filter() === kind ? 'btn-primary' : 'btn-secondary'" (click)="filter.set(kind)">{{ kindLabels[kind] }}</button>
+  }
+</div>
+
+@if (loaded() && visibleItems().length === 0) {
+  <app-empty-state>Bu görünümde kayıt yok.</app-empty-state>
+}
+
+<app-recurring-item-list
+  [items]="visibleItems()"
+  [cards]="cards()"
+  [busy]="busy()"
+  (edit)="editing.set($event)"
+  (remove)="remove($event)"
+/>

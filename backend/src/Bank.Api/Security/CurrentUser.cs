@@ -6,8 +6,6 @@ namespace Bank.Api.Security;
 public sealed class CurrentUser : ICurrentUser
 {
     public long UserId { get; }
-    public string Email { get; }
-
     public bool IsAuthenticated { get; }
 
     public CurrentUser(IHttpContextAccessor accessor)
@@ -15,9 +13,8 @@ public sealed class CurrentUser : ICurrentUser
         var http = accessor.HttpContext;
         var user = http?.User;
 
-        // Token yoksa 0
+        // 0 when there is no token; every endpoint that reads it requires authentication anyway.
         UserId = TryGetLong(user, ClaimTypes.NameIdentifier) ?? 0;
-        Email = user?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
         IsAuthenticated = user?.Identity?.IsAuthenticated ?? false;
     }
 

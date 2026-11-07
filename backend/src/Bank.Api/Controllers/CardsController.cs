@@ -1,7 +1,7 @@
-using Bank.Api.Security;
-using Bank.Application.Abstractions.Security;
-using Bank.Application.Features.Cards.Commands.UpdateSettings;
+using Bank.Application.Features.Cards;
+using Bank.Application.Features.Dashboard;
 using Bank.Contracts.Cards;
+using Bank.Contracts.Dashboard;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,31 +9,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bank.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/cards")]
 [Authorize]
 public sealed class CardsController : ControllerBase
 {
     private readonly ISender _sender;
-    private readonly ICurrentUser _currentUser;
 
-    public CardsController(ISender sender, ICurrentUser currentUser)
-    {
-        _sender = sender;
-        _currentUser = currentUser;
-    }
+    public CardsController(ISender sender) => _sender = sender;
 
-    [HttpPatch("{cardId}/settings")]
-    public async Task<IActionResult> UpdateSettings(long cardId, [FromBody] UpdateCardSettingsRequest request, CancellationToken cancellationToken)
-    {
-        var command = new UpdateCardSettingsCommand(
-            _currentUser.UserId,
-            cardId,
-            request.IsContactlessEnabled,
-            request.IsOnlineEnabled
-        );
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<CardItem>>> GetMyCards(CancellationToken ct)
+        => Ok((await _sender.Send(new GetDashboardQuery(), ct)).Cards);
 
-        var result = await _sender.Send(command, cancellationToken);
-        
-        return Ok(new { Success = result, Message = "Kart ayarları başarıyla güncellendi." });
-    }
+    [HttpPut("{id:long}/settings")]
+    public async Task<ActionResult<CardSettingsResponse>> UpdateSettings(
+        long id, [FromBody] CardSettingsRequest request, CancellationToken ct)
+        => Ok(await _sender.Send(new UpdateCardSettingsCommand(id, request), ct));
+
+    [HttpPost("{id:long}/block")]
+    public async Task<ActionResult<CardSettingsResponse>> Block(long id, CancellationToken ct)
+        => Ok(await _sender.Send(new SetCardBlockedCommand(id, Blocked: true), ct));
+
+    [HttpPost("{id:long}/unblock")]
+    public async Task<ActionResult<CardSettingsResponse>> Unblock(long id, CancellationToken ct)
+        => Ok(await _sender.Send(new SetCardBlockedCommand(id, Blocked: false), ct));
 }
