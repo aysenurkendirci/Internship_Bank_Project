@@ -303,3 +303,34 @@ Bu yüzden token'ı decode edip sürenin gerçekten 60 dakika olduğunu kontrol 
 `fix(api): stop loading the dashboard twice in CardsController`,
 `refactor(api): let each layer register its own services`,
 `fix(auth): honour the configured JWT lifetime`
+
+---
+
+## #010 — Zaman damgaları saat dilimi bilgisi olmadan dönüyordu
+
+**Sprint:** 0
+
+**Sorun.** API, `createdAt` değerini `"2026-11-07T12:32:47.839"` biçiminde, sonunda `Z` olmadan döndürüyordu.
+
+**Analiz.** Veritabanı zamanları UTC olarak tutuyor (`SYSUTCDATETIME()`). Ancak `DATETIME2` tipi saat dilimi
+bilgisi taşımıyor, bu yüzden Dapper değeri `DateTimeKind.Unspecified` olarak okuyor. ISO 8601'de ofseti
+olmayan bir zaman **yerel saat** kabul edilir. Tarayıcı bu değeri Türkiye saati sanıyor ve her işlem
+gerçekte olduğundan 3 saat önce yapılmış gibi görünüyor. Banka hareketlerinde yanlış saat, kullanıcının
+bir işlemi tanımamasına ve gereksiz itirazlara yol açar.
+
+**Çözüm.** API'nin JSON ayarlarına `UtcDateTimeConverter` eklendi. Bu converter tüm `DateTime` değerlerini
+UTC olarak işaretleyip `Z` ekiyle yazıyor. Gelen değerleri de UTC'ye çeviriyor.
+
+**Neden bu yol.**
+- *Her mapping'de `DateTime.SpecifyKind` çağırmak*: ilk unutulan sorguda hata geri gelir.
+- *Dapper type handler*: Dapper, `DateTime` gibi temel tiplerde okuma sırasında kendi dönüşümünü
+  kullanıyor. Özel handler okuma tarafında güvenilir şekilde devreye girmiyor.
+- *Kontratları `DateTimeOffset`'e çevirmek*: doğru ama her DTO'yu ve frontend modelini etkiliyor.
+  Sistemde tek bir saat dilimi (UTC) olduğu için ofset taşımak ek bilgi sağlamıyor.
+
+Kural ("sistemdeki her zaman UTC'dir") tek bir yerde, API sınırında uygulanıyor. Yeni eklenen her
+endpoint bu kuralı otomatik olarak alıyor.
+
+**Doğrulama.** `/api/transactions/recent` yanıtında `"createdAt":"2026-11-07T12:50:22.459Z"` görüldü.
+
+**Commit:** `fix(api): serialise timestamps as UTC`

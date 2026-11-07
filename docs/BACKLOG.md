@@ -15,7 +15,7 @@
 - [x] Interface dosyaları adları ve namespace'leriyle hizalandı — log #009
 - [x] DI kayıtları katmanlara dağıtıldı (`AddApplication`, `AddInfrastructure`) — log #009
 - [x] JWT süresi konfigürasyonu yok sayılıyordu (6 saat yerine 60 dk) — log #009
-- [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
+- [x] Tarihler JSON'da UTC işaretiyle (`Z`) dönüyor — log #010
 - [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı — log #009
 - [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
 - [ ] Test projeleri (xUnit) ve ilk testler

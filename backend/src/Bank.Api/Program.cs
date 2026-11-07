@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Bank.Api.ErrorHandling;
 using Bank.Api.Security;
+using Bank.Api.Serialization;
 using Bank.Application;
 using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure;
@@ -20,6 +21,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
     });
 
 // Error responses follow RFC 9457 (application/problem+json)
