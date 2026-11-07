@@ -1530,3 +1530,41 @@ bir dosyadan geliyordu. Bütçeyi yükseltmek belirtiyi gizlerdi, nedeni ortadan
 - sadece dolu tarih filtrelerinin query'ye eklenmesi
 
 **Commit:** `feat(web): add typed clients for the finance API`
+
+---
+
+## #043 — Web: kart, taksit ve düzenli kalem ekranları
+
+**Sprint:** 7
+
+**Kapsam.**
+- **Kartlar ve taksitler** (`/dashboard/cards`): kart ekleme, düzenleme ve silme. Taksitli alışveriş ekleme ve silme. Her planın
+  ekstre ve son ödeme tarihli taksit takvimi.
+- **Düzenli gelir ve giderler** (`/dashboard/recurring`): gelir, gider ve abonelik ekleme, düzenleme ve silme. Türe göre filtre
+  sekmeleri.
+
+**Kararlar.**
+- **Ortak görsel dil.** `styles.scss`'e `@layer components` ile `.panel`, `.btn-primary`, `.field`, `.input`, `.notice-error` gibi
+  sınıflar eklendi. Her sayfada aynı uzun Tailwind dizilerini tekrar etmek yerine görünüm tek yerden yönetiliyor.
+- **Eşzamanlılık arayüzde de görünür.** Düzenleme isteği kaydın `version` değeriyle gidiyor (`If-Match`). 409 gelirse API'nin
+  mesajı ("siz düzenlerken değiştirildi") gösteriliyor, form kapanıyor ve güncel veri yeniden yükleniyor. Kullanıcı eski veriyle
+  tekrar denemeye zorlanmıyor.
+- **Geçersiz seçenek sunulmuyor.** Tür "Gelir" seçildiğinde "Ödeme kaynağı (kart)" alanı gizleniyor. Backend bu kombinasyonu zaten
+  reddediyor, arayüz kullanıcıyı o hataya hiç götürmüyor. Kart seçenekleri paranın ne zaman çıkacağını da söylüyor:
+  "Hesaptan (kendi tarihinde)" / "Bonus (son ödeme gününde)".
+- **Silme onayı.** Geri alınamayan işlemler (soft delete olsa da kullanıcı açısından geri alınamaz) onay istiyor. Kullanımdaki kartın
+  silinememesi (409) API mesajıyla açıklanıyor.
+
+**Yakalanan iki küçük ama gerçek hata.**
+1. **UTC tarih tuzağı, frontend'de.** "Bugünün tarihi" varsayılanı için yaygın `new Date().toISOString().slice(0, 10)` kalıbı
+   UTC'ye çevirir. Türkiye'de 00:00–03:00 arasında **dünü** verir (#026'daki backend sorununun ikizi). `toIsoDate()` yerel takvim
+   tarihini biçimlendiriyor. Gece yarısını 30 dakika geçe durumu bir testle kilitlendi.
+2. **Türkçe ekler.** İlk şablonlarda `"her ayın {{ gün }}'i"` ve `"{{ tarih }}'den"` yazmıştım. Türkçede ek sayının okunuşuna göre
+   değişir: "20'si", "1'i", "2026'dan". Sabit ek her durumda yanlış sonuç üretiyordu. Ek kurallarını kodlamak yerine (KISS) ifadeler
+   ek gerektirmeyecek şekilde yazıldı: "Kesim günü: 20", "Başlangıç 5 Mar 2026".
+
+**Doğrulama ve sınırı.** Production build (strict template kontrolüyle) ve 12 Vitest testi geçiyor. Sayfalar lazy-load ile ayrı chunk'lara
+bölünüyor (kart sayfası 3,5 KB, sıkıştırılmış). Geliştirme ortamında tarayıcı otomasyonu olmadığı için ekranlar **görsel olarak
+doğrulanmadı**. Akışların bağlı olduğu API davranışı entegrasyon testleriyle (#024) güvence altında.
+
+**Commit:** `feat(web): manage cards, installment plans and recurring items`

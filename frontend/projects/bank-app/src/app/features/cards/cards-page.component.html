@@ -1,0 +1,169 @@
+<header class="mb-8">
+  <h1 class="page-title">Kartlar ve taksitler</h1>
+  <p class="page-subtitle">Kart harcamaları ekstre kesim gününde toplanır, son ödeme gününde hesaptan çıkar.</p>
+</header>
+
+@if (error(); as message) {
+  <p class="notice-error mb-6" role="alert">{{ message }}</p>
+}
+
+<!-- Cards -->
+<section class="mb-10">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="section-title">Kartlarım</h2>
+    <button type="button" class="btn-primary" (click)="startAddingCard()">
+      <span class="material-symbols-outlined">add</span> Kart ekle
+    </button>
+  </div>
+
+  @if (editing() !== undefined) {
+    <form class="panel mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5" [formGroup]="cardForm" (ngSubmit)="saveCard()">
+      <label class="field lg:col-span-2">
+        <span class="field-label">Kart adı</span>
+        <input class="input" formControlName="name" placeholder="Örn. Bonus" />
+        @if (cardForm.controls.name.touched && cardForm.controls.name.invalid) {
+          <span class="field-error">Kart adı zorunludur.</span>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Limit</span>
+        <input class="input" type="number" min="0" step="0.01" formControlName="limitAmount" />
+      </label>
+      <label class="field">
+        <span class="field-label">Kesim günü</span>
+        <input class="input" type="number" min="1" max="31" formControlName="statementDay" />
+      </label>
+      <label class="field">
+        <span class="field-label">Son ödeme (gün)</span>
+        <input class="input" type="number" min="1" max="30" formControlName="paymentDueDays" />
+      </label>
+      <label class="field">
+        <span class="field-label">Para birimi</span>
+        <select class="input" formControlName="currencyCode">
+          <option value="TRY">TRY</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </label>
+      <div class="flex items-end gap-2 lg:col-span-4">
+        <button type="submit" class="btn-primary" [disabled]="busy()">{{ editing() ? 'Güncelle' : 'Kaydet' }}</button>
+        <button type="button" class="btn-secondary" (click)="editing.set(undefined)">Vazgeç</button>
+      </div>
+    </form>
+  }
+
+  @if (!loading() && cards().length === 0) {
+    <p class="panel text-slate-500 font-semibold">Henüz kart eklemediniz. Taksit ve kartla ödenen abonelikleri takip etmek için bir kart ekleyin.</p>
+  }
+
+  <ul class="grid gap-4 md:grid-cols-2">
+    @for (card of cards(); track card.id) {
+      <li class="panel flex flex-col gap-3">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-lg font-black text-slate-900">{{ card.name }}</p>
+            <p class="text-sm font-semibold text-slate-500">
+              Kesim günü: {{ card.statementDay }} · Son ödeme: kesimden {{ card.paymentDueDays }} gün sonra
+            </p>
+          </div>
+          <p class="font-black text-slate-900">{{ card.limitAmount | currency: card.currencyCode : 'symbol-narrow' }}</p>
+        </div>
+        <div class="flex gap-4">
+          <button type="button" class="btn-link" (click)="startEditingCard(card)">Düzenle</button>
+          <button type="button" class="btn-link text-red-600" (click)="deleteCard(card)" [disabled]="busy()">Sil</button>
+        </div>
+      </li>
+    }
+  </ul>
+</section>
+
+<!-- Installment plans -->
+<section>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="section-title">Taksitli alışverişler</h2>
+    <button type="button" class="btn-primary" (click)="startAddingPlan()" [disabled]="cards().length === 0">
+      <span class="material-symbols-outlined">add</span> Taksit ekle
+    </button>
+  </div>
+
+  @if (addingPlan()) {
+    <form class="panel mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5" [formGroup]="planForm" (ngSubmit)="savePlan()">
+      <label class="field">
+        <span class="field-label">Kart</span>
+        <select class="input" formControlName="creditCardId">
+          @for (card of cards(); track card.id) {
+            <option [ngValue]="card.id">{{ card.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="field lg:col-span-2">
+        <span class="field-label">Açıklama</span>
+        <input class="input" formControlName="description" placeholder="Örn. Dizüstü bilgisayar" />
+        @if (planForm.controls.description.touched && planForm.controls.description.invalid) {
+          <span class="field-error">Açıklama zorunludur.</span>
+        }
+      </label>
+      <label class="field">
+        <span class="field-label">Toplam tutar</span>
+        <input class="input" type="number" min="0" step="0.01" formControlName="totalAmount" />
+      </label>
+      <label class="field">
+        <span class="field-label">Taksit sayısı</span>
+        <input class="input" type="number" min="1" max="36" formControlName="installmentCount" />
+      </label>
+      <label class="field">
+        <span class="field-label">Alışveriş tarihi</span>
+        <input class="input" type="date" formControlName="purchaseDate" />
+      </label>
+      <div class="flex items-end gap-2 lg:col-span-4">
+        <button type="submit" class="btn-primary" [disabled]="busy()">Kaydet</button>
+        <button type="button" class="btn-secondary" (click)="addingPlan.set(false)">Vazgeç</button>
+      </div>
+    </form>
+  }
+
+  @if (!loading() && plans().length === 0) {
+    <p class="panel text-slate-500 font-semibold">Kayıtlı taksitli alışveriş yok.</p>
+  }
+
+  <ul class="space-y-3">
+    @for (plan of plans(); track plan.id) {
+      <li class="panel">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="font-black text-slate-900">{{ plan.description }}</p>
+            <p class="text-sm font-semibold text-slate-500">
+              {{ cardName(plan.creditCardId) }} · {{ plan.purchaseDate | date: 'd MMMM y' }} ·
+              {{ plan.installmentCount }} taksit
+            </p>
+          </div>
+          <div class="flex items-center gap-4">
+            <p class="font-black text-slate-900">{{ plan.totalAmount | currency: plan.currencyCode : 'symbol-narrow' }}</p>
+            <button type="button" class="btn-link" (click)="togglePlan(plan.id)" [attr.aria-expanded]="expandedPlan() === plan.id">
+              {{ expandedPlan() === plan.id ? 'Takvimi gizle' : 'Takvim' }}
+            </button>
+            <button type="button" class="btn-link text-red-600" (click)="deletePlan(plan)" [disabled]="busy()">Sil</button>
+          </div>
+        </div>
+
+        @if (expandedPlan() === plan.id) {
+          <table class="w-full mt-4 text-sm">
+            <thead class="text-left text-slate-400 uppercase text-[11px]">
+              <tr><th class="py-2">#</th><th>Ekstre</th><th>Son ödeme</th><th class="text-right">Tutar</th></tr>
+            </thead>
+            <tbody>
+              @for (installment of plan.installments; track installment.number) {
+                <tr class="border-t border-slate-100 font-semibold text-slate-700">
+                  <td class="py-2">{{ installment.number }}</td>
+                  <td>{{ installment.statementDate | date: 'd MMM y' }}</td>
+                  <td>{{ installment.dueDate | date: 'd MMM y' }}</td>
+                  <td class="text-right">{{ installment.amount | currency: plan.currencyCode : 'symbol-narrow' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </li>
+    }
+  </ul>
+</section>

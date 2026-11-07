@@ -1,0 +1,132 @@
+<header class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="page-title">Düzenli gelir ve giderler</h1>
+    <p class="page-subtitle">Maaş, kira, faturalar ve abonelikler. Nakit akışı projeksiyonu bunlardan hesaplanır.</p>
+  </div>
+  <button type="button" class="btn-primary" (click)="startAdding()">
+    <span class="material-symbols-outlined">add</span> Kalem ekle
+  </button>
+</header>
+
+@if (error(); as message) {
+  <p class="notice-error mb-6" role="alert">{{ message }}</p>
+}
+
+@if (editing() !== undefined) {
+  <form class="panel mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" [formGroup]="form" (ngSubmit)="save()">
+    <label class="field lg:col-span-2">
+      <span class="field-label">Ad</span>
+      <input class="input" formControlName="name" placeholder="Örn. Kira" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <span class="field-error">Ad zorunludur.</span>
+      }
+    </label>
+    <label class="field">
+      <span class="field-label">Tür</span>
+      <select class="input" formControlName="kind">
+        @for (kind of kinds; track kind) {
+          <option [value]="kind">{{ kindLabels[kind] }}</option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-label">Kategori</span>
+      <input class="input" formControlName="category" placeholder="Örn. Konut" />
+      @if (form.controls.category.touched && form.controls.category.invalid) {
+        <span class="field-error">Kategori zorunludur.</span>
+      }
+    </label>
+    <label class="field">
+      <span class="field-label">Tutar</span>
+      <input class="input" type="number" min="0" step="0.01" formControlName="amount" />
+    </label>
+    <label class="field">
+      <span class="field-label">Para birimi</span>
+      <select class="input" formControlName="currencyCode">
+        <option value="TRY">TRY</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-label">Sıklık</span>
+      <select class="input" formControlName="frequency">
+        <option value="Weekly">Haftalık</option>
+        <option value="Monthly">Aylık</option>
+        <option value="Yearly">Yıllık</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-label">Her kaç dönemde bir</span>
+      <input class="input" type="number" min="1" max="52" formControlName="interval" />
+    </label>
+    <label class="field">
+      <span class="field-label">Başlangıç</span>
+      <input class="input" type="date" formControlName="startDate" />
+    </label>
+    <label class="field">
+      <span class="field-label">Bitiş (isteğe bağlı)</span>
+      <input class="input" type="date" formControlName="endDate" />
+    </label>
+    @if (canUseCard()) {
+      <label class="field lg:col-span-2">
+        <span class="field-label">Ödeme kaynağı</span>
+        <select class="input" formControlName="creditCardId">
+          <option [ngValue]="0">Hesaptan (kendi tarihinde)</option>
+          @for (card of cards(); track card.id) {
+            <option [ngValue]="card.id">{{ card.name }} (son ödeme gününde)</option>
+          }
+        </select>
+      </label>
+    }
+    <div class="flex items-end gap-2 lg:col-span-4">
+      <button type="submit" class="btn-primary" [disabled]="busy()">{{ editing() ? 'Güncelle' : 'Kaydet' }}</button>
+      <button type="button" class="btn-secondary" (click)="editing.set(undefined)">Vazgeç</button>
+    </div>
+  </form>
+}
+
+<div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar" role="tablist" aria-label="Türe göre filtre">
+  <button type="button" role="tab" [attr.aria-selected]="filter() === null"
+          [ngClass]="filter() === null ? 'btn-primary' : 'btn-secondary'" (click)="filter.set(null)">Tümü</button>
+  @for (kind of kinds; track kind) {
+    <button type="button" role="tab" [attr.aria-selected]="filter() === kind"
+            [ngClass]="filter() === kind ? 'btn-primary' : 'btn-secondary'" (click)="filter.set(kind)">{{ kindLabels[kind] }}</button>
+  }
+</div>
+
+@if (!loading() && visibleItems().length === 0) {
+  <p class="panel text-slate-500 font-semibold">Bu görünümde kayıt yok.</p>
+}
+
+<ul class="space-y-3">
+  @for (item of visibleItems(); track item.id) {
+    <li class="panel flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <span
+          class="badge"
+          [ngClass]="{
+            'bg-emerald-50 text-emerald-700': item.kind === 'Income',
+            'bg-slate-100 text-slate-700': item.kind === 'Expense',
+            'bg-violet-50 text-violet-700': item.kind === 'Subscription'
+          }"
+        >{{ kindLabels[item.kind] }}</span>
+        <div>
+          <p class="font-black text-slate-900">{{ item.name }}</p>
+          <p class="text-sm font-semibold text-slate-500">
+            {{ item.category }} · {{ describeSchedule(item) }} · Başlangıç {{ item.startDate | date: 'd MMM y' }}
+            @if (item.endDate) { · Bitiş {{ item.endDate | date: 'd MMM y' }} }
+            @if (cardName(item.creditCardId); as card) { · {{ card }} kartından }
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <p class="font-black" [ngClass]="item.kind === 'Income' ? 'text-emerald-600' : 'text-slate-900'">
+          {{ item.amount | currency: item.currencyCode : 'symbol-narrow' }}
+        </p>
+        <button type="button" class="btn-link" (click)="startEditing(item)">Düzenle</button>
+        <button type="button" class="btn-link text-red-600" (click)="remove(item)" [disabled]="busy()">Sil</button>
+      </div>
+    </li>
+  }
+</ul>

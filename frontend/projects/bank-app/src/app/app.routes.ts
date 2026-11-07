@@ -25,6 +25,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
+      {
+        path: 'cards',
+        title: 'Kartlar ve taksitler',
+        loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),
+      },
+      {
+        path: 'recurring',
+        title: 'Düzenli gelir ve giderler',
+        loadComponent: () =>
+          import('./features/recurring/recurring-page.component').then((m) => m.RecurringPageComponent),
+      },
     ],
   },
 

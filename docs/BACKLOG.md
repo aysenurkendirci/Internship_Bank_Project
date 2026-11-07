@@ -111,7 +111,7 @@
 - [x] Oturum yönetimi, 401 → login (`returnUrl`, open-redirect korumalı), ProblemDetails mesajları — log #040
 - [x] Uygulama kabuğu, çıkış, `tr-TR` para/tarih formatı, sahte öğeler kaldırıldı — log #041
 - [x] Finans API katmanı: tipli modeller, kaynak başına servis, `If-Match` — log #042
-- [ ] Kartlar ve düzenli kalemler
+- [x] Kartlar, taksitler ve düzenli kalemler ekranları; 409'da yeniden yükleme — log #043
 - [ ] Nakit akışı zaman çizelgesi
 - [ ] Taksit senaryosu karşılaştırma
 - [ ] İşlemler: CSV yükleme, demo verisi
