@@ -907,3 +907,49 @@ doğrudan SQL ile ekliyor. Bu, testte açıkça yorumla belirtildi.
 - `months=0` ve `months=13` → 400.
 
 **Commit:** `feat(finance): expose cash-flow projection endpoint`
+
+---
+
+## #027 — Taksit senaryosu karşılaştırma motoru
+
+**Sprint:** 4
+
+**İhtiyaç.** "Bu bilgisayarı 3 yerine 6 taksitle alırsam ne olur?" Kullanıcı bir alışverişi gerçekleştirmeden önce
+seçeneklerin gelecekteki nakit akışına etkisini görmek istiyor.
+
+**Çözüm.** `ScenarioComparer` projeksiyon motorunu yeniden kullanıyor:
+1. Alışveriş olmadan bir kez çalıştırıyor (**baz senaryo**).
+2. Her seçenek için girdiye o seçeneğin hipotetik taksit planını ekleyip tekrar çalıştırıyor.
+3. Her sonuç için olguları çıkarıyor: eksiye düşülen ay sayısı, en düşük bakiye ve tarihi, açık veren ay sayısı,
+   en yüksek aylık çıkış, en yüksek yük oranı, dönem sonu bakiyesi.
+
+Motor saf bir fonksiyon olduğu (#025) için senaryo hiçbir şeyi veritabanına yazmadan, sadece girdiyi değiştirerek
+hesaplanabildi. `record` + `with` ifadesi çağıranın girdisini değiştirmiyor, bu bir testle kilitlendi.
+
+**Tasarım kararları.**
+- **Her seçeneğin kendi toplam tutarı var.** Satıcılar taksit sayısı arttıkça genellikle vade farkı ekler
+  (ör. 3 taksit 9.000 TL, 6 taksit 9.450 TL). Hepsi için aynı fiyatı varsaymak uzun vadeli seçenekleri olduğundan iyi gösterir.
+- **Bütün seçenekler aynı ufukta, en uzun seçeneğin son taksitine kadar karşılaştırılıyor.**
+- **Sistem öneri yapmıyor.** "En iyi seçenek" diye bir alan yok. Proje kapsamı açık: karar destek ve simülasyon,
+  tavsiye değil. Her seçenek için olgular yan yana sunuluyor, kararı kullanıcı veriyor.
+- En fazla 6 seçenek. Aynı seçenek iki kez verilemez, geçmiş tarihli alışveriş kabul edilmez. 24 ayı aşan seçenekler
+  reddediliyor.
+
+**Örnek (unit test, değerler kod çalıştırılmadan önce elle hesaplandı).** Bakiye 1.000 TL; her ay 1'inde 20.000 TL
+maaş, 2'sinde 18.400 TL gider. Kullanıcı ayda 1.600 TL artırıyor. 9.000 TL'lik laptop:
+
+| | Aylık taksit | En yüksek aylık çıkış | Eksiye düşülen ay | En düşük bakiye |
+|---|---|---|---|---|
+| Almadan | – | 18.400 | 0 | – |
+| 3 taksit | 3.000 | 21.400 | **5** | **−3.200** |
+| 6 taksit | 1.500 | 19.900 | **0** | pozitif |
+
+3 taksit aylık birikimi aştığı için bakiye Nisan'da eksiye düşüyor ve ancak Eylül'de toparlanıyor. 6 taksit birikimin
+altında kalıyor. Aynı fiyatta iki seçenek de dönem sonunda aynı bakiyeyi bırakıyor. Fark sadece **yükün zamana dağılımı**.
+
+**Mutation testi: ufuk neden uzatılıyor?** Ufuk en uzun seçeneğe göre uzatılmayıp sadece istenen 3 ayda bırakıldığında
+**5 test kırıldı**. En öğreticisi `SamePrice_LeavesTheSameBalanceOnceEveryPlanIsPaidOff`: kısa ufukta 6 taksitlik seçenek,
+son 3 taksiti pencerenin dışında kaldığı için **daha fazla para bırakıyormuş gibi** görünüyor. Bu, kullanıcıyı doğrudan
+yanlış karara itecek bir ölçüm hatası olurdu.
+
+**Commit:** `feat(domain): compare installment options for a planned purchase`

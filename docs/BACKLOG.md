@@ -63,9 +63,13 @@
 - Mutation testi, ADR'de yazılı olup testle korunmayan bir varsayımı (aynı gün sıralaması) ortaya çıkardı.
 - Sırada: Sprint 4, senaryo karşılaştırma ("3 yerine 6 taksit alırsam ne olur?"). Motor saf bir fonksiyon olduğu için senaryo, girdiye eklenen geçici bir plan olarak çalıştırılabilecek.
 
+## Sprint 4 — Senaryo karşılaştırma
+
+- [x] Taksit seçeneklerini karşılaştırma motoru: ortak ufuk, baz senaryo, öneri yok — log #027
+- [ ] Senaryo API'si
+
 ## Sonraki sprintler
 
-4. Senaryo karşılaştırma (3 / 6 / 9 taksit what-if)
 5. CSV içe aktarma ve deterministik sentetik veri üretici
 6. Analitik: kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, güven aralıklı tahmin
 7. Angular ekranları
