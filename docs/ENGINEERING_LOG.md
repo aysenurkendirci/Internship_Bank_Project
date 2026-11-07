@@ -783,3 +783,44 @@ kartları tek sorguyla çekilip sözlüğe konuyor.
 - Planı olan kartı silmek → 409. Plan silindikten sonra liste boş döndü.
 
 **Commit:** `feat(finance): add installment plans with computed payment schedules`
+
+---
+
+## #024 — Entegrasyon testleri: elle yapılan smoke testlerin otomatikleştirilmesi
+
+**Sprint:** 2
+
+**Sorun.** #021–#023'teki 30'u aşkın senaryo elle (curl) doğrulanmıştı. Elle yapılan test bir kez çalışır, sonraki
+değişiklikte tekrarlanmaz.
+
+**Çözüm.** `Bank.IntegrationTests` projesi:
+- `WebApplicationFactory<Program>` API'yi bellekte ayağa kaldırıyor. İstekler gerçek pipeline'dan geçiyor:
+  routing, JWT doğrulama, model doğrulama, exception handler, Dapper, SQL Server.
+- **Gerçek SQL Server, ayrı veritabanı.** `BankDb_IntegrationTests` her koşuda silinip, migrator ile sıfırdan kuruluyor.
+  Bunun için migrator `DatabaseMigrator` sınıfına çıkarıldı. Testler, canlıya giden scriptlerin aynısını
+  çalıştırıyor, yani migration'lar da her seferinde test ediliyor.
+- **Mock yok.** #021'deki kültür hatası ve #020'deki constraint'ler ancak gerçek bileşenlerle yakalanabilir.
+- Her test kendi kullanıcısını oluşturuyor, bu yüzden testler birbirine bağımlı değil. Test kullanıcıları için
+  checksum'ı geçerli TCKN'ler bir sayaçtan üretiliyor.
+
+**Kapsanan senaryolar (17 test).**
+- **Auth:** kayıt → giriş → korumalı endpoint; token yoksa 401; geçersiz kayıt 400 ve alan hataları;
+  mükerrer kayıt 409; bilinmeyen kullanıcı ile yanlış şifre aynı cevabı alıyor.
+- **Kart:** oluşturma (201 + `Location`); başka kullanıcı göremiyor, değiştiremiyor, silemiyor (404) ve
+  verinin değişmediği doğrulanıyor; güncel version → 200, **eski version → 409 ve yeni veri korunuyor**;
+  `If-Match` yok → 428; geçersiz değerler → 400; soft delete.
+- **İlişkiler:** başka kullanıcının kartına abonelik → 400; `?kind=Subscription` filtresi; kullanımdaki kart
+  silinemiyor, bağlı plan silinince siliniyor; taksit takvimi domain testindeki değerlerle aynı; kartın
+  kesim günü değişince takvim yeniden hesaplanıyor.
+
+**Testlerin koruduğunun doğrulanması.**
+1. *İzolasyon:* 17 test kullanıcısının hepsi test veritabanında. Geliştirme veritabanına sızan kayıt sıfır.
+2. *Mutation:* `CreditCardRepository`'den `UserId` filtresi ve `RowVersion` koşulu kaldırıldı → **3 test kırıldı**
+   (sahiplik, eski version, başka kullanıcının kartına abonelik). Kod geri yüklendi, 17/17 geçti.
+
+**Mutation deneyinden çıkan bulgu.** Sahiplik filtresi kaldırıldığında başka kullanıcının kartına abonelik ekleme
+isteği servis kontrolünü geçti, ama **veritabanındaki bileşik foreign key (#020) eklemeyi yine reddetti**. Cevap
+400 yerine 500 oldu, yani istemci için kusursuz değil. Ama veri bütünlüğü korundu. Katmanlı savunmanın neden
+gerektiğini gösteren somut bir örnek: uygulama kodundaki bir hata, veri sızıntısına dönüşmedi.
+
+**Commit:** `test: add API integration tests against a real SQL Server database`

@@ -60,6 +60,11 @@ cd backend
 dotnet test
 ```
 
+- `Bank.UnitTests`: domain rules, services and helpers; no external dependencies.
+- `Bank.IntegrationTests`: hosts the API in memory against a real SQL Server database,
+  `BankDb_IntegrationTests`, which is dropped and rebuilt from the migrations on every run.
+  Point it elsewhere with the `INTEGRATION_TESTS_DB` environment variable.
+
 ### Frontend
 
 ```bash

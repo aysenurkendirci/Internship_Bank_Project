@@ -43,7 +43,14 @@
 - [x] Kredi kartı CRUD: sahiplik, `If-Match` ile eşzamanlılık, atomik soft delete — log #021
 - [x] Gelir / gider / abonelik CRUD, `?kind=` filtresi, kart referansı doğrulaması — log #022
 - [x] Taksit planları, her okumada hesaplanan ödeme takvimi — log #023
-- [ ] Entegrasyon testleri: kullanıcı izolasyonu, eşzamanlılık, doğrulama
+- [x] Entegrasyon testleri (17): kullanıcı izolasyonu, eşzamanlılık, doğrulama, ilişkiler — log #024
+
+**Sprint 2 retrospektifi**
+- Teslim: `finance` şeması; kart, düzenli kalem ve taksit planı API'leri; 17 entegrasyon testi. Toplam 110 test.
+- İyi giden: her endpoint önce elle, sonra otomatik testle doğrulandı. Türkçe kültür hatası (`0.01`) ve iç tip adı sızıntısı bu sayede yakalandı.
+- Mutation deneyi, veritabanı constraint'lerinin uygulama hatasına karşı gerçekten koruma sağladığını gösterdi.
+- Bilinen sınır: kart silme ile karta kayıt ekleme arasında dar bir yarış penceresi var (log #022).
+- Sırada: Sprint 3, nakit akışı projeksiyon motoru.
 
 ## Sonraki sprintler
 
