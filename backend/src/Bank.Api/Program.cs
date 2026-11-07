@@ -9,6 +9,7 @@ using Bank.Application;
 using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -120,6 +121,21 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// Behind the nginx container every request arrives from the proxy's address, which would make the per-IP rate
+// limit count all users as one. With ReverseProxy:Enabled the client address is taken from X-Forwarded-For.
+// Only turn it on where the API is reachable solely through the proxy, or callers could forge the header.
+if (app.Configuration.GetValue<bool>("ReverseProxy:Enabled"))
+{
+    var forwarded = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+        ForwardLimit = 1
+    };
+    forwarded.KnownIPNetworks.Clear();
+    forwarded.KnownProxies.Clear();
+    app.UseForwardedHeaders(forwarded);
+}
 
 // The correlation id comes first so every later log line, including errors, carries it.
 app.UseMiddleware<CorrelationIdMiddleware>();
