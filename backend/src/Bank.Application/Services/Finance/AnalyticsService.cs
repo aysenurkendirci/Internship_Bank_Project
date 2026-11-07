@@ -2,6 +2,7 @@ using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Abstractions.Services;
 using Bank.Application.Common;
+using Bank.Application.Features.Planning;
 using Bank.Contracts.Finance;
 using Bank.Domain.Analytics;
 using Bank.Domain.Common;

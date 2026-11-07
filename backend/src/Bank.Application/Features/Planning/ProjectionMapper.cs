@@ -1,7 +1,7 @@
 using Bank.Contracts.Finance;
 using Bank.Domain.Projection;
 
-namespace Bank.Application.Services.Finance;
+namespace Bank.Application.Features.Planning;
 
 /// <summary>Domain → contract mapping shared by the projection and scenario endpoints.</summary>
 internal static class ProjectionMapper

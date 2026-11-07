@@ -1,6 +1,7 @@
 using Bank.Application.Abstractions.Services;
 using Bank.Application.Common.Behaviors;
 using Bank.Application.Services;
+using Bank.Application.Features.Planning;
 using Bank.Application.Services.Finance;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,8 +25,6 @@ public static class DependencyInjection
 
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ProjectionInputLoader>();
-        services.AddScoped<IProjectionService, ProjectionService>();
-        services.AddScoped<IScenarioService, ScenarioService>();
         services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
 

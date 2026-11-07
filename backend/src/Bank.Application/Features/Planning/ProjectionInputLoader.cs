@@ -4,7 +4,7 @@ using Bank.Application.Common;
 using Bank.Domain.Projection;
 using Bank.Domain.ValueObjects;
 
-namespace Bank.Application.Services.Finance;
+namespace Bank.Application.Features.Planning;
 
 /// <summary>Gathers the current user's finance data into the input the projection engine expects.</summary>
 public sealed class ProjectionInputLoader

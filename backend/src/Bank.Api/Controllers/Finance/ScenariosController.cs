@@ -1,5 +1,6 @@
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.Planning;
 using Bank.Contracts.Finance;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,9 +11,9 @@ namespace Bank.Api.Controllers.Finance;
 [Authorize]
 public sealed class ScenariosController : ControllerBase
 {
-    private readonly IScenarioService _scenarios;
+    private readonly ISender _sender;
 
-    public ScenariosController(IScenarioService scenarios) => _scenarios = scenarios;
+    public ScenariosController(ISender sender) => _sender = sender;
 
     /// <summary>
     /// Compares installment options for a planned card purchase against the user's current outlook.
@@ -21,5 +22,5 @@ public sealed class ScenariosController : ControllerBase
     [HttpPost("installments")]
     public async Task<ActionResult<ScenarioComparisonResponse>> CompareInstallments(
         [FromBody] InstallmentScenarioRequest request, CancellationToken ct)
-        => Ok(await _scenarios.CompareInstallmentsAsync(request, ct));
+        => Ok(await _sender.Send(new CompareInstallmentOptionsQuery(request), ct));
 }

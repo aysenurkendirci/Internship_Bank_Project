@@ -1,19 +1,26 @@
-using Bank.Application.Abstractions.Services;
 using Bank.Contracts.Finance;
 using Bank.Domain.Scenarios;
 using Bank.Domain.ValueObjects;
+using MediatR;
 
-namespace Bank.Application.Services.Finance;
+namespace Bank.Application.Features.Planning;
 
-public sealed class ScenarioService : IScenarioService
+/// <summary>
+/// Compares installment options for a planned card purchase against the user's current outlook.
+/// A query, not a command: the purchase only exists for the duration of the calculation.
+/// </summary>
+public sealed record CompareInstallmentOptionsQuery(InstallmentScenarioRequest Scenario) : IRequest<ScenarioComparisonResponse>;
+
+public sealed class CompareInstallmentOptionsQueryHandler
+    : IRequestHandler<CompareInstallmentOptionsQuery, ScenarioComparisonResponse>
 {
     private readonly ProjectionInputLoader _inputs;
 
-    public ScenarioService(ProjectionInputLoader inputs) => _inputs = inputs;
+    public CompareInstallmentOptionsQueryHandler(ProjectionInputLoader inputs) => _inputs = inputs;
 
-    public async Task<ScenarioComparisonResponse> CompareInstallmentsAsync(
-        InstallmentScenarioRequest request, CancellationToken ct = default)
+    public async Task<ScenarioComparisonResponse> Handle(CompareInstallmentOptionsQuery query, CancellationToken ct)
     {
+        var request = query.Scenario;
         var current = await _inputs.LoadAsync(request.Months, ct);
 
         // The card must be one of the user's own; ScenarioComparer rejects any other id.
