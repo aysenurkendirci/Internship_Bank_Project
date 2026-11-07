@@ -1233,3 +1233,54 @@ geliyor. %100 sonucu gerçek dünya performansı olarak sunulmamalı. Bu yüzden
   düşen bir ön işleme adımı ile çözülebilir.
 
 **Commit:** `feat(domain): detect recurring payments in transaction history`
+
+---
+
+## #035 — Anomali tespiti ve duyarlılık analizi
+
+**Sprint:** 6
+
+**İhtiyaç.** "Beklenmeyen/sıra dışı harcamaları işaretleme." Kullanıcıya "bu harcama senin için alışılmadık" diyebilmek. Bir yargı
+olarak değil, bir açıklama olarak: "Market kategorisindeki tipik tutarının 12 katı".
+
+**Yöntem: Iglewicz ve Hoaglin'in değiştirilmiş z-skoru.** `M = 0,6745 × (ln x − medyan) / MAD`, `M > 3,5` ise işaretleniyor.
+
+| Karar | Gerekçe |
+|---|---|
+| Ortalama/standart sapma değil, **medyan/MAD** | Tek bir 30.000 TL'lik harcama ortalamayı o kadar yukarı çeker ki kendini normal gösterir ("masking"). Medyan etkilenmez. |
+| **Log ölçek** | Harcamalar sağa çarpık. 100 → 200 TL, 10.000 → 10.100 TL'den daha büyük bir sapmadır. |
+| Eşik **3,5** | Literatürde önerilen değer. Veriye göre **ayarlanmadı**. |
+| Kategori içi kıyas, ≥10 örnek yoksa **tüm harcamalarla** kıyas | Yılda iki kez görülen bir kategori için kategori içi istatistik anlamsız. |
+| **Tekrarlayan ödemeler hariç** (#034) | 20.000 TL kira büyük ama beklenen bir ödeme. |
+| Sadece **yukarı yönlü** sapmalar | Alışılmadık derecede küçük bir harcama kullanıcıya bir şey söylemez. |
+| MAD = 0 durumu | Değerlerin yarısından fazlası aynıysa (sabit İstanbulkart dolumu) MAD sıfır olur. Ortalama mutlak sapmaya düşülüyor. Bu durum ayrı bir testle kilitlendi. |
+
+**Değerlendirme 1: etiketli anomaliler** (seed 101–110, kabul eşiği önceden ≥ 0,95). **36/36 yakalandı, 0 yanlış pozitif.**
+
+**Ama bu sonuç yanıltıcı derecede kolay.** Sentetik anomaliler 12–35 bin TL, tipik harcama ise yaklaşık 600 TL. Bunları her yöntem bulur.
+Asıl soru şu: *yöntem ne kadar küçük bir sapmayı yakalayabiliyor?*
+
+**Değerlendirme 2: duyarlılık analizi.** Temiz sentetik geçmişlere (seed 1–10) her ay, market medyanının **k katı** büyüklüğünde bir
+market alışverişi enjekte edildi. 120 enjeksiyon, 3.386 normal işlem:
+
+| Eşik | k=2 | k=3 | k=4 | k=5 | k=8 | Yanlış pozitif |
+|---|---|---|---|---|---|---|
+| 2,0 | 0,00 | 0,50 | 1,00 | 1,00 | 1,00 | 0 / 3.386 |
+| 2,5 | 0,00 | 0,00 | 0,60 | 1,00 | 1,00 | 0 / 3.386 |
+| 3,0 | 0,00 | 0,00 | 0,00 | 0,50 | 1,00 | 0 / 3.386 |
+| **3,5** | 0,00 | 0,00 | 0,00 | 0,00 | **0,90** | 0 / 3.386 |
+
+**Yorum.**
+- Varsayılan eşikte yöntem, **değişkenliği yüksek bir kategoride ancak tipik tutarın yaklaşık 8 katını** güvenilir şekilde yakalıyor.
+- Bu bir hata değil, matematiğin sonucu. Yakalanabilen en küçük oran `exp(eşik × MAD / 0,6745)`. Sentetik market harcamaları 250–1.400 TL
+  arasında (log-MAD ≈ 0,4), yani zaten doğal olarak 5,6 kat değişiyor. Değişkenliği düşük bir kategoride (ör. sabit ulaşım dolumu)
+  çok daha küçük sapmalar yakalanıyor (`IdenticalTypicalAmounts_StillLetAnOutlierThrough`).
+- **Hiçbir eşikte yanlış pozitif çıkmadı.** Ama bu sentetik verinin sınırlı (uniform) dağılımından kaynaklanıyor. Gerçek harcamaların uzun
+  kuyrukları olduğu için düşük eşikler gerçekte yanlış alarm üretecektir. Bu yüzden varsayılan literatürdeki temkinli 3,5'te bırakıldı.
+  Eşik, ileride bir "hassasiyet" ayarı olarak kullanıcıya açılabilecek şekilde parametreleştirildi.
+
+**Hata ayıklama notu.** Bir test 485 TL beklerken 500 TL buldu. Kod doğruydu, beklenti yanlıştı: medyanı 12 market tutarı üzerinden
+hesaplamıştım, ama taban çizgisi işaretlenen alışverişin kendisini de içeriyor (13 değer). Medyanın bu ekstra değere rağmen sadece
+7. sıraya kayması, robust istatistiğin neden seçildiğini de gösteriyor.
+
+**Commit:** `feat(domain): flag unusually large purchases with a robust z-score`
