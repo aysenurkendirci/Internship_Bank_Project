@@ -1437,3 +1437,42 @@ bir dosyadan geliyordu. Bütçeyi yükseltmek belirtiyi gizlerdi, nedeni ortadan
 **Doğrulama.** `ng build bank-app` ilk kez başarılı: başlangıç paketi 296 KB (aktarım 80 KB), hata ve uyarı yok.
 
 **Commit:** `fix(web): repair the production build and remove dead code`
+
+---
+
+## #040 — Web: oturum yönetimi, süresi dolan token ve hata mesajları
+
+**Sprint:** 7
+
+**Sorunlar.**
+1. Token'a üç ayrı yerden (interceptor, guard, login) doğrudan `localStorage` ile erişiliyordu. Oturum durumunun tek bir sahibi yoktu.
+2. Token 60 dakika sonra geçersiz oluyor (#009), ama bu durum hiç ele alınmıyordu. API 401 döndüğünde kullanıcı boş veya bozuk bir
+   ekranda kalıyordu.
+3. Hata mesajları `err.error.message` alanından okunuyordu. API ise Sprint 0'dan beri RFC 9457 ProblemDetails dönüyor
+   (`detail`, `errors`). Kullanıcı her hatada genel bir metin görüyordu.
+4. Kayıt formunda `markAllAsTouched()` geçersizlik kontrolünden **sonra** çağrılıyordu. Form geçersizken fonksiyon erken döndüğü için
+   kullanıcı hangi alanın hatalı olduğunu hiç görmüyordu, buton sadece "çalışmıyordu".
+
+**Çözümler.**
+- **`SessionService`:** oturumun tek sahibi, signal tabanlı. Saklama yeri değişirse (ör. HttpOnly cookie) tek bir dosya değişecek.
+  Token'ın `localStorage`'da durmasının XSS riski sınıf belgesinde açıkça yazılı. Güvenlik sprint'inde (Sprint 8) ele alınacak.
+- **401 yönetimi:** interceptor, token'lı bir isteğe 401 gelirse oturumu kapatıp kullanıcıyı `returnUrl` ve "oturum süresi doldu"
+  mesajıyla login'e yönlendiriyor. Login'in kendi 401'i (yanlış şifre) bu kurala takılmıyor, çünkü o anda token yok.
+- **Açık yönlendirme (open redirect) koruması:** girişten sonra `returnUrl`'e sadece `/` ile başlayan, `//` ile başlamayan
+  uygulama içi yollar için gidiliyor. Aksi hâlde `?returnUrl=https://saldirgan.com` içeren bir bağlantı, kullanıcıyı başarılı
+  girişin ardından sahte bir siteye taşıyabilirdi. Bu, oltalama saldırılarında sık kullanılan bir tekniktir.
+- **`problemMessage()`:** ProblemDetails'ten kullanıcıya gösterilecek metni çıkarıyor. Sırasıyla `detail`, ilk alan hatası, son
+  olarak çağıranın verdiği varsayılan metin. Ağ hatasında (status 0) "Sunucuya ulaşılamadı" gösteriliyor. 500'lerde sunucunun
+  genel başlığı yerine bağlama uygun bir metin. `problemErrors()` import'un satır hatalarını ve alan hatalarını tek listeye düzleştiriyor.
+- Login'de sadece alanların dolu olup olmadığı kontrol ediliyor. "TC 11 haneli olmalı" gibi format kuralları kaldırıldı (backend
+  ile aynı ilke, #019).
+- Bileşenler signal'e geçirildi, şablonlar yeni kontrol akışını (`@if`) kullanıyor. Hata kutularına `role="alert"` eklendi, ekran
+  okuyucular hatayı duyuruyor.
+- Kayıt formu `nonNullable` yapıldı. Böylece gereksiz bir tip dönüşümüne (`as ...`) ihtiyaç kalmadı.
+
+**Doğrulama.**
+- `problemMessage`/`problemErrors` için 7 Vitest testi: detail, alan hataları, ağ hatası, 500, HTTP dışı hata, import satır listesi.
+- Backend ve Angular dev server birlikte çalıştırıldı. Dev server üzerinden gönderilen login isteği proxy ile backend'e ulaştı (200).
+  Yanlış şifrede gelen 401'in `detail` alanı, arayüzün göstereceği metnin ta kendisi.
+
+**Commit:** `feat(web): centralise the session and show API error details`

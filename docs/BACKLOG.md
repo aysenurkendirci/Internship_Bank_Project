@@ -108,7 +108,7 @@
 ## Sprint 7 — Web arayüzü
 
 - [x] Production build onarıldı; ölü kod, kopyalar, sabit URL'ler, token log'ları kaldırıldı — log #039
-- [ ] Oturum yönetimi ve ProblemDetails hata eşleyicisi
+- [x] Oturum yönetimi, 401 → login (`returnUrl`, open-redirect korumalı), ProblemDetails mesajları — log #040
 - [ ] Uygulama kabuğu ve `tr-TR` locale
 - [ ] Finans API katmanı
 - [ ] Kartlar ve düzenli kalemler

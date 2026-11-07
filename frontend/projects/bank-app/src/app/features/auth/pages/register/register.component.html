@@ -27,7 +27,9 @@
           <p>NeoBank hesabınızı oluşturun.</p>
         </div>
 
-        <div class="notice notice--error" *ngIf="error">{{ error }}</div>
+        @if (error(); as message) {
+          <div class="notice notice--error" role="alert">{{ message }}</div>
+        }
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="form">
           <div class="row2">
@@ -94,8 +96,8 @@
             </div>
           </div>
 
-          <lib-button type="submit" [disabled]="loading || form.invalid">
-            {{ loading ? 'Hesap oluşturuluyor...' : 'KAYIT OL' }}
+          <lib-button type="submit" [disabled]="loading()">
+            {{ loading() ? 'Hesap oluşturuluyor...' : 'KAYIT OL' }}
           </lib-button>
 
           <div class="footer">

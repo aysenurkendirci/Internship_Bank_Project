@@ -27,8 +27,12 @@
           <p>Kurumsal portalınıza güvenli erişim.</p>
         </div>
 
-        <div class="notice notice--success" *ngIf="success">{{ success }}</div>
-        <div class="notice notice--error" *ngIf="error">{{ error }}</div>
+        @if (notice(); as message) {
+          <div class="notice notice--success">{{ message }}</div>
+        }
+        @if (error(); as message) {
+          <div class="notice notice--error" role="alert">{{ message }}</div>
+        }
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="form">
           <lib-input
@@ -36,7 +40,7 @@
             placeholder="11 haneli"
             [control]="form.controls.tcNo"
             [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
-            errorText="TC No 11 haneli olmalı">
+            errorText="TC kimlik numarası zorunludur">
           </lib-input>
 
           <lib-input
@@ -45,11 +49,11 @@
             placeholder="••••••••"
             [control]="form.controls.password"
             [showError]="form.controls.password.touched && form.controls.password.invalid"
-            errorText="Şifre en az 6 karakter">
+            errorText="Şifre zorunludur">
           </lib-input>
 
-          <lib-button type="submit" [disabled]="loading || form.invalid">
-            {{ loading ? 'Giriş yapılıyor...' : 'GİRİŞ YAP' }}
+          <lib-button type="submit" [disabled]="loading()">
+            {{ loading() ? 'Giriş yapılıyor...' : 'GİRİŞ YAP' }}
           </lib-button>
 
           <div class="footer">
