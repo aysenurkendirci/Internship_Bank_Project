@@ -51,6 +51,22 @@ public sealed class SecurityTests
     }
 
     [Fact]
+    public async Task AccessToken_CarriesNoPersonalData()
+    {
+        var registration = TestUsers.NewRegistration();
+        var response = await _factory.CreateClient().PostAsJsonAsync("/api/auth/register", registration);
+        var token = (await response.Content.ReadFromJsonAsync<AuthResponse>())!.Token;
+
+        // A JWT is only signed: its payload is plain base64url that anyone holding the token can read.
+        var payload = token.Split('.')[1].Replace('-', '+').Replace('_', '/');
+        var json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=')));
+
+        Assert.DoesNotContain(registration.Email, json);
+        Assert.DoesNotContain(registration.TcNo, json);
+        Assert.DoesNotContain(registration.FirstName, json);
+    }
+
+    [Fact]
     public async Task ErrorResponses_CarryTheHeadersToo()
     {
         var response = await _factory.CreateClient().GetAsync("/api/finance/credit-cards");

@@ -129,7 +129,7 @@
 
 - [x] Giriş uçlarında IP başına rate limiting, güvenlik başlıkları, `no-store` — log #049
 - [x] Giriş denemelerinin güvenlik kaydı, TC maskeli; log'da tam TC geçmediği testle kilitli — log #050
-- [ ] Token'da kişisel veri azaltma
+- [x] Token'da sadece kullanıcı id'si; e-posta çıkarıldı — log #051
 - [ ] Refresh token + HttpOnly cookie (kapsam dışı kalırsa ADR ile kayıt)
 
 ## Sonraki sprintler

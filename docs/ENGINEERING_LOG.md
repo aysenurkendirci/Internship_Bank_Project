@@ -1794,3 +1794,22 @@ yazıldığını ve **hiçbir satırda tam TC geçmediğini** kontrol ediyor. Bu
 `req.TcNo`'yu log'a eklerse test kırılsın diye var.
 
 **Commit:** `feat(security): log sign-in attempts with masked identity numbers`
+
+---
+
+## #051 — Token'dan e-posta çıktı
+
+**Sprint:** 8
+
+JWT'ler imzalanır ama şifrelenmez. Token'ın ortasındaki parça düz base64url: token'ı gören herkes, örneğin header'ları log'layan bir
+proxy, tarayıcı eklentisi ya da bir hata ekranı, içini okuyabilir. Bizim token'ımız kullanıcının e-posta adresini iki ayrı claim
+olarak taşıyordu. Baktığımda API'nin bu bilgiye hiç ihtiyacı yoktu: `ICurrentUser.Email` hiçbir yerde okunmuyordu.
+
+KVKK'nın veri minimizasyonu ilkesi tam olarak bu durum için var. Token artık sadece kullanıcı id'sini taşıyor. `ITokenGenerator`
+imzası `Generate(userId)` oldu ve kullanılmayan `Email` özelliği `ICurrentUser`'dan silindi. Ad soyad zaten token'da değil, login
+cevabında ayrı geliyor.
+
+Bir entegrasyon testi gerçek bir kayıt yapıp dönen token'ın payload'ını çözüyor ve içinde e-posta, TC ve ad olmadığını doğruluyor.
+İleride biri "şunu da token'a koyalım" derse test hatırlatacak.
+
+**Commit:** `refactor(security): keep personal data out of the access token`

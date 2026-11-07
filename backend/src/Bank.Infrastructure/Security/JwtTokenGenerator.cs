@@ -16,7 +16,7 @@ public sealed class JwtTokenGenerator : ITokenGenerator
         _config = config;
     }
 
-    public string Generate(long userId, string? email)
+    public string Generate(long userId)
     {
         var key = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
         var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing");
@@ -24,16 +24,7 @@ public sealed class JwtTokenGenerator : ITokenGenerator
         var lifetime = TimeSpan.FromMinutes(_config.GetValue<int?>("Jwt:ExpiresMinutes")
             ?? throw new InvalidOperationException("Jwt:ExpiresMinutes is missing"));
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-        };
-
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            claims.Add(new Claim(ClaimTypes.Email, email));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Email, email));
-        }
+        Claim[] claims = [new Claim(ClaimTypes.NameIdentifier, userId.ToString())];
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);

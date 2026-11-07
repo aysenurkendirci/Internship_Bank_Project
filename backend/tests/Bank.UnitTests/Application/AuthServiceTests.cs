@@ -31,7 +31,7 @@ public sealed class AuthServiceTests
     public AuthServiceTests()
     {
         _sut = new AuthService(_repo, _hasher, _tokens, _log);
-        _tokens.Generate(Arg.Any<long>(), Arg.Any<string?>()).Returns("jwt");
+        _tokens.Generate(Arg.Any<long>()).Returns("jwt");
     }
 
     [Fact]

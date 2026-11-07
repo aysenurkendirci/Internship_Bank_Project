@@ -71,5 +71,5 @@ public sealed class AuthService : IAuthService
     }
 
     private AuthResponse CreateResponse(UserRow user)
-        => new(user.UserId, $"{user.FirstName} {user.LastName}", _token.Generate(user.UserId, user.Email));
+        => new(user.UserId, $"{user.FirstName} {user.LastName}", _token.Generate(user.UserId));
 }
