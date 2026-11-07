@@ -26,7 +26,14 @@
 - [x] `Money` ve `Currency` value object'leri — log #013
 - [x] Gelir, düzenli gider, abonelik (`RecurringCashFlow`) — log #016
 - [x] Kredi kartı ekstre döngüsü: kesim, son ödeme, hafta sonu kaydırma — log #017
-- [ ] Taksit planı
+- [x] Taksit planı: ekstre bazlı takvim, kuruşsuz bölme — log #018
+
+**Sprint 1 retrospektifi**
+- Teslim: `Money`, `Currency`, `RecurrenceRule`, `RecurringCashFlow`, `CreditCard`, `InstallmentPlan`. Domain katmanı dış bağımlılık içermiyor.
+- 81 test. Ay sonu kayması ve user enumeration testleri mutation ile doğrulandı.
+- İyi giden: her kural önce testle tanımlandı. Hafta sonu kaydırması, ayda iki taksit çakışmasını ortaya çıkardı.
+- Bir sonraki sprintte dikkat: tatil takvimi ve kategori bazlı taksit sınırları bilinçli olarak kapsam dışı. Projeksiyon ekranında kullanıcıya bunun söylenmesi gerekiyor.
+- Planlanan büyük harcama (`PlannedExpense`) Sprint 4'teki senaryo karşılaştırmasıyla birlikte modellenecek.
 - [x] Tekrarlama kuralı: haftalık/aylık/yıllık, ay sonu kayması olmadan — log #015
 
 ## Sonraki sprintler

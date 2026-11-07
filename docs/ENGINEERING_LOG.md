@@ -540,3 +540,34 @@ nakit akışım nasıl olacak?") bu ayrım olmadan yanlış cevaplanır.
 (15 Nis 2026 + 10 = Cumartesi, 16 Nis + 10 = Pazar, ikisi de 27 Nis Pazartesi'ye kaymalı).
 
 **Commit:** `feat(domain): model credit card statement and due dates`
+
+---
+
+## #018 — Taksit planı: parçaları birleştirmek
+
+**Sprint:** 1
+
+**İhtiyaç.** "Bu bilgisayarı 3 yerine 6 taksitle alırsam ne olur?" sorusunun cevabı, her taksidin **hangi
+ekstreye** ve **hangi son ödeme gününe** düştüğünü bilmeyi gerektiriyor.
+
+**Çözüm.** `InstallmentPlan.ScheduleOn(card)` önceki üç parçayı birleştiriyor:
+- Tutarlar `Money.Allocate` ile bölünüyor (#014). Taksitlerin toplamı her zaman satın alma tutarına eşit.
+- İlk taksit, harcamanın düştüğü ekstreye (#017), her sonraki taksit bir sonraki ekstreye yazılıyor.
+- Son ödeme günleri kartın kuralıyla hesaplanıyor (hafta sonu kaydırması dahil).
+
+Tutarlılık kontrolleri: plan başka bir karta uygulanamıyor, kartın para biriminden farklı bir tutar reddediliyor.
+
+**Testlerden çıkan gerçek hayat bulgusu.** 25 Mart 2026'da 3 taksitle yapılan 1.000 TL'lik bir alışverişte
+Mayıs taksidinin son ödeme günü (30 Mayıs) Cumartesi'ye denk geliyor ve 1 Haziran'a kayıyor. Haziran
+taksidi de 30 Haziran'da. Sonuç: **Haziran'da iki taksit ödemesi, Mayıs'ta hiç yok.** Ay bazında bütçe yapan bir
+kullanıcı bunu fark etmez. Bu, projenin araştırma sorusunun ("gelecekteki yük daha erken görünür
+hale getirilebilir mi?") küçük ama somut bir örneği. Bu durum ayrı bir testle kilitlendi.
+
+**Kapsam kararları.**
+- Üst sınır olarak 36 taksit **sadece bir akıl sağlığı kontrolü**. Gerçekte düzenleyici kurum, taksit sayısını
+  harcama kategorisine göre sınırlıyor. Bu kategori bazlı sınırlar modellenmedi ve sınıf belgesinde bunu
+  açıkça belirttim.
+- Vade farkı veya faiz modellenmedi. Taksitli alışverişlerde tutar satıcıyla belirlenir. Kredi kartı faizi
+  borç devrettiğinde (asgari ödeme) devreye girer ve bu ayrı bir senaryo.
+
+**Commit:** `feat(domain): schedule card installments on statement dates`
