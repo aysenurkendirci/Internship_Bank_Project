@@ -128,7 +128,7 @@
 ## Sprint 8 — Güvenlik ve KVKK
 
 - [x] Giriş uçlarında IP başına rate limiting, güvenlik başlıkları, `no-store` — log #049
-- [ ] Giriş denemelerinin güvenlik kaydı (TC maskeli)
+- [x] Giriş denemelerinin güvenlik kaydı, TC maskeli; log'da tam TC geçmediği testle kilitli — log #050
 - [ ] Token'da kişisel veri azaltma
 - [ ] Refresh token + HttpOnly cookie (kapsam dışı kalırsa ADR ile kayıt)
 

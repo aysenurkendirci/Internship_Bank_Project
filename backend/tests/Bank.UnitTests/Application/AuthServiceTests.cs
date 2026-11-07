@@ -3,6 +3,7 @@ using Bank.Application.Abstractions.Security;
 using Bank.Application.Common.Exceptions;
 using Bank.Application.Services;
 using Bank.Contracts.Auth;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Bank.UnitTests.Application;
@@ -15,6 +16,7 @@ public sealed class AuthServiceTests
     private readonly IAuthRepository _repo = Substitute.For<IAuthRepository>();
     private readonly IPasswordHasher _hasher = Substitute.For<IPasswordHasher>();
     private readonly ITokenGenerator _tokens = Substitute.For<ITokenGenerator>();
+    private readonly RecordingLogger<AuthService> _log = new();
     private readonly AuthService _sut;
 
     private static readonly UserRow ExistingUser = new()
@@ -28,7 +30,7 @@ public sealed class AuthServiceTests
 
     public AuthServiceTests()
     {
-        _sut = new AuthService(_repo, _hasher, _tokens);
+        _sut = new AuthService(_repo, _hasher, _tokens, _log);
         _tokens.Generate(Arg.Any<long>(), Arg.Any<string?>()).Returns("jwt");
     }
 
@@ -95,6 +97,22 @@ public sealed class AuthServiceTests
             Arg.Any<RegisterRequest>(), "hashed-value", Arg.Any<CancellationToken>());
     }
 
+    // KVKK: security events are logged, but an identity number never appears in full.
+    [Fact]
+    public async Task SecurityEvents_AreLogged_WithTheIdentityNumberMasked()
+    {
+        GivenExistingUserWithPassword("correct");
+
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _sut.LoginAsync(new LoginRequest(TcNo, "wrong")));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _sut.LoginAsync(new LoginRequest("99999999990", "x")));
+        await _sut.LoginAsync(new LoginRequest(TcNo, "correct"));
+
+        Assert.Equal(3, _log.Messages.Count);
+        Assert.Contains(_log.Messages, m => m.Contains("wrong password") && m.Contains("123******01"));
+        Assert.Contains(_log.Messages, m => m.Contains("unknown identity number") && m.Contains("999******90"));
+        Assert.DoesNotContain(_log.Messages, m => m.Contains(TcNo) || m.Contains("99999999990"));
+    }
+
     private void GivenExistingUserWithPassword(string password)
     {
         _repo.GetUserByTcOrDefaultAsync(TcNo, Arg.Any<CancellationToken>()).Returns(ExistingUser);
@@ -105,4 +123,17 @@ public sealed class AuthServiceTests
 
     private static RegisterRequest NewRegistration()
         => new(TcNo, "Ayşe", "Yılmaz", "ayse@example.com", "5550000000", "P@ssw0rd!", "Personal");
+}
+
+/// <summary>Keeps the rendered log lines so tests can check what would reach the log store.</summary>
+internal sealed class RecordingLogger<T> : ILogger<T>
+{
+    public List<string> Messages { get; } = [];
+
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        => Messages.Add(formatter(state, exception));
 }

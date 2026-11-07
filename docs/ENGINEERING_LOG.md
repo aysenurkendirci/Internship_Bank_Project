@@ -1770,3 +1770,27 @@ hepsi 429'a takılırdı. Ana test host'unda limiti çok yüksek tuttum. Limiti 
 Başlıklar `OnStarting` ile ekleniyor, yani 401 gibi hata cevaplarında da var. Bu da bir testle kontrol ediliyor.
 
 **Commit:** `feat(security): throttle auth endpoints and add security headers`
+
+---
+
+## #050 — Giriş denemeleri artık kayıt altında, ama TC maskeli
+
+**Sprint:** 8
+
+Rate limit tek başına yetmiyor. Biri sınırın hemen altında, yavaş yavaş deniyorsa bunu ancak kayıtlara bakarak görebilirsiniz. Şimdiye
+kadar başarısız bir giriş hiçbir iz bırakmıyordu.
+
+`AuthService` artık her denemeyi yapılandırılmış bir güvenlik olayı olarak log'luyor: başarılı giriş, bilinmeyen TC ile deneme, yanlış
+şifre, kayıt ve zaten kayıtlı TC ile tekrar kayıt girişimi. İstemciye hâlâ tek ve aynı cevap gidiyor (#006). Log ise başarısızlığın gerçek
+nedenini tutuyor, çünkü "bu TC'ye yüz kere yanlış şifre girildi" ile "yüz farklı TC deneniyor" çok farklı iki saldırı.
+
+Buradaki asıl karar şuydu: log'a ne yazılmalı? Log'ları veritabanından çok daha fazla kişi ve sistem görüyor: operasyon ekibi, log
+toplama servisleri, destek. TC kimlik numarası KVKK kapsamında kişisel veri. Log'a açık yazılırsa, veritabanında ne kadar
+korunduğunun bir önemi kalmaz. `PersonalData.MaskTcKimlikNo` numaranın sadece ilk üç ve son iki hanesini bırakıyor (`100******46`):
+olayları birbirine bağlamaya yetiyor, kişiyi tanımlamaya yetmiyor. Başarılı girişlerde zaten kullanıcı id'si var, orada TC hiç yazılmıyor.
+
+Test tarafında bir `RecordingLogger` yazdım. Log'a gerçekte ne düşeceğini yakalıyor. Test üç olayın log'landığını, nedenlerin doğru
+yazıldığını ve **hiçbir satırda tam TC geçmediğini** kontrol ediyor. Bu son kontrol, ileride biri hata ayıklarken
+`req.TcNo`'yu log'a eklerse test kırılsın diye var.
+
+**Commit:** `feat(security): log sign-in attempts with masked identity numbers`
