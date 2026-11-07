@@ -1837,3 +1837,25 @@ YAML sözdizimi doğrulandı. Repo henüz bir uzak sunucuya push edilmediği iç
 kontrol edilmesi gereken bir şey: SQL Server container'ının sağlık kontrolü (`mssql-tools18` yolu imaj sürümüne göre değişebilir).
 
 **Commit:** `ci: build and test backend and frontend on every push`
+
+---
+
+## #053 — Health check uçları
+
+**Sprint:** 8
+
+Canlıya çıkacak her servis, onu çalıştıran ortama "ayaktayım" ve "trafik alabilirim" diyebilmeli. Bu ikisi farklı sorular ve
+karıştırılmaları gerçek bir operasyon hatasına yol açıyor:
+
+- `/health/live`: süreç ayakta mı? Hiçbir bağımlılığa bakmıyor. Veritabanı geçici olarak gitti diye container'ın yeniden
+  başlatılmasını istemiyoruz. Yeniden başlatmak sorunu çözmez, sadece yükü artırır.
+- `/health/ready`: trafik alabilir mi? Veritabanına gerçekten bağlanıp `SELECT 1` çalıştırıyor. Bağlanamazsa 503 ve sadece
+  "Unhealthy" yazıyor. Bağlantı ayrıntısı veya hata mesajı dışarı sızmıyor, o bilgi sunucu log'unda kalıyor.
+
+İkisi de kimlik doğrulamasız, çünkü onları çağıran şey bir load balancer, kullanıcı değil.
+
+Testte en çok önemsediğim senaryo, readiness'in **gerçekten** başarısız olabildiğini görmekti. Her zaman "Healthy" dönen bir health
+check, hiç olmamasından daha kötü, çünkü yanlış bir güven veriyor. Ayrı bir host'a hiçbir şeyin dinlemediği bir bağlantı dizesi verdim:
+ready 503 döndü, live 200'de kaldı.
+
+**Commit:** `feat(ops): add liveness and readiness health checks`

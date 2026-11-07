@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Bank.Api.ErrorHandling;
+using Bank.Api.Health;
 using Bank.Api.Security;
 using Bank.Api.Serialization;
 using Bank.Application;
@@ -32,6 +33,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddAuthRateLimiting(builder.Configuration);
+
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -114,5 +118,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Liveness answers "is the process up?" without touching dependencies, so a database outage does not get the
+// container restarted; readiness answers "can it serve traffic?" and includes the database.
+app.MapHealthChecks("/health/live", new() { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
 
 app.Run();
