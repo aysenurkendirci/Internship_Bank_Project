@@ -131,10 +131,14 @@
 - [x] Giriş denemelerinin güvenlik kaydı, TC maskeli; log'da tam TC geçmediği testle kilitli — log #050
 - [x] Token'da sadece kullanıcı id'si; e-posta çıkarıldı — log #051
 - [ ] Refresh token + HttpOnly cookie: tasarım kararı ADR-0004'te, uygulama sonraki adım
+- [x] CI: warnings-as-errors, açık taraması, SQL Server container ile entegrasyon testleri, web build ve testleri — log #052
+- [x] `/health/live` ve `/health/ready` — log #053
+- [x] Temporal tablolarla kart, düzenli kalem ve taksit planlarının tam değişiklik geçmişi — log #054
 
 **Sprint 8 retrospektifi**
 - Giriş uçları artık kaba kuvvete karşı sınırlı, her deneme iz bırakıyor, log'larda ve token'da kişisel veri yok.
 - En değerli testler "olmaması gereken" şeyleri kontrol edenler oldu: log'da tam TC yok, token'da e-posta yok. Bunlar ileride sessizce bozulabilecek şeyler.
+- Değişiklik geçmişini uygulama koduna değil veritabanına bırakmak (temporal tablolar), "audit kaydı yazmayı unutma" riskini tamamen ortadan kaldırdı.
 - Refresh token bilerek ertelendi. Yarım bir oturum mekanizması (rotation var, reuse detection yok gibi) hiç olmamasından daha riskli. Plan ADR-0004'te.
 
 ## Sonraki sprintler

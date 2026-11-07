@@ -36,7 +36,7 @@ doğrulamak gerekiyor.
 | 5 | Ekstre import'u ve sentetik veri | Encoding, Türkçe sayı formatları, satır parmak izi ile mükerrer koruması |
 | 6 | Analitik | Trend, tekrarlayan ödeme, anomali, tahmin ve bunların ölçülmesi |
 | 7 | Web arayüzü | Bozuk build'in onarımı, sekiz ekran, bileşen tabanlı yapı |
-| 8 | Güvenlik ve KVKK | Rate limiting, güvenlik başlıkları, maskeli log, token'da veri azaltma, CI |
+| 8 | Güvenlik, KVKK ve operasyon | Rate limiting, güvenlik başlıkları, maskeli log, token'da veri azaltma, temporal tablolarla değişiklik geçmişi, health check'ler, CI |
 
 ## En öğretici on sorun
 
@@ -68,7 +68,8 @@ doğrulamak gerekiyor.
 
 ## Ölçülen sonuçlar
 
-**Testler:** 232 unit test, 47 entegrasyon testi (gerçek SQL Server), 25 frontend testi. Build sıfır uyarı ile geçiyor.
+**Testler:** 232 unit test, 52 entegrasyon testi (gerçek SQL Server), 30 frontend testi. Build sıfır uyarı ile geçiyor ve CI
+uyarıyı hata sayıyor.
 
 **Analitik değerlendirmesi** ([EVALUATION.md](research/EVALUATION.md)). Geliştirme sırasında bakılmamış 50 sentetik profilde yapıldı,
 kabul kriterleri ölçümden önce yazıldı:
