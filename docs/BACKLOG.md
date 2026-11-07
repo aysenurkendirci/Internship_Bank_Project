@@ -109,7 +109,7 @@
 
 - [x] Production build onarıldı; ölü kod, kopyalar, sabit URL'ler, token log'ları kaldırıldı — log #039
 - [x] Oturum yönetimi, 401 → login (`returnUrl`, open-redirect korumalı), ProblemDetails mesajları — log #040
-- [ ] Uygulama kabuğu ve `tr-TR` locale
+- [x] Uygulama kabuğu, çıkış, `tr-TR` para/tarih formatı, sahte öğeler kaldırıldı — log #041
 - [ ] Finans API katmanı
 - [ ] Kartlar ve düzenli kalemler
 - [ ] Nakit akışı zaman çizelgesi

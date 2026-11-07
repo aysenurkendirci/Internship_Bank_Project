@@ -2,18 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* senin global stilin devam edebilir */
 body {
   background-color: #f6f8fc;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Kart gradient classların */
-.elegant-gradient-1 { background: linear-gradient(135deg, #2d3436, #0f172a); }
-.elegant-gradient-2 { background: linear-gradient(135deg, #2563eb, #3b82f6); }
-.elegant-gradient-3 { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
-
-/* no-scrollbar */
+// Horizontal card and menu strips scroll by touch or trackpad without a visible scrollbar.
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

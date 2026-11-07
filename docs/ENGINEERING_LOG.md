@@ -1476,3 +1476,32 @@ bir dosyadan geliyordu. Bütçeyi yükseltmek belirtiyi gizlerdi, nedeni ortadan
   Yanlış şifrede gelen 401'in `detail` alanı, arayüzün göstereceği metnin ta kendisi.
 
 **Commit:** `feat(web): centralise the session and show API error details`
+
+---
+
+## #041 — Web: uygulama kabuğu, Türkçe format ve sahte arayüz öğelerinin kaldırılması
+
+**Sprint:** 7
+
+**Sorunlar.**
+1. **Çalışmayan, yanıltıcı öğeler.** Yan menüde "PRO PLAN – %2 Nakit İade Alın – Şimdi Yükselt" kutusu, panelde "Para Yükle",
+   "Para Gönder" butonları, işlevsiz bir "İşlem ara" kutusu ve hiçbir yere gitmeyen "Tümünü Gör" bağlantıları vardı. Olmayan bir
+   kampanyayı ("%2 nakit iade") göstermek, #008'deki uydurma "%32 faiz" ile aynı sınıfta bir sorun. Çalışmayan butonlar da kullanıcı
+   güvenini zedeler.
+2. **Formatlar İngilizceydi.** Tutarlar `₺15,000.00`, tarihler "7 November" gibi görünüyordu. Para sembolü elle yazılıp `number`
+   pipe'ı ile birleştiriliyordu.
+3. **Font hiç yüklenmiyordu.** CSS `font-family: 'Inter'` diyordu ama `index.html` sadece ikon fontunu yüklüyordu. Tarayıcı sessizce
+   başka bir fonta düşüyordu.
+4. Çıkış yapmanın bir yolu yoktu. Mobilde menü tamamen gizleniyordu.
+
+**Çözümler.**
+- `registerLocaleData(tr)`, `LOCALE_ID = 'tr'`, `DEFAULT_CURRENCY_CODE = 'TRY'`. Bütün tutarlar artık `currency` pipe'ı ile
+  biçimleniyor (`₺15.000,00`), döviz hesapları kendi para birimiyle. Tarihler Türkçe.
+- Kabuk: navigasyon, sayfalar eklendikçe büyüyen tipli bir `NavItem` listesi. Kullanıcı adı ve **Çıkış** butonu eklendi. Mobilde menü
+  yatay kaydırılabilir bir şerit oluyor, gizlenmiyor.
+- Sahte öğeler kaldırıldı. Kart üzerindeki sabit "NEO" yazısı yerine kartın gerçek tipi (Banka kartı / Kredi kartı) gösteriliyor.
+- Panel signal'lere geçirildi. Hata durumunda `problemMessage` ile anlamlı bir mesaj gösteriliyor.
+- Kullanılmayan stil dosyaları (`.activeLink`, `.transition-hover`, Tailwind'in kendi sınıfını kopyalayan `.flex-shrink-0`, hiçbir yerde
+  kullanılmayan `elegant-gradient-*`) silindi. Inter fontu yükleniyor, sayfa başlığı ve viewport meta etiketi düzeltildi.
+
+**Commit:** `feat(web): add the app shell with Turkish formatting and drop non-functional UI`
