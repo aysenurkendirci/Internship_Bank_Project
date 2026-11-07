@@ -25,7 +25,19 @@ jobs:
           --health-timeout 5s
           --health-retries 10
 
+      # Only the publisher test needs it; without RABBITMQ_HOST that test is skipped.
+      rabbitmq:
+        image: rabbitmq:4-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
+      RABBITMQ_HOST: localhost
       INTEGRATION_TESTS_DB: "Server=localhost,1433;Database=BankDb_IntegrationTests;User Id=sa;Password=Ci_Only_Passw0rd!;TrustServerCertificate=True"
 
     defaults:

@@ -1,10 +1,12 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Bank.Application.Abstractions.Messaging;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Common.Behaviors;
 using Bank.Application.Common.Exceptions;
+using Bank.Contracts.Events;
 using Bank.Contracts.Payments;
 using Bank.Domain.Accounts;
 using Bank.Domain.Common;
@@ -43,12 +45,15 @@ public sealed class TransferMoneyCommandValidator : AbstractValidator<TransferMo
 public sealed class TransferMoneyCommandHandler : IRequestHandler<TransferMoneyCommand, TransferResult>
 {
     private readonly ITransferRepository _transfers;
+    private readonly IOutbox _outbox;
     private readonly ICurrentUser _currentUser;
     private readonly ILogger<TransferMoneyCommandHandler> _logger;
 
-    public TransferMoneyCommandHandler(ITransferRepository transfers, ICurrentUser currentUser, ILogger<TransferMoneyCommandHandler> logger)
+    public TransferMoneyCommandHandler(
+        ITransferRepository transfers, IOutbox outbox, ICurrentUser currentUser, ILogger<TransferMoneyCommandHandler> logger)
     {
         _transfers = transfers;
+        _outbox = outbox;
         _currentUser = currentUser;
         _logger = logger;
     }
@@ -84,6 +89,10 @@ public sealed class TransferMoneyCommandHandler : IRequestHandler<TransferMoneyC
 
         var stored = await _transfers.AddAsync(
             new NewTransfer(userId, key, requestHash, source, target, amount, request.Description.Trim(), postings), ct);
+
+        // Same transaction as the transfer: the event exists if and only if the money moved.
+        await _outbox.AddAsync(
+            new TransferCompleted(stored.TransferId, source.Id, target.Id, amount.Amount, amount.Currency.Code, stored.CreatedAt), ct);
 
         _logger.LogInformation(
             "Transfer {TransferId}: {Amount} from account {SourceAccountId} to account {TargetAccountId}",

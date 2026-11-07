@@ -1,6 +1,8 @@
+using Bank.Application.Abstractions.Messaging;
 using Bank.Application.Abstractions.Persistence;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
+using Bank.Infrastructure.Messaging;
 using Bank.Infrastructure.Persistence;
 using Bank.Infrastructure.Repositories;
 using Bank.Infrastructure.Repositories.Finance;
@@ -35,6 +37,8 @@ public static class DependencyInjection
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
 
+        AddMessaging(services, configuration);
+
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
 
@@ -42,5 +46,21 @@ public static class DependencyInjection
         services.TryAddSingleton(TimeProvider.System);
 
         return services;
+    }
+
+    private static void AddMessaging(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(MessagingOptions.Section);
+        services.Configure<MessagingOptions>(section);
+
+        // Events are always written to the outbox; whether they are forwarded to a broker is a deployment choice.
+        services.AddScoped<IOutbox, OutboxWriter>();
+
+        if (!section.GetValue<bool>(nameof(MessagingOptions.Enabled)))
+            return;
+
+        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+        services.AddSingleton<OutboxProcessor>();
+        services.AddHostedService<OutboxPublisherService>();
     }
 }
