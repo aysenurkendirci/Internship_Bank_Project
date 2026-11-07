@@ -7,4 +7,7 @@
     <Project Path="src/Bank.Domain/Bank.Domain.csproj" />
     <Project Path="src/Bank.Infrastructure/Bank.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Bank.UnitTests/Bank.UnitTests.csproj" />
+  </Folder>
 </Solution>

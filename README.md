@@ -50,6 +50,13 @@ dotnet run
 
 The API fails fast at startup if `Jwt:Key` is missing.
 
+### Tests
+
+```bash
+cd backend
+dotnet test
+```
+
 ### Frontend
 
 ```bash

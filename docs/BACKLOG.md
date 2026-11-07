@@ -18,7 +18,7 @@
 - [x] Tarihler JSON'da UTC işaretiyle (`Z`) dönüyor — log #010
 - [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı — log #009
 - [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
-- [ ] Test projeleri (xUnit) ve ilk testler
+- [x] xUnit test projesi, Sprint 0 düzeltmelerini kilitleyen 14 test — log #012
 - [x] `System.Security.Cryptography.Pkcs` açığı kapatıldı, build 0 uyarı — log #011
 
 ## Sprint 1 — Finansal domain modeli

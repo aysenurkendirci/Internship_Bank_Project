@@ -360,3 +360,37 @@ Build 0 uyarı veriyor. Migrator ve login uçtan uca çalıştırıldı.
 bir uyarı çıktığında fark edilmez. Sıfır uyarılı bir build bu yüzden tutulmaya değer bir standart.
 
 **Commit:** `build(deps): override vulnerable transitive Pkcs package`
+
+---
+
+## #012 — Projede hiç test yoktu
+
+**Sprint:** 0
+
+**Sorun.** Sprint 0'da düzeltilen hataların (düz metin şifre, user enumeration, UTC'siz tarih) geri
+gelmesini engelleyen hiçbir şey yoktu. Bir refactor sırasında herhangi biri sessizce geri dönebilirdi.
+
+**Çözüm.** `backend/tests/Bank.UnitTests` (xUnit + NSubstitute) eklendi. Klasör yapısı katmanları izliyor
+(`Application/`, `Infrastructure/`, `Api/`). İlk testler, bu sprintte düzeltilen davranışları kilitliyor:
+
+| Test sınıfı | Neyi koruyor |
+|---|---|
+| `AuthServiceTests` | Bilinmeyen TC ve yanlış şifre **aynı** hatayı veriyor. Başarısız girişte "son giriş" güncellenmiyor. Mükerrer kayıtta kullanıcı oluşturulmuyor. Repository'ye şifrenin hash'i gidiyor. |
+| `PasswordHasherTests` | Hash düz metni içermiyor. Aynı şifre her seferinde farklı hash üretiyor (salt). Yanlış şifreler reddediliyor. |
+| `UtcDateTimeConverterTests` | DB'den gelen `Unspecified` tarih `Z` ile yazılıyor. Ofsetli girdi UTC'ye çevriliyor. |
+
+**Testlerin gerçekten koruduğunun doğrulanması (mutation testing).** Hiç başarısız olmamış bir test,
+bir şeyi koruduğunu kanıtlamaz. Bu yüzden eski hatalar kodda geçici olarak geri getirildi:
+- `PasswordHasher` tekrar düz metin döndürecek hale getirildi → 2 test başarısız oldu.
+- Login'de bilinmeyen kullanıcı için tekrar `NotFoundException` fırlatıldı → 1 test başarısız oldu.
+
+Kod geri yüklendi, 14 testin hepsi geçti.
+
+**Neden bu yol.**
+- Mock kütüphanesi olarak NSubstitute seçildi. Söz dizimi kısa ve okunabilir. FluentAssertions 8 sürümünden
+  itibaren ticari lisansa geçtiği için yerleşik `Assert` kullanıldı.
+- Test isimleri `Metot_Durum_BeklenenSonuç` kalıbında. Testin neyi koruduğu adından okunabiliyor.
+- Veritabanına gerçekten bağlanan entegrasyon testleri, repository sayısı arttığında (Sprint 2) ayrı bir
+  projede gelecek.
+
+**Commit:** `test: add unit test project covering the sprint 0 fixes`
