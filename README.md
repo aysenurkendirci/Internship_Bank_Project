@@ -1,84 +1,101 @@
 # Personal Finance Platform
 
-A personal finance life-management platform built on top of a banking core.
-Beyond summarising past spending, it projects future obligations (installments,
-subscriptions, credit card statements, recurring expenses) over the next 3–12
-months and lets users compare spending scenarios.
+Most budgeting apps summarise the past. This one looks ahead: it combines salary, rent, bills, subscriptions,
+credit card statements and installment plans into a day-by-day cash-flow projection for the next 3–12 months,
+and lets you compare installment options before you buy.
 
-> Decision-support and simulation only. The system never makes credit or
-> investment recommendations.
+> Decision support and simulation only. The system never recommends credit, investments or purchases; it makes
+> the user's own obligations visible.
+
+## What it does
+
+| Feature | Details |
+|---|---|
+| **Cash-flow projection** | Card spending is collected per statement and leaves the account on the due date, not on the day of purchase. Weekend shifts, month-end clamping and same-day ordering are modelled ([ADR-0003](docs/adr/0003-cash-flow-projection-assumptions.md)). Reports the *lowest* balance within each month, so a month that closes positive but dips below zero before payday is still visible. |
+| **Installment scenarios** | "3 or 6 installments?" — each option with its own price, compared over a common horizon against not buying at all. Options are never ranked. |
+| **Recurring items & cards** | Income, expenses, subscriptions, credit cards with statement/due days, installment plans with cent-exact schedules. |
+| **Statement import** | CSV exports from other banks: UTF-8 or Windows-1254, `;`/`,`/tab, signed amount or debit/credit columns, Turkish number formats. Re-importing or overlapping statements adds only new lines. |
+| **Analytics** | Category trends, recurring payment detection (with one-click tracking), anomaly detection with a robust z-score, and an everyday-spending forecast shown as a 95% range. |
+| **Synthetic data** | A reproducible profile generator (seeded) for demos and for evaluating the analytics against known answers. |
+
+The analytics are evaluated on held-out synthetic profiles; method, results and threats to validity are in
+[`docs/research/EVALUATION.md`](docs/research/EVALUATION.md).
 
 ## Tech stack
 
-| Layer    | Technology                                   |
-|----------|----------------------------------------------|
-| Backend  | .NET 10, ASP.NET Core Web API, Dapper        |
-| Database | SQL Server, schema migrations with DbUp      |
-| Frontend | Angular, Tailwind CSS                        |
-| Auth     | JWT bearer tokens                            |
+| Layer | Technology |
+|---|---|
+| Backend | .NET 10, ASP.NET Core Web API, Dapper, Clean Architecture (`Domain` ← `Application` ← `Infrastructure` / `Api`) |
+| Database | SQL Server, versioned migrations with DbUp |
+| Frontend | Angular 21 (standalone, signals, zoneless), Tailwind CSS, Apache ECharts |
+| Tests | xUnit + NSubstitute, integration tests on a real SQL Server via `WebApplicationFactory`, Vitest |
+| Security | PBKDF2 password hashing, JWT, rate-limited auth endpoints, RFC 9457 problem details, security headers, masked personal data in logs |
 
-Backend follows Clean Architecture: `Domain` ← `Application` ← `Infrastructure` / `Api`,
-with request/response DTOs in `Contracts`.
+## Project layout
 
-## Local setup
+```
+backend/
+  src/
+    Bank.Domain/          pure business rules: Money, recurrence, card cycles, projection, scenarios, analytics
+    Bank.Application/     use cases, CSV parsing, synthetic data, ports (repository interfaces)
+    Bank.Infrastructure/  SQL Server repositories (Dapper), password hashing, JWT
+    Bank.Api/             HTTP: controllers, error handling, rate limiting, security headers
+    Bank.Contracts/       request/response DTOs
+    Bank.Database/        DbUp migrator and SQL scripts
+  tests/                  unit and integration tests
+  tools/Bank.Evaluation/  reproduces every figure in the evaluation report
+frontend/                 Angular app (pages are containers, display parts are presentational components)
+docs/                     engineering log, ADRs, backlog, evaluation, design prompt
+```
 
-### Database
+## Running locally
 
-Requires a local SQL Server instance reachable with Windows Authentication.
-The migrator creates `BankDb` if it does not exist and applies pending scripts:
+Requirements: .NET 10 SDK, Node 22, a local SQL Server reachable with Windows authentication.
 
 ```bash
+# 1. Database: creates BankDb and applies pending migrations
 cd backend
 dotnet run --project src/Bank.Database
-```
 
-Schema changes are added as new numbered scripts under
-`backend/src/Bank.Database/Migrations/` (`V002__...sql`). An applied script is never edited.
-
-> `TrustServerCertificate=True` in the connection string is for local development only.
->
-> When running scripts by hand with `sqlcmd`, pass `-I`: tables with filtered indexes
-> require `QUOTED_IDENTIFIER ON`, which `sqlcmd` disables by default.
-
-### Backend
-
-Secrets are never committed. Configure them once per machine with
-[user-secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets):
-
-```bash
-cd backend/src/Bank.Api
+# 2. API (http://localhost:5164); secrets are never committed
+cd src/Bank.Api
 dotnet user-secrets set "Jwt:Key" "<random string, at least 32 characters>"
 dotnet run
-```
 
-The API fails fast at startup if `Jwt:Key` is missing.
-
-### Tests
-
-```bash
-cd backend
-dotnet test
-```
-
-- `Bank.UnitTests`: domain rules, services and helpers; no external dependencies.
-- `Bank.IntegrationTests`: hosts the API in memory against a real SQL Server database,
-  `BankDb_IntegrationTests`, which is dropped and rebuilt from the migrations on every run.
-  Point it elsewhere with the `INTEGRATION_TESTS_DB` environment variable.
-
-### Evaluation
-
-The analytics are evaluated on synthetic profiles; every figure in
-[`docs/research/EVALUATION.md`](docs/research/EVALUATION.md) is reproduced by:
-
-```bash
-cd backend
-dotnet run --project tools/Bank.Evaluation -c Release
-```
-
-### Frontend
-
-```bash
-cd frontend
+# 3. Web app (http://localhost:4200); /api is proxied to the backend
+cd ../../../frontend
 npm install
 npm start
 ```
+
+After signing up, *İşlem geçmişi → 12 aylık demo verisi oluştur* fills the account with a realistic history.
+
+Schema changes go into new numbered scripts under `backend/src/Bank.Database/Migrations/` (`V004__...sql`); an
+applied script is never edited. When running scripts by hand with `sqlcmd`, pass `-I` (filtered indexes need
+`QUOTED_IDENTIFIER ON`). `TrustServerCertificate=True` in the connection string is for local development only.
+
+## Tests
+
+```bash
+cd backend && dotnet test          # unit + integration (needs SQL Server)
+cd frontend && npx ng test --watch=false
+```
+
+- `Bank.UnitTests` covers the domain rules, parsing, analytics and services without external dependencies.
+- `Bank.IntegrationTests` hosts the API in memory against `BankDb_IntegrationTests`, rebuilt from the migrations
+  on every run. Point it elsewhere with the `INTEGRATION_TESTS_DB` environment variable.
+- CI (`.github/workflows/ci.yml`) runs both against a SQL Server container, plus the web build and specs.
+
+```bash
+# Evaluation of the analytics (writes the tables in docs/research/EVALUATION.md)
+cd backend && dotnet run --project tools/Bank.Evaluation -c Release
+```
+
+## Documentation
+
+- [`docs/ENGINEERING_LOG.md`](docs/ENGINEERING_LOG.md) — every problem found and how it was solved, in order
+- [`docs/adr/`](docs/adr/) — architecture decisions (database, projection assumptions, session hardening)
+- [`docs/research/EVALUATION.md`](docs/research/EVALUATION.md) — evaluation of the analytics
+- [`docs/REPORT.md`](docs/REPORT.md) — project summary
+- [`docs/BACKLOG.md`](docs/BACKLOG.md) — sprint backlog and retrospectives
+- [`docs/design/STITCH_PROMPT.md`](docs/design/STITCH_PROMPT.md) — prompt for the visual design
