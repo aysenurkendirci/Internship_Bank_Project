@@ -52,9 +52,13 @@
 - Bilinen sınır: kart silme ile karta kayıt ekleme arasında dar bir yarış penceresi var (log #022).
 - Sırada: Sprint 3, nakit akışı projeksiyon motoru.
 
+## Sprint 3 — Nakit akışı projeksiyonu
+
+- [x] Projeksiyon motoru: kart ödemeleri son ödeme gününde, en düşük bakiye, yük oranı — ADR-0003, log #025
+- [ ] Projeksiyon API'si: başlangıç bakiyesi, `TimeProvider` ile test edilebilir "bugün"
+
 ## Sonraki sprintler
 
-3. Nakit akışı projeksiyon motoru (3–12 ay, ekstre dönemi bazlı taksit dağıtımı)
 4. Senaryo karşılaştırma (3 / 6 / 9 taksit what-if)
 5. CSV içe aktarma ve deterministik sentetik veri üretici
 6. Analitik: kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, güven aralıklı tahmin

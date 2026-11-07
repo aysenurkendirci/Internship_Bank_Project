@@ -824,3 +824,49 @@ isteği servis kontrolünü geçti, ama **veritabanındaki bileşik foreign key 
 gerektiğini gösteren somut bir örnek: uygulama kodundaki bir hata, veri sızıntısına dönüşmedi.
 
 **Commit:** `test: add API integration tests against a real SQL Server database`
+
+---
+
+## #025 — Nakit akışı projeksiyon motoru
+
+**Sprint:** 3
+
+**İhtiyaç.** Projenin ana sorusu: "Önümüzdeki aylarda taksitler, abonelikler, kart ekstreleri ve düzenli giderler
+birlikte nasıl bir yük oluşturacak?" Bütçe uygulamalarının çoğu geçmişi özetler. Bu motor geleceği gösteriyor.
+
+**Çözüm.** `CashFlowProjector` saf bir domain servisi. Girdi olarak düzenli kalemleri, kartları, taksit planlarını,
+başlangıç bakiyesini ve ufku (ay sayısı) alıyor. Çıktıları:
+- **Tarihli hareketler:** maaş, kira, kartsız abonelikler kendi tarihinde. **Kart harcamaları ekstrede toplanıp tek
+  bir kart ödemesi olarak son ödeme gününde.** Ekstrenin satırları da listeleniyor.
+- **Aylık özet:** gelir, toplam çıkış, kart ödemeleri, net, ay sonu bakiyesi, **ayın en düşük bakiyesi ve tarihi**,
+  ödeme yükü oranı.
+- **Dışarıda bırakılan kalemler:** başka para birimindekiler, açıkça listeleniyor.
+
+Varsayımlar ayrı bir karar kaydında: [ADR-0003](adr/0003-cash-flow-projection-assumptions.md).
+
+**Neden "en düşük bakiye"?** Kira 1'inde, maaş 15'inde olan bir kullanıcı için Mart ayı **+25.000 TL net** ile
+kapanıyor, ama bakiye 1–15 Mart arasında **−15.000 TL**'de. Sadece ay sonu rakamlarına bakan bir özet bu baskıyı
+hiç göstermez. Test: `Month_ClosingPositive_CanStillDipBelowZeroMidMonth`. Bu, araştırma sorusunun ("finansal
+baskı daha erken görünür hale getirilebilir mi?") doğrudan bir cevabı.
+
+**Testler (14).** Her varsayım bir testle kilitlendi:
+- kart aboneliği harcama gününde değil son ödeme gününde
+- ufuk öncesi harcama ufuk içinde ödeniyorsa dahil
+- aynı ekstredeki abonelik ve taksit tek ödeme olarak birleşiyor (229,99 + 333,34 = 563,33)
+- Sprint 1'de bulunan Haziran'da çift taksit durumu aylık özette görünüyor (Nisan 333,34 / Mayıs 0 / Haziran 666,66)
+- ödeme yükü oranı ve gelirsiz ay için `null`
+- ay ortasında başlayan ufuk
+- bakiyenin aylar arası taşınması
+- para birimi dışlaması
+- bilinmeyen kart
+- ufuk sınırları
+
+**Mutation testinin bulduğu eksik.**
+- Geriye bakış süresi 0'a indirildi → 3 test kırıldı. Bu varsayım iyi korunuyor.
+- Aynı gün sıralaması ters çevrildi (gelir önce) → **hiçbir test kırılmadı.** ADR'de yazılı bir varsayımı hiçbir
+  test korumuyordu. `SameDay_OutflowsAreAppliedBeforeIncome` eklendi. Aynı gün 10.000 TL maaş ve 15.000 TL kira
+  ile en düşük bakiyenin −15.000 olduğunu doğruluyor. Mutation tekrarlandığında test kırıldı.
+
+Bu deney, "testler geçiyor" ile "testler koruyor" arasındaki farkı somut olarak gösterdi.
+
+**Commit:** `feat(domain): add cash-flow projection engine`
