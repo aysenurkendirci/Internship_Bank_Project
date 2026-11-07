@@ -1,14 +1,14 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Common.Exceptions;
-using Bank.Application.Services;
+using Bank.Application.Features.Auth;
 using Bank.Contracts.Auth;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Bank.UnitTests.Application;
 
-public sealed class AuthServiceTests
+public sealed class AuthCommandTests
 {
     private const string TcNo = "12345678901";
     private const string StoredHash = "stored-hash";
@@ -16,8 +16,9 @@ public sealed class AuthServiceTests
     private readonly IAuthRepository _repo = Substitute.For<IAuthRepository>();
     private readonly IPasswordHasher _hasher = Substitute.For<IPasswordHasher>();
     private readonly ITokenGenerator _tokens = Substitute.For<ITokenGenerator>();
-    private readonly RecordingLogger<AuthService> _log = new();
-    private readonly AuthService _sut;
+    private readonly RecordingLogger<LoginCommandHandler> _log = new();
+    private readonly LoginCommandHandler _login;
+    private readonly RegisterCommandHandler _register;
 
     private static readonly UserRow ExistingUser = new()
     {
@@ -28,9 +29,10 @@ public sealed class AuthServiceTests
         Email = "ayse@example.com"
     };
 
-    public AuthServiceTests()
+    public AuthCommandTests()
     {
-        _sut = new AuthService(_repo, _hasher, _tokens, _log);
+        _login = new LoginCommandHandler(_repo, _hasher, _tokens, _log);
+        _register = new RegisterCommandHandler(_repo, _hasher, _tokens, new RecordingLogger<RegisterCommandHandler>());
         _tokens.Generate(Arg.Any<long>()).Returns("jwt");
     }
 
@@ -39,7 +41,7 @@ public sealed class AuthServiceTests
     {
         GivenExistingUserWithPassword("correct");
 
-        var response = await _sut.LoginAsync(new LoginRequest(TcNo, "correct"));
+        var response = await Login(new LoginRequest(TcNo, "correct"));
 
         Assert.Equal(7, response.UserId);
         Assert.Equal("Ayşe Yılmaz", response.FullName);
@@ -53,7 +55,7 @@ public sealed class AuthServiceTests
         GivenExistingUserWithPassword("correct");
 
         await Assert.ThrowsAsync<AuthenticationFailedException>(
-            () => _sut.LoginAsync(new LoginRequest(TcNo, "wrong")));
+            () => Login(new LoginRequest(TcNo, "wrong")));
 
         await _repo.DidNotReceive().UpdateLastLoginAsync(Arg.Any<long>(), Arg.Any<CancellationToken>());
     }
@@ -66,9 +68,9 @@ public sealed class AuthServiceTests
         GivenExistingUserWithPassword("correct");
 
         var wrongPassword = await Assert.ThrowsAsync<AuthenticationFailedException>(
-            () => _sut.LoginAsync(new LoginRequest(TcNo, "wrong")));
+            () => Login(new LoginRequest(TcNo, "wrong")));
         var unknownUser = await Assert.ThrowsAsync<AuthenticationFailedException>(
-            () => _sut.LoginAsync(new LoginRequest("99999999999", "anything")));
+            () => Login(new LoginRequest("99999999999", "anything")));
 
         Assert.Equal(wrongPassword.Message, unknownUser.Message);
     }
@@ -78,7 +80,7 @@ public sealed class AuthServiceTests
     {
         _repo.GetUserByTcOrDefaultAsync(TcNo, Arg.Any<CancellationToken>()).Returns(ExistingUser);
 
-        await Assert.ThrowsAsync<ConflictException>(() => _sut.RegisterAsync(NewRegistration()));
+        await Assert.ThrowsAsync<ConflictException>(() => _register.Handle(new RegisterCommand(NewRegistration()), default));
 
         await _repo.DidNotReceive().CreateUserAsync(
             Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -91,7 +93,7 @@ public sealed class AuthServiceTests
         _repo.CreateUserAsync(Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
              .Returns(ExistingUser);
 
-        await _sut.RegisterAsync(NewRegistration());
+        await _register.Handle(new RegisterCommand(NewRegistration()), default);
 
         await _repo.Received(1).CreateUserAsync(
             Arg.Any<RegisterRequest>(), "hashed-value", Arg.Any<CancellationToken>());
@@ -103,15 +105,17 @@ public sealed class AuthServiceTests
     {
         GivenExistingUserWithPassword("correct");
 
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _sut.LoginAsync(new LoginRequest(TcNo, "wrong")));
-        await Assert.ThrowsAsync<AuthenticationFailedException>(() => _sut.LoginAsync(new LoginRequest("99999999990", "x")));
-        await _sut.LoginAsync(new LoginRequest(TcNo, "correct"));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => Login(new LoginRequest(TcNo, "wrong")));
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => Login(new LoginRequest("99999999990", "x")));
+        await Login(new LoginRequest(TcNo, "correct"));
 
         Assert.Equal(3, _log.Messages.Count);
         Assert.Contains(_log.Messages, m => m.Contains("wrong password") && m.Contains("123******01"));
         Assert.Contains(_log.Messages, m => m.Contains("unknown identity number") && m.Contains("999******90"));
         Assert.DoesNotContain(_log.Messages, m => m.Contains(TcNo) || m.Contains("99999999990"));
     }
+
+    private Task<AuthResponse> Login(LoginRequest credentials) => _login.Handle(new LoginCommand(credentials), default);
 
     private void GivenExistingUserWithPassword(string password)
     {

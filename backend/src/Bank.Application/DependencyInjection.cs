@@ -22,7 +22,6 @@ public static class DependencyInjection
         });
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
-        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ICreditCardService, CreditCardService>();
         services.AddScoped<IRecurringCashFlowService, RecurringCashFlowService>();

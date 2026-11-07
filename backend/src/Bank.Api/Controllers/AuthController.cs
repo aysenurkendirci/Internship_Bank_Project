@@ -1,6 +1,7 @@
 using Bank.Api.Security;
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.Auth;
 using Bank.Contracts.Auth;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -11,15 +12,15 @@ namespace Bank.Api.Controllers;
 [EnableRateLimiting(AuthRateLimiting.Policy)]
 public sealed class AuthController : ControllerBase
 {
-    private readonly IAuthService _auth;
+    private readonly ISender _sender;
 
-    public AuthController(IAuthService auth) => _auth = auth;
+    public AuthController(ISender sender) => _sender = sender;
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req, CancellationToken ct)
-        => Ok(await _auth.LoginAsync(req, ct));
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
+        => Ok(await _sender.Send(new LoginCommand(request), ct));
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req, CancellationToken ct)
-        => Ok(await _auth.RegisterAsync(req, ct));
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
+        => Ok(await _sender.Send(new RegisterCommand(request), ct));
 }
