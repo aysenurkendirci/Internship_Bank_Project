@@ -24,7 +24,9 @@
 ## Sprint 1 — Finansal domain modeli
 
 - [x] `Money` ve `Currency` value object'leri — log #013
-- [ ] Gelir, düzenli gider, abonelik, kredi kartı (ekstre kesim / son ödeme günü), taksit planı, planlanan harcama
+- [x] Gelir, düzenli gider, abonelik (`RecurringCashFlow`) — log #016
+- [ ] Kredi kartı ekstre döngüsü (kesim günü, son ödeme günü)
+- [ ] Taksit planı
 - [x] Tekrarlama kuralı: haftalık/aylık/yıllık, ay sonu kayması olmadan — log #015
 
 ## Sonraki sprintler

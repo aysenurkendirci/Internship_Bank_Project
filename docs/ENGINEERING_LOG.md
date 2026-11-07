@@ -478,3 +478,32 @@ hatayı gösterdi (`Beklenen 31.03.2026, Gerçek 28.03.2026, 28.04.2026, 28.05.2
   kredi kartı son ödeme gününde ayrıca ele alınacak.
 
 **Commit:** `feat(domain): add recurrence rule for repeating payments`
+
+---
+
+## #016 — Gelir, gider ve abonelik için tek model
+
+**Sprint:** 1
+
+**İhtiyaç.** Kullanıcı maaşını, kirasını, faturalarını ve aboneliklerini sisteme girebilmeli. Bunların hepsi
+"belirli bir tutar, belirli bir tekrarla" ödeniyor.
+
+**Tasarım.** Gelir, gider ve abonelik için üç ayrı sınıf yazmak yerine tek bir `RecurringCashFlow` sınıfı ve
+`CashFlowKind` (Income / Expense / Subscription) kullanıldı. Davranışları aynı olduğu için üç sınıf sadece kod
+tekrarı üretirdi (KISS, DRY). Abonelik ayrı bir tür olarak tutuldu, çünkü kullanıcıya "aboneliklerin toplamı"
+ayrıca gösterilecek ve iptal edilebilir harcamalar olarak gruplanacaklar.
+
+**Kurallar (invariant'lar).** Nesne geçersiz bir durumda oluşturulamıyor:
+- Tutar her zaman pozitif. Yön `Kind` alanından geliyor. Bu, veritabanındaki `Transactions` tablosuyla
+  aynı kural. Negatif tutara izin verilseydi "negatif gider" yönü ikinci kez tersine çevirirdi.
+- Gelir bir kredi kartına bağlanamaz.
+- Ad ve kategori boş olamaz, kenar boşlukları temizleniyor.
+
+**Kredi kartına bağlı kalemler.** Kartla ödenen bir abonelik, paranın hesaptan çıktığı gün değil, kartın son
+ödeme günü nakit akışını etkiler. `CreditCardId` bu bilgiyi taşıyor. Sprint 3'teki projeksiyon motoru,
+kartlı kalemleri ilgili ekstreye aktaracak.
+
+**Çıktı.** `OccurrencesBetween` her tekrar için `CashFlowOccurrence` üretiyor. Tutar burada kullanıcının
+bakış açısından işaretli: gelir pozitif, çıkışlar negatif. Projeksiyon motoru bu değerleri doğrudan toplayabilecek.
+
+**Commit:** `feat(domain): model recurring income, expenses and subscriptions`
