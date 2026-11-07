@@ -94,7 +94,7 @@ cd backend && dotnet run --project tools/Bank.Evaluation -c Release
 ## Documentation
 
 - [`docs/ENGINEERING_LOG.md`](docs/ENGINEERING_LOG.md) — every problem found and how it was solved, in order
-- [`docs/adr/`](docs/adr/) — architecture decisions (database, projection assumptions, session hardening)
+- [`docs/adr/`](docs/adr/) — architecture decisions (database, projection assumptions, session hardening, right to erasure)
 - [`docs/research/EVALUATION.md`](docs/research/EVALUATION.md) — evaluation of the analytics
 - [`docs/REPORT.md`](docs/REPORT.md) — project summary
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — sprint backlog and retrospectives
