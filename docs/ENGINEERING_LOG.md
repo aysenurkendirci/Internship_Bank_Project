@@ -1813,3 +1813,27 @@ Bir entegrasyon testi gerçek bir kayıt yapıp dönen token'ın payload'ını �
 İleride biri "şunu da token'a koyalım" derse test hatırlatacak.
 
 **Commit:** `refactor(security): keep personal data out of the access token`
+
+---
+
+## #052 — CI pipeline'ı
+
+**Sprint:** 8
+
+Şimdiye kadar "build temiz, testler geçiyor" demem benim makinemde çalıştırdığım komutlara dayanıyordu. Bunun bir kurala dönüşmesi için
+`.github/workflows/ci.yml` ekledim:
+
+- **Backend:** Release build `-warnaserror` ile, yani tek bir uyarı bile build'i kırıyor. Sprint 0'dan beri koruduğum sıfır uyarı
+  standardı artık bir kontrol. Ardından `dotnet list package --vulnerable` ile bilinen açık taraması (#011'deki gibi bir şey tekrar
+  sızarsa yakalansın diye), unit testler ve **gerçek bir SQL Server container'ına karşı** entegrasyon testleri. Bağlantı, testlerin
+  zaten desteklediği `INTEGRATION_TESTS_DB` değişkeniyle veriliyor (#024).
+- **Frontend:** `npm ci`, production build ve Vitest testleri.
+
+Container'ın `sa` şifresi workflow dosyasında açık duruyor. Bu bilinçli: container sadece o job süresince yaşayan, dışarıya kapalı
+geçici bir veritabanı. Korunacak bir sır değil ve dosyada da bu şekilde not edildi.
+
+**Doğrulama ve sınırı.** Backend adımlarının aynısını yerelde çalıştırdım: Release build ve `-warnaserror` 0 uyarı, açık taraması temiz.
+YAML sözdizimi doğrulandı. Repo henüz bir uzak sunucuya push edilmediği için workflow **GitHub üzerinde hiç koşmadı**. İlk push'ta
+kontrol edilmesi gereken bir şey: SQL Server container'ının sağlık kontrolü (`mssql-tools18` yolu imaj sürümüne göre değişebilir).
+
+**Commit:** `ci: build and test backend and frontend on every push`
