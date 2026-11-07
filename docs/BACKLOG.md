@@ -66,7 +66,14 @@
 ## Sprint 4 — Senaryo karşılaştırma
 
 - [x] Taksit seçeneklerini karşılaştırma motoru: ortak ufuk, baz senaryo, öneri yok — log #027
-- [ ] Senaryo API'si
+- [x] Senaryo API'si; ortak `ProjectionInputLoader` ile tekrar kaldırıldı — log #028
+
+**Sprint 4 retrospektifi**
+- Teslim: senaryo motoru ve API'si. Toplam 148 test (122 unit, 26 entegrasyon).
+- Saf projeksiyon motoru (Sprint 3) sayesinde senaryo özelliği yeni kural yazılmadan, sadece girdi değiştirilerek kuruldu. Bu, motorun I/O'suz tasarlanmasının somut getirisi.
+- Mutation testi, ortak ufuk kararının kullanıcıyı yanlış seçeneğe yöneltecek bir ölçüm hatasını önlediğini gösterdi.
+- Kapsam dışı: peşin nakit ödeme seçeneği (karttan değil hesaptan), kart limiti kontrolü. İkisi de ileride `PurchaseOption`'a eklenebilir.
+- Sırada: Sprint 5, CSV içe aktarma ve sentetik veri.
 
 ## Sonraki sprintler
 

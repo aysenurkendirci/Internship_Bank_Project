@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Bank.Contracts.Finance;
 using Bank.IntegrationTests.Infrastructure;
-using Microsoft.Data.SqlClient;
 
 namespace Bank.IntegrationTests;
 
@@ -20,7 +19,7 @@ public sealed class ProjectionTests
     public async Task Projection_CombinesAccountBalanceRecurringItemsAndCardStatements()
     {
         var (client, userId) = await _factory.CreateUserAsync();
-        await AddTryAccountAsync(userId, balance: 5_000m);
+        await TestData.AddTryAccountAsync(userId, balance: 5_000m);
 
         var card = await CreditCardTests.CreateCardAsync(client);
         await client.PostAsJsonAsync("/api/finance/recurring-cash-flows",
@@ -76,21 +75,5 @@ public sealed class ProjectionTests
         var response = await client.GetAsync($"{Url}?months={months}");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    // There is no account API yet; balances are seeded directly.
-    private static async Task AddTryAccountAsync(long userId, decimal balance)
-    {
-        await using var connection = new SqlConnection(ApiFactory.ConnectionString);
-        await connection.OpenAsync();
-
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
-            INSERT INTO dbo.Accounts (UserId, AccountType, CurrencyCode, Iban, Balance)
-            VALUES (@UserId, 'Demand', 'TRY', LEFT(CONCAT('TR', REPLACE(CONVERT(VARCHAR(36), NEWID()), '-', '')), 26), @Balance)
-            """;
-        command.Parameters.AddWithValue("@UserId", userId);
-        command.Parameters.AddWithValue("@Balance", balance);
-        await command.ExecuteNonQueryAsync();
     }
 }

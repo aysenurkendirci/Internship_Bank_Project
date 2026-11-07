@@ -953,3 +953,38 @@ son 3 taksiti pencerenin dışında kaldığı için **daha fazla para bırakıy
 yanlış karara itecek bir ölçüm hatası olurdu.
 
 **Commit:** `feat(domain): compare installment options for a planned purchase`
+
+---
+
+## #028 — Senaryo API'si ve ortak veri yükleyici
+
+**Sprint:** 4
+
+**Kapsam.** `POST /api/finance/scenarios/installments`. Planlanan bir kart alışverişini ve 1–6 ödeme seçeneğini
+(taksit sayısı + toplam tutar) alıyor. Baz senaryo ve her seçenek için metrikleri ve aylık özetleri döndürüyor.
+
+**Neden POST?** Senaryo bir kaynak oluşturmuyor ve hiçbir şey kaydetmiyor, ama karmaşık bir girdi (seçenek listesi)
+alıyor. Bunu query string'e sığdırmak okunaksız olurdu. Hesaplama amaçlı POST, REST'te kabul gören bir kalıp. Cevap
+`201` değil `200`.
+
+**Refactor: tekrar eden kodun çıkarılması (DRY).** Projeksiyon servisi ile senaryo servisi aynı veriye ihtiyaç duyuyor:
+kartlar, kalemler, planlar, bakiye ve "yarın". Bu toplama işi `ProjectionInputLoader`'a, kontrat eşlemesi de
+`ProjectionMapper`'a taşındı. İki servis de artık birkaç satırdan ibaret ve sadece domain'i çağırıp sonucu eşliyor.
+
+**Güvenlik.** Kart ID'si istekten geliyor ama domain'e sadece kullanıcının kendi kartları veriliyor. Başka kullanıcının
+kartı `ScenarioComparer`'da "Senaryodaki kart bulunamadı" ile reddediliyor (400). Ayrı bir sahiplik kontrolü yazmaya
+gerek kalmadı.
+
+**Doğrulama (entegrasyon, gerçek DB).** #027'deki "dar bütçe" senaryosu API üzerinden kuruldu: hesap, maaş ve gider
+kalemleri, kart. API, domain testindeki elle hesaplanmış değerleri **birebir** üretti:
+- 3 taksit: 5 ay eksi bakiye, en düşük −3.200 TL.
+- 6 taksit: 0 ay. Baz senaryo: 0 ay.
+- Ufuk Eylül sonuna uzadı.
+
+Ek testler:
+- senaryo sonrası kullanıcının taksit planı listesi boş (hiçbir şey kaydedilmiyor)
+- başka kullanıcının kartı → 400
+- seçeneksiz istek → 400
+- 0 taksitli seçenek → 400
+
+**Commit:** `feat(finance): expose installment scenario comparison endpoint`
