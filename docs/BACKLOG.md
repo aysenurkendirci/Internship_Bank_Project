@@ -116,7 +116,7 @@
 - [x] Taksit senaryosu: seçenek başına fiyat, karşılaştırma tablosu, en düşük bakiye grafiği, öneri yok — log #045
 - [x] İşlem geçmişi: CSV yükleme (satır hataları), demo verisi, filtre ve sayfalama — log #046
 - [x] Ortak UI bileşenleri ve container/presentational yapı; analitik paneli ("Takibe al" köprüsü) — log #047
-- [ ] Mevcut sayfaları bileşenlere ayır: nakit akışı, senaryo, kartlar, düzenli kalemler, işlemler
+- [x] Bütün sayfalar container + sunum bileşenlerine ayrıldı — log #048
 - [ ] Google Stitch için tasarım prompt'u
 
 ## Sonraki sprintler

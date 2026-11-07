@@ -1701,3 +1701,38 @@ diğer üç analiz çalışmaya devam ediyor.
 **Doğrulama.** Production build. 19 Vitest testi (4 yeni bileşen testi dahil).
 
 **Commit:** `feat(web): add the analytics page as composed components`
+
+---
+
+## #048 — Bütün sayfaları bileşenlere ayırdım
+
+**Sprint:** 7
+
+Analitik panelini container/presentational düzeniyle yazdıktan sonra (#047) diğer sayfalar göze batmaya başladı: her biri tek bir
+dosyada form, liste, durum yönetimi ve API çağrısını birlikte taşıyordu. Kart sayfasının şablonu 150 satırı geçmişti. Tasarım da sonradan
+Stitch'te yapılacağı için bu dağınıklığı şimdi toplamak mantıklıydı. Yeni tasarım geldiğinde onu parça parça uygulayabilmek istiyorum.
+
+Ayırdığım parçalar:
+
+| Sayfa | Bileşenler |
+|---|---|
+| Nakit akışı | `ProjectionSummary`, `BalanceChart`, `MonthlyFlowChart`, `MonthlySummaryTable`, `ProjectionMovements` |
+| Taksit senaryosu | `ScenarioForm`, `ScenarioComparisonTable`, `ScenarioChart` |
+| Kartlar | `CardForm`, `CardList`, `InstallmentPlanForm`, `InstallmentPlanList` |
+| Düzenli kalemler | `RecurringItemForm`, `RecurringItemList` |
+| İşlem geçmişi | `StatementUpload`, `TransactionList` |
+
+Her sayfada kural aynı: sayfa API'yi çağırıp durumu tutuyor, alt bileşenler `input()` ile veri alıp `output()` ile olay bildiriyor.
+Formlar kendi `FormGroup`'larını yönetip hazır isteği yukarı gönderiyor. 409 sonrası yeniden yükleme gibi davranışlar sayfada kaldı,
+çünkü bunlar veriyle ilgili kararlar.
+
+Yol üstünde birkaç küçük şeyi de topladım:
+- Ay adlarını üç farklı yerde ayrı `Intl.DateTimeFormat` ile üretiyordum. Hepsi `formatMonth()`'a geçti.
+- Senaryodaki "fiyat farkı en ucuz seçeneğe göre" ve "seçenekler sıralanmaz" kuralları bileşenin içinde kayboluyordu.
+  `toComparisonRows()` diye düz bir fonksiyona çıktı ve artık kendi testi var.
+- "3 ayda bir", "Her hafta" gibi ifadeler form ve listede tekrar ediyordu. `recurring-labels.ts`'e taşındı.
+
+Ekranların görünüşü değişmedi, sadece içleri düzenlendi. Build ve 25 frontend testi geçiyor.
+
+**Commit'ler:** `refactor(web): split the cash-flow page…`, `…break the scenario page…`, `…split cards page…`,
+`…split recurring items page…`, `refactor(web): split transactions page into upload and list`
