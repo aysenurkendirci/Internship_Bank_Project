@@ -1151,3 +1151,38 @@ verilen `Random` örnekleri tam da bu amaçla eski algoritmayı koruyor. Testler
 Import kaydında kaynak `Synthetic` olarak işaretleniyor, böylece demo verisi gerçek ekstrelerden her zaman ayırt edilebilir.
 
 **Commit:** `feat(finance): generate reproducible synthetic transaction history`
+
+---
+
+## #033 — Analitik temeli ve kategori trendleri
+
+**Sprint:** 6
+
+**İhtiyaç.** "Kategori bazında harcama trendleri": hangi kategoriye ne kadar harcanıyor, bu tutar artıyor mu?
+
+**Temel yapı taşları.**
+- `HistoryEntry`: analitiğin gördüğü haliyle bir geçmiş işlem (tarih, açıklama, işaretli tutar, kategori). Kategorisi
+  olmayanlar tek bir "Kategorisiz" grubunda toplanıyor.
+- `YearMonth`: analitiğin temel birimi olan takvim ayı. `(Year, Month)` ikilisini her yerde elle taşımak yerine
+  karşılaştırılabilir bir değer tipi.
+- `Statistics`: medyan, MAD, standart sapma ve en küçük kareler eğimi. Sonraki analizörlerin hepsi bunları kullanacak,
+  bu yüzden her biri tek bir yerde tanımlı ve tek bir yerde test ediliyor.
+
+**Kategori trendi.** `CategoryTrendAnalyzer` her kategori için şunları üretiyor:
+- aylık harcama (harcama olmayan ay sıfır olarak, eksik bırakılmadan)
+- toplam ve aylık ortalama
+- toplam içindeki pay
+- son ayın bir önceki aya göre değişimi
+- dönem boyunca **en küçük kareler eğimi** (TL/ay)
+
+Sadece çıkışlar harcama sayılıyor, gelir hariç.
+
+**Neden iki ayrı trend ölçüsü?** Aydan aya değişim tek bir aya duyarlı: tek bir büyük market alışverişi "+%40" gösterebilir.
+Eğim bütün dönemi kullandığı için gürültüye daha dayanıklı. İkisi birlikte hem "son ayda ne oldu" hem de "genel gidişat
+ne" sorularını cevaplıyor.
+
+**Bilinen sınır.** Doğalgaz gibi mevsimsel kategorilerde eğim yanıltıcı olabilir. Ekim–Mart arası bakılırsa artış,
+Mart–Ağustos arası bakılırsa düşüş görünür. Mevsimsellik ayrıştırması için en az iki yıllık veri gerekir. Bu sınır API
+dokümantasyonunda ve raporda belirtilecek.
+
+**Commit:** `feat(domain): add category spending trends`

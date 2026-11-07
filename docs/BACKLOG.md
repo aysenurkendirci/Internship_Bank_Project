@@ -89,9 +89,17 @@
 - Süreç notu: araç zinciri ` ` gibi kaçış dizilerini görünmez karakterlere çeviriyordu. Kaynak taraması bir kontrol adımı olarak eklendi.
 - Sırada: Sprint 6, analitik (kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, tahmin).
 
+## Sprint 6 — Analitik
+
+- [x] Analitik temeli (`HistoryEntry`, `YearMonth`, `Statistics`) ve kategori trendleri — log #033
+- [ ] Tekrarlayan ödeme tespiti (abonelik / fatura ayrımı)
+- [ ] Anomali tespiti (robust z-skoru), sentetik veride precision/recall
+- [ ] Tahmin ve güven aralığı, backtest ile yöntem karşılaştırması
+- [ ] Analitik API'si
+- [ ] Değerlendirme raporu (tez için)
+
 ## Sonraki sprintler
 
-6. Analitik: kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, güven aralıklı tahmin
 7. Angular ekranları
    - [ ] **Production build `main`'de bozuk**: `app.scss` bütçeyi aşıyor
    - [ ] `app.ts` / `app.component.ts` kopyası, `// ...existing code...` kalıntıları, `console.log`'lar
