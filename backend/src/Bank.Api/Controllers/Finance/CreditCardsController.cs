@@ -1,5 +1,6 @@
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.CreditCards;
 using Bank.Contracts.Finance;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,22 +11,22 @@ namespace Bank.Api.Controllers.Finance;
 [Authorize]
 public sealed class CreditCardsController : ControllerBase
 {
-    private readonly ICreditCardService _cards;
+    private readonly ISender _sender;
 
-    public CreditCardsController(ICreditCardService cards) => _cards = cards;
+    public CreditCardsController(ISender sender) => _sender = sender;
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<CreditCardResponse>>> List(CancellationToken ct)
-        => Ok(await _cards.ListAsync(ct));
+        => Ok(await _sender.Send(new ListCreditCardsQuery(), ct));
 
     [HttpGet("{id:long}")]
     public async Task<ActionResult<CreditCardResponse>> Get(long id, CancellationToken ct)
-        => Ok(await _cards.GetAsync(id, ct));
+        => Ok(await _sender.Send(new GetCreditCardQuery(id), ct));
 
     [HttpPost]
     public async Task<ActionResult<CreditCardResponse>> Create([FromBody] CreditCardRequest request, CancellationToken ct)
     {
-        var created = await _cards.CreateAsync(request, ct);
+        var created = await _sender.Send(new CreateCreditCardCommand(request), ct);
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
@@ -41,17 +42,15 @@ public sealed class CreditCardsController : ControllerBase
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(ifMatch))
-            return Problem(statusCode: StatusCodes.Status428PreconditionRequired,
-                           title: "Kayıt sürümü gerekli",
-                           detail: "Güncelleme için If-Match başlığında kaydın version değeri gönderilmelidir.");
+            return this.VersionRequired();
 
-        return Ok(await _cards.UpdateAsync(id, request, ifMatch, ct));
+        return Ok(await _sender.Send(new UpdateCreditCardCommand(id, request, ifMatch), ct));
     }
 
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> Delete(long id, CancellationToken ct)
     {
-        await _cards.DeleteAsync(id, ct);
+        await _sender.Send(new DeleteCreditCardCommand(id), ct);
         return NoContent();
     }
 }

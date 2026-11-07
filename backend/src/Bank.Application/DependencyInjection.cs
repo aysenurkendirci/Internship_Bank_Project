@@ -23,15 +23,11 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         services.AddScoped<IDashboardService, DashboardService>();
-        services.AddScoped<ICreditCardService, CreditCardService>();
-        services.AddScoped<IRecurringCashFlowService, RecurringCashFlowService>();
-        services.AddScoped<IInstallmentPlanService, InstallmentPlanService>();
         services.AddScoped<ProjectionInputLoader>();
         services.AddScoped<IProjectionService, ProjectionService>();
         services.AddScoped<IScenarioService, ScenarioService>();
         services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
-        services.AddScoped<IPersonalDataService, PersonalDataService>();
 
         return services;
     }

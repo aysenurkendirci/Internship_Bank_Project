@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.RecurringCashFlows;
 using Bank.Contracts.Finance;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,27 +11,24 @@ namespace Bank.Api.Controllers.Finance;
 [Authorize]
 public sealed class RecurringCashFlowsController : ControllerBase
 {
-    private readonly IRecurringCashFlowService _items;
+    private readonly ISender _sender;
 
-    public RecurringCashFlowsController(IRecurringCashFlowService items) => _items = items;
+    public RecurringCashFlowsController(ISender sender) => _sender = sender;
 
     /// <param name="kind">Optional filter, e.g. <c>Subscription</c> to review all subscriptions.</param>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<RecurringCashFlowResponse>>> List(
-        [FromQuery, AllowedValues("Income", "Expense", "Subscription", null, ErrorMessage = "Geçersiz tür filtresi.")]
-        string? kind,
-        CancellationToken ct)
-        => Ok(await _items.ListAsync(kind, ct));
+    public async Task<ActionResult<IReadOnlyList<RecurringCashFlowResponse>>> List([FromQuery] string? kind, CancellationToken ct)
+        => Ok(await _sender.Send(new ListRecurringCashFlowsQuery(kind), ct));
 
     [HttpGet("{id:long}")]
     public async Task<ActionResult<RecurringCashFlowResponse>> Get(long id, CancellationToken ct)
-        => Ok(await _items.GetAsync(id, ct));
+        => Ok(await _sender.Send(new GetRecurringCashFlowQuery(id), ct));
 
     [HttpPost]
     public async Task<ActionResult<RecurringCashFlowResponse>> Create(
         [FromBody] RecurringCashFlowRequest request, CancellationToken ct)
     {
-        var created = await _items.CreateAsync(request, ct);
+        var created = await _sender.Send(new CreateRecurringCashFlowCommand(request), ct);
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
@@ -43,17 +40,15 @@ public sealed class RecurringCashFlowsController : ControllerBase
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(ifMatch))
-            return Problem(statusCode: StatusCodes.Status428PreconditionRequired,
-                           title: "Kayıt sürümü gerekli",
-                           detail: "Güncelleme için If-Match başlığında kaydın version değeri gönderilmelidir.");
+            return this.VersionRequired();
 
-        return Ok(await _items.UpdateAsync(id, request, ifMatch, ct));
+        return Ok(await _sender.Send(new UpdateRecurringCashFlowCommand(id, request, ifMatch), ct));
     }
 
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> Delete(long id, CancellationToken ct)
     {
-        await _items.DeleteAsync(id, ct);
+        await _sender.Send(new DeleteRecurringCashFlowCommand(id), ct);
         return NoContent();
     }
 }
