@@ -117,7 +117,13 @@
 - [x] İşlem geçmişi: CSV yükleme (satır hataları), demo verisi, filtre ve sayfalama — log #046
 - [x] Ortak UI bileşenleri ve container/presentational yapı; analitik paneli ("Takibe al" köprüsü) — log #047
 - [x] Bütün sayfalar container + sunum bileşenlerine ayrıldı — log #048
-- [ ] Google Stitch için tasarım prompt'u
+- [x] Google Stitch için tasarım prompt'u — `docs/design/STITCH_PROMPT.md`
+
+**Sprint 7 retrospektifi**
+- `main`'de hiç çalışmayan production build'den, sekiz ekranlı ve bileşen tabanlı bir arayüze geldik. 25 frontend testi.
+- En çok zaman alan şey, eski kodun sessiz hataları oldu: hiç kullanılmayan kök bileşen, token basan log'lar, form hatalarını hiç göstermeyen kayıt sayfası.
+- Türkçe ekler ("20'si", "2026'dan") küçük ama gerçek bir sorundu. Ek gerektirmeyen ifadeler seçmek, ek kuralları kodlamaktan daha sağlam.
+- Eksik kalan: ekranlar bir tarayıcıda gözle kontrol edilmedi. Görsel tasarım Stitch'ten gelince yapılacak.
 
 ## Sonraki sprintler
 
