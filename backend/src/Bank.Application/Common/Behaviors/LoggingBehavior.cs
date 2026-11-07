@@ -21,7 +21,7 @@ public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
     {
         var started = Stopwatch.GetTimestamp();
-        var response = await next();
+        var response = await next(ct);
         var elapsed = Stopwatch.GetElapsedTime(started);
 
         if (elapsed > SlowThreshold)

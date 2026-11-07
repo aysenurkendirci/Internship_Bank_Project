@@ -29,6 +29,6 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         if (failures.Count > 0)
             throw new ValidationException(failures);
 
-        return await next();
+        return await next(ct);
     }
 }

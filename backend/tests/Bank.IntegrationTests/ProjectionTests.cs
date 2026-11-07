@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Bank.Contracts.Finance;
 using Bank.IntegrationTests.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.IntegrationTests;
 
@@ -73,7 +74,10 @@ public sealed class ProjectionTests
         var client = await _factory.CreateAuthenticatedClientAsync();
 
         var response = await client.GetAsync($"{Url}?months={months}");
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
 
+        // Same field -> messages shape as ASP.NET model validation, so the web client reads both alike.
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(["Projeksiyon süresi 1 ile 12 ay arasında olmalıdır."], problem!.Errors["months"]);
     }
 }
