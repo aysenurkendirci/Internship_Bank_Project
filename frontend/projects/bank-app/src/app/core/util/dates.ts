@@ -13,3 +13,12 @@ export function toIsoDate(date: Date): IsoDate {
 export function todayIsoDate(): IsoDate {
   return toIsoDate(new Date());
 }
+
+const shortMonth = new Intl.DateTimeFormat('tr-TR', { month: 'short', year: 'numeric' });
+const longMonth = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' });
+
+/** "Nis 2026" (short) or "Nisan 2026" (long) for a calendar month given as numbers or as "yyyy-MM". */
+export function formatMonth(month: { year: number; month: number } | string, style: 'short' | 'long' = 'short'): string {
+  const [year, monthNumber] = typeof month === 'string' ? month.split('-').map(Number) : [month.year, month.month];
+  return (style === 'short' ? shortMonth : longMonth).format(new Date(year, monthNumber - 1, 1));
+}

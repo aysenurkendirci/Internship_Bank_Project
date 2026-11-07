@@ -1,6 +1,7 @@
 import { CurrencyPipe, PercentPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
+import { formatMonth } from '../../../core/util/dates';
 import { SpendingForecast } from '../../../data-access/models/finance.models';
 
 const METHOD_LABELS: Record<string, string> = {
@@ -8,8 +9,6 @@ const METHOD_LABELS: Record<string, string> = {
   MovingAverage: 'Son 3 ayın ortalaması',
   LinearTrend: 'Son 6 ayın eğilimi',
 };
-
-const monthName = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' });
 
 /**
  * Expected everyday spending as a range rather than a single number: the evaluation showed simple
@@ -60,10 +59,7 @@ export class SpendingForecastComponent {
   readonly forecast = input.required<SpendingForecast>();
 
   protected readonly months = computed(() =>
-    this.forecast().months.map((m) => {
-      const [year, month] = m.month.split('-').map(Number);
-      return { ...m, label: monthName.format(new Date(year, month - 1, 1)) };
-    }),
+    this.forecast().months.map((m) => ({ ...m, label: formatMonth(m.month, 'long') })),
   );
 
   protected methodLabel(method: string): string {

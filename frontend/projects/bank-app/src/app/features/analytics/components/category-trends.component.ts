@@ -2,12 +2,11 @@ import { CurrencyPipe, PercentPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { EChartsCoreOption } from 'echarts/core';
 
+import { formatMonth } from '../../../core/util/dates';
 import { CategoryTrends } from '../../../data-access/models/finance.models';
 import { ChartComponent } from '../../../shared/chart/chart.component';
 import { CHART, baseAxisStyle, baseTooltip, formatTry, formatTryCompact } from '../../../shared/chart/chart-theme';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
-
-const monthName = new Intl.DateTimeFormat('tr-TR', { month: 'short', year: 'numeric' });
 
 /** Spending per category: a bar chart of totals and a month-by-month table that doubles as its accessible view. */
 @Component({
@@ -19,12 +18,7 @@ const monthName = new Intl.DateTimeFormat('tr-TR', { month: 'short', year: 'nume
 export class CategoryTrendsComponent {
   readonly trends = input.required<CategoryTrends>();
 
-  protected readonly monthLabels = computed(() =>
-    this.trends().months.map((m) => {
-      const [year, month] = m.split('-').map(Number);
-      return monthName.format(new Date(year, month - 1, 1));
-    }),
-  );
+  protected readonly monthLabels = computed(() => this.trends().months.map((m) => formatMonth(m)));
 
   protected readonly chart = computed<EChartsCoreOption | null>(() => {
     const categories = this.trends().categories;
