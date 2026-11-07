@@ -26,6 +26,7 @@ export class DashboardLayoutComponent {
     { path: '/dashboard/scenarios', label: 'Taksit senaryosu', icon: 'compare_arrows' },
     { path: '/dashboard/recurring', label: 'Gelir ve giderler', icon: 'event_repeat' },
     { path: '/dashboard/cards', label: 'Kartlar ve taksitler', icon: 'credit_card' },
+    { path: '/dashboard/transactions', label: 'İşlem geçmişi', icon: 'receipt_long' },
   ];
 
   logout(): void {

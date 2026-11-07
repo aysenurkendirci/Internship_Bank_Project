@@ -41,6 +41,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),
       },
       {
+        path: 'transactions',
+        title: 'İşlem geçmişi',
+        loadComponent: () =>
+          import('./features/transactions/transactions-page.component').then((m) => m.TransactionsPageComponent),
+      },
+      {
         path: 'recurring',
         title: 'Düzenli gelir ve giderler',
         loadComponent: () =>

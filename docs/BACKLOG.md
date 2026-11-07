@@ -114,7 +114,7 @@
 - [x] Kartlar, taksitler ve düzenli kalemler ekranları; 409'da yeniden yükleme — log #043
 - [x] Nakit akışı zaman çizelgesi: stat kartları, bakiye grafiği, aylık tablo, ekstre detayı — log #044
 - [x] Taksit senaryosu: seçenek başına fiyat, karşılaştırma tablosu, en düşük bakiye grafiği, öneri yok — log #045
-- [ ] İşlemler: CSV yükleme, demo verisi
+- [x] İşlem geçmişi: CSV yükleme (satır hataları), demo verisi, filtre ve sayfalama — log #046
 - [ ] Analitik paneli
 
 ## Sonraki sprintler

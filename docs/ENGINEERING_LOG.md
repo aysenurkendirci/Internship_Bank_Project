@@ -1640,3 +1640,24 @@ yaklaşık 4 KB'a indi. Grafik kodu bir kez iniyor.
 **Gözden geçirmede yakalanan.** Baz satırın etiketi "Almazsam" yazılmıştı, "Almasam" olarak düzeltildi.
 
 **Commit:** `feat(web): compare installment options before buying`
+
+---
+
+## #046 — Web: işlem geçmişi, CSV yükleme ve demo verisi
+
+**Sprint:** 7
+
+**Kapsam.** `/dashboard/transactions`: CSV ekstre yükleme, tek tuşla 12 aylık demo verisi, tarih filtreli ve sayfalı işlem listesi.
+
+**Kararlar.**
+- **Sonuç her zaman sayılarla söyleniyor:** "120 satır işlendi: 117 yeni işlem eklendi, 3 satır zaten kayıtlıydı." Mükerrer koruması
+  (#031) kullanıcıya görünür. Aynı ekstreyi tekrar yüklemenin güvenli olduğu böylece anlaşılıyor.
+- **Reddedilen dosyada satır listesi:** API'nin "ya hep ya hiç" cevabındaki satır hataları ("Satır 3: Tarih okunamadı") madde madde
+  gösteriliyor. Kullanıcı dosyayı nerede düzelteceğini biliyor.
+- **2 MB sınırı istemcide de kontrol ediliyor.** API zaten reddediyor (413), ama kullanıcı büyük bir dosyanın yüklenmesini
+  bekledikten sonra hata görmesin diye.
+- Dosya seçimi sıfırlanıyor. Kullanıcı dosyayı düzeltip **aynı adla** tekrar seçebiliyor (tarayıcı aynı dosya için `change` olayını
+  tekrar tetiklemez).
+- Kabul edilen format sayfada tek cümleyle anlatılıyor: gerekli kolonlar, ayraçlar, kodlama.
+
+**Commit:** `feat(web): import statements and browse transaction history`
