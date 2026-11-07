@@ -1,11 +1,13 @@
 using Bank.Application.Common.Exceptions;
+using Bank.Domain.Common;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Bank.Api.ErrorHandling;
 
 /// <summary>
 /// Translates exceptions into RFC 9457 problem details responses.
-/// Only <see cref="AppException"/> messages reach the client; any other exception becomes a
+/// Only <see cref="AppException"/> and <see cref="DomainException"/> messages reach the client;
+/// both are written for end users. Any other exception becomes a
 /// generic 500 so stack traces, SQL errors and internal names are never leaked.
 /// </summary>
 internal sealed class GlobalExceptionHandler : IExceptionHandler
@@ -23,6 +25,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
     {
         var (status, title) = exception switch
         {
+            DomainException => (StatusCodes.Status400BadRequest, "İş kuralı ihlali"),
             NotFoundException => (StatusCodes.Status404NotFound, "Kayıt bulunamadı"),
             ConflictException => (StatusCodes.Status409Conflict, "İşlem mevcut kayıtla çakışıyor"),
             AuthenticationFailedException => (StatusCodes.Status401Unauthorized, "Kimlik doğrulama başarısız"),
@@ -42,7 +45,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             {
                 Status = status,
                 Title = title,
-                Detail = exception is AppException ? exception.Message : null
+                Detail = exception is AppException or DomainException ? exception.Message : null
             }
         });
     }

@@ -22,6 +22,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+
+        // Malformed JSON otherwise echoes internal type names and byte offsets back to the caller.
+        options.AllowInputFormatterExceptionMessages = false;
     });
 
 // Error responses follow RFC 9457 (application/problem+json)

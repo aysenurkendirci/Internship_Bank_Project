@@ -571,3 +571,39 @@ hale getirilebilir mi?") küçük ama somut bir örneği. Bu durum ayrı bir tes
   borç devrettiğinde (asgari ödeme) devreye girer ve bu ayrı bir senaryo.
 
 **Commit:** `feat(domain): schedule card installments on statement dates`
+
+---
+
+## #019 — Girdi doğrulaması: geçersiz istekler 500 alıyordu
+
+**Sprint:** 2
+
+**Sorun.** `membership: "Gold"` gibi geçersiz bir kayıt isteği hiçbir doğrulamaya takılmadan veritabanına
+kadar gidiyor, `CHECK` constraint'e çarpıp **500** dönüyordu (bkz. #006). Kullanıcı neyi yanlış girdiğini
+öğrenemiyordu ve her geçersiz istek log'da "sunucu hatası" olarak görünüyordu.
+
+**Çözüm.**
+- İstek kontratlarına DataAnnotations eklendi. `[ApiController]` geçersiz istekleri controller'a ulaşmadan
+  alan bazlı hatalarla **400 (ValidationProblemDetails)** olarak döndürüyor.
+- **TC kimlik numarası için checksum doğrulaması** (`[TcKimlikNo]`). "11 hane" kontrolü, var olamayacak
+  numaraları da kabul eder. TCKN'nin son iki hanesi ilk dokuz haneden hesaplanan kontrol haneleri.
+  Algoritma, ASCII dışı rakamları da içeren testlerle kilitlendi (`char.IsDigit` Arapça rakamları kabul
+  ederdi, bu yüzden `char.IsAsciiDigit` kullanıldı).
+- Domain kurallarının ihlali (`DomainException`) artık **400** dönüyor. Mesajları son kullanıcı için yazıldığı
+  için istemciye gösteriliyor.
+- Kural uyumu: şifre en az 8 karakter, telefon zorunlu. Frontend kayıt formu da aynı kurallara getirildi.
+  Önceden frontend 6 karakteri kabul ediyordu ve telefon boş gidebiliyordu.
+- Login isteğinde sadece alanların dolu olup olmadığı kontrol ediliyor. Formatı kontrol etmek, saldırgana
+  hangi alanın yanlış olduğunu söylerdi (#006 ile aynı mantık).
+
+**Doğrulama sırasında bulunan sızıntı.** Bozuk JSON gönderildiğinde cevap
+`"The JSON value could not be converted to Bank.Contracts.Auth.RegisterRequest. Path: $.firstName | BytePositionInLine: 40"`
+şeklinde iç tip adını ve parser detayını içeriyordu. `AllowInputFormatterExceptionMessages = false` ile
+genel bir mesaja çevrildi.
+
+**Bir yanlış alarm.** İlk denemede geçerli istek de 400 aldı. Sebep API değil, test komutuydu: Windows'taki
+bash `Ayşe` içindeki `ş` harfini UTF-8 olarak göndermemişti. Test gövdeleri UTF-8 dosyadan
+(`--data-binary @file`) gönderilerek doğrulandı. Hatanın kaynağını kanıtlamadan API'yi "düzeltmeye"
+girişmemek önemliydi.
+
+**Commit:** `feat(api): validate request payloads and map domain errors to 400`

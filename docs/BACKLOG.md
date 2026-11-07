@@ -36,9 +36,17 @@
 - Planlanan büyük harcama (`PlannedExpense`) Sprint 4'teki senaryo karşılaştırmasıyla birlikte modellenecek.
 - [x] Tekrarlama kuralı: haftalık/aylık/yıllık, ay sonu kayması olmadan — log #015
 
+## Sprint 2 — Kalıcılık ve CRUD API
+
+- [x] Girdi doğrulaması (400), TCKN checksum, `DomainException` → 400 — log #019
+- [ ] `V002`: `finance` şeması (kart, düzenli kalem, taksit planı), audit kolonları, soft delete, `ROWVERSION`
+- [ ] Kredi kartı CRUD
+- [ ] Gelir / gider / abonelik CRUD
+- [ ] Taksit planı ve ödeme takvimi endpoint'i
+- [ ] Entegrasyon testleri: kullanıcı izolasyonu, eşzamanlılık, doğrulama
+
 ## Sonraki sprintler
 
-2. CRUD API: girdi validasyonu (geçersiz istek şu an DB CHECK'e takılıp 500 dönüyor, 400 olmalı), audit kolonları, soft delete, optimistic concurrency
 3. Nakit akışı projeksiyon motoru (3–12 ay, ekstre dönemi bazlı taksit dağıtımı)
 4. Senaryo karşılaştırma (3 / 6 / 9 taksit what-if)
 5. CSV içe aktarma ve deterministik sentetik veri üretici
