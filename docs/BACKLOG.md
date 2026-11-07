@@ -5,14 +5,17 @@
 - [x] Kök `.gitignore`, build çıktılarını takipten çıkar — log #001
 - [x] JWT secret'ını kaynak koddan çıkar — log #002
 - [x] Şemayı versiyonla: SQL Server + DbUp, baseline `V001` — ADR-0002, log #003
-- [ ] Infrastructure katmanını Oracle'dan SQL Server'a taşı
+- [x] Infrastructure katmanını Oracle'dan SQL Server'a taşı — log #004
 - [ ] **Şifreler düz metin saklanıyor**: `PasswordHasher` gerçek hash kullanmalı (PBKDF2)
-- [ ] `CancellationToken`'ı `OracleExecutor` → Dapper'a kadar ilet
+- [x] `CancellationToken`'ı repository → Dapper'a kadar ilet — log #004
+- [ ] `CancellationToken`'ı controller → service → repository zincirinde eksiksiz ilet (AuthService)
 - [ ] `DashboardRepository`'deki sunum mantığını (etiket, ikon, sabit `0.024m`) doğru katmana taşı
 - [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
-- [ ] `ErrorHandlingMiddleware` yazılmış ama pipeline'a eklenmemiş
+- [ ] `ErrorHandlingMiddleware` pipeline'a eklenmemiş: hatalar 500 + stack trace dönüyor (bilgi sızıntısı)
+- [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
+- [ ] Login'de bilinmeyen TC için 404 dönüyor: kullanıcı varlığı sızıyor (user enumeration), 401 olmalı
 - [ ] Test projeleri (xUnit) ve ilk testler
-- [ ] `System.Security.Cryptography.Pkcs` 8.0.1 açığı (NU1903), transitive bağımlılığı yükselt
+- [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
 
 ## Sprint 1 — Finansal domain modeli
 

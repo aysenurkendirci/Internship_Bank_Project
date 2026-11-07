@@ -92,3 +92,38 @@ veritabanı seçimi de yeniden değerlendirildi (bkz. [ADR-0002](adr/0002-sql-se
   yönün ayrı kolonda tutulması.
 
 **Commit:** `a1945d3` (karar), `build(db): add DbUp migrator with baseline SQL Server schema` (uygulama)
+
+---
+
+## #004 — Veri erişim katmanı: Oracle'dan SQL Server'a geçiş
+
+**Sprint:** 0 · **Tarih:** 2026-11-07
+
+**Sorun.** Infrastructure katmanı Oracle'a özgü yapılara bağlıydı (`OracleDynamicParameters`, RefCursor
+çıkış parametreleri, `PKG_*` prosedür çağrıları). Bunların yanında üç sorun daha vardı:
+- Dashboard tek bir istek için **5 ayrı bağlantı açıp 5 ayrı sorgu** çalıştırıyordu.
+- `CancellationToken` Dapper'a iletilmiyordu. Kullanıcı sayfadan çıksa bile sorgular çalışmaya devam ediyordu.
+- `TotalWealth` farklı para birimlerindeki bakiyeleri (TL + USD) doğrudan topluyordu.
+
+**Analiz.** Her bağlantı açılışı ve her sorgu turu (round trip) gecikme ekler. 5 sorgu, ağ gecikmesini
+5 kez öder. İptal edilmeyen sorgular yük altında bağlantı havuzunu gereksiz yere meşgul eder.
+Para birimi karışımı ise bir doğruluk hatası: 15.000 TL + 900 USD için "15.900" göstermek yanlış bir bilgi.
+
+**Çözüm.**
+- `OracleExecutor` sarmalayıcısı kaldırıldı. Repository'ler `SqlConnectionFactory`'den bağlantı alıp
+  Dapper'ı doğrudan kullanıyor. Ek bir soyutlama katmanı değer katmıyordu (KISS).
+- Dashboard'un beş sorgusu tek bir batch'te `QueryMultipleAsync` ile çalışıyor: tek bağlantı, tek round trip.
+- Tüm sorgular `CommandDefinition` ile `CancellationToken` taşıyor.
+- `TotalWealth` sadece aktif TRY hesaplarını topluyor. Döviz çevrimi kur verisi gerektirdiği için ayrı bir iş.
+- Kayıt işlemi `INSERT ... OUTPUT INSERTED.*` ile yeni satırı aynı sorguda döndürüyor (önceden ayrıca SELECT yapılıyordu).
+- Sorgu sonuçları sadece repository içinde kullanılan private row sınıflarına eşleniyor.
+
+**Doğrulama.** API gerçek SQL Server'a karşı çalıştırıldı: kayıt, giriş ve dashboard doğru döndü,
+token'sız istek 401 aldı.
+
+**Smoke test sırasında bulunanlar (backlog'a eklendi):**
+- Mükerrer kayıt **500 ve tam stack trace** dönüyor. `ErrorHandlingMiddleware` pipeline'a hiç eklenmemiş.
+- Veritabanında şifre düz metin duruyor (`PasswordHash = "P@ssw0rd!"`).
+- `createdAt` JSON'da `Z` (UTC) eki olmadan dönüyor.
+
+**Commit:** `refactor(infrastructure): move data access from Oracle to SQL Server`

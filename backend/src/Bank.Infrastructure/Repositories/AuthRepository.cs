@@ -1,94 +1,77 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Contracts.Auth;
-using Bank.Infrastructure.Oracle;
+using Bank.Infrastructure.Persistence;
 using Dapper;
-using Oracle.ManagedDataAccess.Client;
-using System.Data;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 
 namespace Bank.Infrastructure.Repositories;
 
 public sealed class AuthRepository : IAuthRepository
 {
-    private readonly OracleExecutor _db;
+    private readonly SqlConnectionFactory _connections;
 
-    public AuthRepository(OracleExecutor db)
+    public AuthRepository(SqlConnectionFactory connections) => _connections = connections;
+
+    public async Task<UserRow> GetUserByTcAsync(string tcNo, CancellationToken ct = default)
+        => await GetUserByTcOrDefaultAsync(tcNo, ct)
+           ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+
+    public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo, CancellationToken ct = default)
     {
-        _db = db;
+        const string sql = """
+            SELECT UserId, Email, FirstName, LastName, TcNo
+            FROM dbo.Users
+            WHERE TcNo = @TcNo
+            """;
+
+        await using var connection = await _connections.OpenAsync(ct);
+        return await connection.QuerySingleOrDefaultAsync<UserRow>(
+            new CommandDefinition(sql, new { TcNo = tcNo }, cancellationToken: ct));
     }
 
-    // ✅ exception fırlatan (login için kullanıyorsun)
-   public async Task<UserRow> GetUserByTcAsync(string tcNo)
-{
-    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
-    p.Add("P_TC_NO", tcNo, OracleDbType.Varchar2, ParameterDirection.Input);
-    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
-    var result = await _db.QuerySingleAsync<UserRow>(
-        "GENCBANK.PKG_AUTH.GET_USER_BY_TCN",
-        p
-    );
-
-    return result ?? throw new KeyNotFoundException($"Kullanıcı bulunamadı: {tcNo}");
-}
-public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo)
-{
-    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
-    p.Add("P_TC_NO", tcNo, OracleDbType.Varchar2, ParameterDirection.Input);
-    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
-    return await _db.QuerySingleAsync<UserRow>(
-        "GENCBANK.PKG_AUTH.GET_USER_BY_TCN",
-        p
-    );
-}
-
-   public async Task<CredentialRow> GetCredentialsAsync(long userId)
-{
-    var p = new Bank.Infrastructure.Oracle.OracleDynamicParameters();
-    p.Add("P_USER_ID", userId, OracleDbType.Int64, ParameterDirection.Input);
-    p.Add("O_CURSOR", dbType: OracleDbType.RefCursor, direction: ParameterDirection.Output);
-
-    var result = await _db.QuerySingleAsync<CredentialRow>(
-        "GENCBANK.PKG_AUTH.GET_CREDENTIALS",
-        p
-    );
-
-    return result ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
-}
-
-    public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash)
+    public async Task<CredentialRow> GetCredentialsAsync(long userId, CancellationToken ct = default)
     {
-        var p = new DynamicParameters();
+        const string sql = """
+            SELECT UserId, PasswordHash
+            FROM dbo.Users
+            WHERE UserId = @UserId
+            """;
 
-        p.Add("P_TC_NO", req.TcNo, DbType.String, ParameterDirection.Input);
-        p.Add("P_FIRST_NAME", req.FirstName, DbType.String, ParameterDirection.Input);
-        p.Add("P_LAST_NAME", req.LastName, DbType.String, ParameterDirection.Input);
-        p.Add("P_EMAIL", req.Email, DbType.String, ParameterDirection.Input);
-        p.Add("P_PHONE", req.Phone, DbType.String, ParameterDirection.Input);
-        p.Add("P_MEMBERSHIP", req.Membership, DbType.String, ParameterDirection.Input);
-        p.Add("P_PASSWORD_HASH", passwordHash, DbType.String, ParameterDirection.Input);
-
-        p.Add("O_USER_ID", dbType: DbType.Int64, direction: ParameterDirection.Output);
-
-        await _db.ExecuteAsync("PKG_AUTH.REGISTER_USER", p);
-
-        var newUserId = p.Get<long>("O_USER_ID");
-        if (newUserId <= 0)
-            throw new InvalidOperationException("Kullanıcı oluşturuldu ama O_USER_ID dönmedi.");
-
-        // ✅ kayıt sonrası tekrar çekiyoruz// ExecuteAsync satırından hemen sonra bunu ekle:
-        Console.WriteLine($"Yeni Kullanıcı ID: {newUserId}");
-        return await GetUserByTcAsync(req.TcNo);
+        await using var connection = await _connections.OpenAsync(ct);
+        return await connection.QuerySingleOrDefaultAsync<CredentialRow>(
+                   new CommandDefinition(sql, new { UserId = userId }, cancellationToken: ct))
+               ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
     }
 
-    public async Task UpdateLastLoginAsync(long userId)
+    public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash, CancellationToken ct = default)
     {
-        await _db.ExecuteAsync(
-            "PKG_AUTH.UPDATE_LAST_LOGIN",
-            new { P_USER_ID = userId }
-        );
+        // OUTPUT returns the inserted row in the same round trip, so no follow-up SELECT is needed.
+        const string sql = """
+            INSERT INTO dbo.Users (TcNo, FirstName, LastName, Email, Phone, Membership, PasswordHash)
+            OUTPUT INSERTED.UserId, INSERTED.Email, INSERTED.FirstName, INSERTED.LastName, INSERTED.TcNo
+            VALUES (@TcNo, @FirstName, @LastName, @Email, @Phone, @Membership, @PasswordHash)
+            """;
+
+        var parameters = new
+        {
+            req.TcNo,
+            req.FirstName,
+            req.LastName,
+            req.Email,
+            req.Phone,
+            req.Membership,
+            PasswordHash = passwordHash
+        };
+
+        await using var connection = await _connections.OpenAsync(ct);
+        return await connection.QuerySingleAsync<UserRow>(
+            new CommandDefinition(sql, parameters, cancellationToken: ct));
+    }
+
+    public async Task UpdateLastLoginAsync(long userId, CancellationToken ct = default)
+    {
+        const string sql = "UPDATE dbo.Users SET LastLoginAt = SYSUTCDATETIME() WHERE UserId = @UserId";
+
+        await using var connection = await _connections.OpenAsync(ct);
+        await connection.ExecuteAsync(new CommandDefinition(sql, new { UserId = userId }, cancellationToken: ct));
     }
 }

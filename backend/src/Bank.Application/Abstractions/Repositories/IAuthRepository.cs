@@ -5,11 +5,11 @@ namespace Bank.Application.Abstractions.Repositories; // Namespace bu olmalı
 
 public interface IAuthRepository
 {
-    Task<UserRow> GetUserByTcAsync(string tcNo);
-    Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo);
-    Task UpdateLastLoginAsync(long userId);
-    Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash);
-    Task<CredentialRow> GetCredentialsAsync(long userId);
+    Task<UserRow> GetUserByTcAsync(string tcNo, CancellationToken ct = default);
+    Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo, CancellationToken ct = default);
+    Task UpdateLastLoginAsync(long userId, CancellationToken ct = default);
+    Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash, CancellationToken ct = default);
+    Task<CredentialRow> GetCredentialsAsync(long userId, CancellationToken ct = default);
 }
 
 public sealed class UserRow // Burayı record'dan class'a çevirmiştik

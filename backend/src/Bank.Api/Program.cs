@@ -1,5 +1,5 @@
 using Microsoft.OpenApi.Models;
-using Bank.Infrastructure.Oracle;
+using Bank.Infrastructure.Persistence;
 
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Abstractions.Services;
@@ -71,10 +71,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Oracle
-builder.Services.Configure<OracleOptions>(builder.Configuration.GetSection("Oracle"));
-builder.Services.AddSingleton<OracleConnectionFactory>();
-builder.Services.AddScoped<OracleExecutor>();
+// Database
+var connectionString = builder.Configuration.GetConnectionString("BankDb")
+    ?? throw new InvalidOperationException("Connection string 'BankDb' is missing.");
+builder.Services.AddSingleton(new SqlConnectionFactory(connectionString));
 
 // ✅ CurrentUser için gerekli
 builder.Services.AddHttpContextAccessor();
