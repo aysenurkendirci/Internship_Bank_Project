@@ -394,3 +394,34 @@ Kod geri yüklendi, 14 testin hepsi geçti.
   projede gelecek.
 
 **Commit:** `test: add unit test project covering the sprint 0 fixes`
+
+---
+
+## #013 — Para, para birimiyle birlikte taşınmalı
+
+**Sprint:** 1
+
+**Sorun.** Kod tabanında tutarlar çıplak `decimal` olarak dolaşıyordu. Dashboard'da TL ve USD bakiyelerinin
+toplanması (bkz. #004) bu tasarımın doğal sonucuydu: tip sistemi iki farklı para birimini toplamayı
+engellemiyordu.
+
+**Çözüm.** Domain katmanına iki value object eklendi:
+- `Currency`: desteklenen ISO 4217 kodları (TRY, USD, EUR). Bilinmeyen bir kod `DomainException` fırlatıyor.
+- `Money`: tutar ve para birimi bir arada. Farklı para birimleri arasında toplama, çıkarma ve
+  karşılaştırma `DomainException` fırlatıyor. `record` olduğu için değer eşitliği var ve değiştirilemez (immutable).
+
+**Tasarım kararları.**
+- **`decimal`, asla `double`.** `0.1 + 0.2` ikili kayan noktada `0.30000000000000004` olur. Bir testle
+  `decimal`'in bunu tam hesapladığı kilitlendi.
+- **Yuvarlama açıkça çağrılıyor.** Hesaplama sırasında tam hassasiyet korunuyor, kuruşa yuvarlama sadece
+  `Round()` ile yapılıyor. Her işlemde otomatik yuvarlama, ara adımlarda hata biriktirir.
+- **Yuvarlama kuralı: yarım değerler sıfırdan uzağa (2.345 → 2.35).** .NET'in varsayılanı "banker's rounding"
+  (2.345 → 2.34). Ekstre ve dekontta kullanıcının beklediği ise okulda öğretilen yuvarlama. Testlerde iki
+  yöntemin farklı sonuç verdiği vakalar özellikle seçildi. İlk yazılan `2.335` vakası iki yöntemde de
+  aynı sonucu verdiği için hiçbir şeyi ayırt etmiyordu, `0.125` ile değiştirildi.
+- **Sadece iki kuruş haneli para birimleri.** JPY gibi alt birimi olmayan para birimleri "kuruşa yuvarla"
+  kuralını bozar. Desteklenen liste bu yüzden bilinçli olarak dar tutuldu.
+- **`Money` bir `class` (`record`), `struct` değil.** `default(Money)` bir struct için para birimi `null`
+  olan geçersiz bir değer üretirdi. Sınıfta ise her nesne kurucudan geçmek zorunda.
+
+**Commit:** `feat(domain): add Money and Currency value objects`
