@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.TransactionHistory;
 using Bank.Contracts.Finance;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,34 +13,28 @@ public sealed class TransactionHistoryController : ControllerBase
 {
     private const int MaxFileBytes = 2 * 1024 * 1024;
 
-    private readonly ITransactionHistoryService _history;
+    private readonly ISender _sender;
 
-    public TransactionHistoryController(ITransactionHistoryService history) => _history = history;
+    public TransactionHistoryController(ISender sender) => _sender = sender;
 
     [HttpGet]
     public async Task<ActionResult<PagedResponse<HistoryTransactionResponse>>> List(
         [FromQuery] DateOnly? from,
         [FromQuery] DateOnly? to,
-        [FromQuery, Range(1, int.MaxValue, ErrorMessage = "Sayfa 1 veya daha büyük olmalıdır.")] int page = 1,
-        [FromQuery, Range(1, 200, ErrorMessage = "Sayfa boyutu 1 ile 200 arasında olmalıdır.")] int pageSize = 50,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
         CancellationToken ct = default)
-        => Ok(await _history.ListAsync(from, to, page, pageSize, ct));
+        => Ok(await _sender.Send(new ListTransactionsQuery(from, to, page, pageSize), ct));
 
-    /// <summary>
-    /// Generates a reproducible demo history (salary, bills, subscriptions, everyday spending and a few
-    /// unusually large purchases) for the last <paramref name="months"/> months.
-    /// </summary>
+    /// <summary>Generates a reproducible demo history for the last <paramref name="months"/> months.</summary>
     [HttpPost("demo")]
     public async Task<ActionResult<ImportResultResponse>> GenerateDemo(
-        [FromQuery, Range(1, 24, ErrorMessage = "Süre 1 ile 24 ay arasında olmalıdır.")] int months = 12,
+        [FromQuery] int months = 12,
         [FromQuery] int seed = 42,
         CancellationToken ct = default)
-        => Ok(await _history.GenerateDemoHistoryAsync(months, seed, ct));
+        => Ok(await _sender.Send(new GenerateDemoHistoryCommand(months, seed), ct));
 
-    /// <summary>
-    /// Imports a bank statement CSV. Lines already imported are skipped and counted as duplicates,
-    /// so uploading the same or an overlapping statement again is safe.
-    /// </summary>
+    /// <summary>Imports a bank statement CSV; lines imported before are skipped and counted as duplicates.</summary>
     [HttpPost("import")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaxFileBytes + 64 * 1024)]
@@ -55,6 +49,6 @@ public sealed class TransactionHistoryController : ControllerBase
         using var buffer = new MemoryStream((int)file.Length);
         await file.CopyToAsync(buffer, ct);
 
-        return Ok(await _history.ImportCsvAsync(Path.GetFileName(file.FileName), buffer.ToArray(), ct));
+        return Ok(await _sender.Send(new ImportStatementCommand(Path.GetFileName(file.FileName), buffer.ToArray()), ct));
     }
 }

@@ -25,7 +25,6 @@ public static class DependencyInjection
 
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ProjectionInputLoader>();
-        services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
 
         return services;
