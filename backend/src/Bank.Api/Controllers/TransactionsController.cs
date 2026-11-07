@@ -1,5 +1,6 @@
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.Dashboard;
 using Bank.Contracts.Dashboard;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,17 +11,11 @@ namespace Bank.Api.Controllers;
 [Authorize]
 public sealed class TransactionsController : ControllerBase
 {
-    private readonly IDashboardService _dashboard;
+    private readonly ISender _sender;
 
-    public TransactionsController(IDashboardService dashboard)
-    {
-        _dashboard = dashboard;
-    }
+    public TransactionsController(ISender sender) => _sender = sender;
 
     [HttpGet("recent")]
     public async Task<ActionResult<IReadOnlyList<TransactionItem>>> GetRecent(CancellationToken ct)
-    {
-        var items = await _dashboard.GetRecentTransactionsAsync(ct);
-        return Ok(items);
-    }
+        => Ok((await _sender.Send(new GetDashboardQuery(), ct)).RecentTransactions);
 }

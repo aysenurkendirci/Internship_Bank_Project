@@ -1,5 +1,6 @@
-using Bank.Application.Abstractions.Services;
+using Bank.Application.Features.Dashboard;
 using Bank.Contracts.Dashboard;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,17 +11,11 @@ namespace Bank.Api.Controllers;
 [Authorize]
 public sealed class DashboardController : ControllerBase
 {
-    private readonly IDashboardService _service;
+    private readonly ISender _sender;
 
-    public DashboardController(IDashboardService service)
-    {
-        _service = service;
-    }
+    public DashboardController(ISender sender) => _sender = sender;
 
     [HttpGet]
     public async Task<ActionResult<DashboardResponse>> Get(CancellationToken ct)
-    {
-        var res = await _service.GetDashboardAsync(ct);
-        return Ok(res);
-    }
+        => Ok(await _sender.Send(new GetDashboardQuery(), ct));
 }

@@ -1,8 +1,6 @@
-using Bank.Application.Abstractions.Services;
 using Bank.Application.Common.Behaviors;
-using Bank.Application.Services;
+using Bank.Application.Features.Analytics;
 using Bank.Application.Features.Planning;
-using Bank.Application.Services.Finance;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,9 +21,9 @@ public static class DependencyInjection
         });
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
-        services.AddScoped<IDashboardService, DashboardService>();
+        // Read helpers shared by more than one query handler.
         services.AddScoped<ProjectionInputLoader>();
-        services.AddScoped<IAnalyticsService, AnalyticsService>();
+        services.AddScoped<AnalyticsHistory>();
 
         return services;
     }
