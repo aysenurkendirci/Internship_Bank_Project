@@ -1888,3 +1888,30 @@ Migration'ı önce içinde veri olan geliştirme veritabanına uyguladım: mevcu
 güncellenmiyorlar.
 
 **Commit:** `feat(db): keep a full change history of user finance data`
+
+---
+
+## #055 — "Verilerimi indir": KVKK erişim hakkı
+
+**Sprint:** 8
+
+KVKK'nın 11. maddesi kişiye, hakkında hangi verilerin işlendiğini öğrenme hakkı veriyor. Bir bankada bu talep çoğu zaman bir dilekçe ve
+haftalarca süren bir süreç demek. Burada tek bir istekle karşılanabiliyor: `GET /api/me/data-export` sistemin kullanıcı hakkında tuttuğu
+her şeyi tek bir JSON dosyası olarak indiriyor: profil, kartlar, düzenli kalemler, taksit planları ve bütün işlem geçmişi.
+
+Birkaç küçük karar:
+- **Mevcut servisler yeniden kullanıldı.** Dışa aktarım, API'nin zaten döndüğü biçimleri (`CreditCardResponse` vb.) kullanıyor. Ayrı
+  bir eşleme kodu yok ve dışa aktarılan veri ekranda görülenle bire bir aynı.
+- **Tam TC dosyada var.** Log'larda maskeliyim (#050), ama burada istenen tam olarak kişinin kendi verisi ve kimliği doğrulanmış bir
+  kanaldan kendisine gidiyor. Maskelemek hakkın özünü boşaltırdı.
+- **Her dışa aktarım log'lanıyor.** Veri sistemden çıkıyor. Kimin ne zaman aldığı bilinmeli.
+- Tarih aralığı için `1900-01-01` alt sınırı: `DateOnly.MinValue` SQL'e `datetime` olarak gittiğinde (alt sınır 1753) hata verirdi.
+  Bunu yazarken fark ettim ve kodda not olarak bıraktım.
+
+Üç entegrasyon testi var: kendi kartı ve içe aktarılmış işlemi dosyada, cevap `attachment` olarak geliyor, **başka bir kullanıcının
+dışa aktarımında bu verilerin hiçbiri yok** ve giriş yapmadan 401 dönüyor.
+
+Erişim hakkının kardeşi olan silme hakkı (unutulma hakkı) henüz yok. Soft delete'li ve temporal tablolu bir yapıda "silme"nin ne
+anlama geleceği (anonimleştirme mi, fiziksel silme mi, geçmiş tablolar ne olacak) ayrı bir karar gerektiriyor.
+
+**Commit:** `feat(privacy): let users export all their personal data`

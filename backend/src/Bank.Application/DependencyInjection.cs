@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IScenarioService, ScenarioService>();
         services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
+        services.AddScoped<IPersonalDataService, PersonalDataService>();
 
         return services;
     }

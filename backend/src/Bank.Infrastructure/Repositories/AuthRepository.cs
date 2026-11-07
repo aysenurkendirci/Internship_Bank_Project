@@ -78,6 +78,20 @@ public sealed class AuthRepository : IAuthRepository
         }
     }
 
+    public async Task<UserProfileRow> GetProfileAsync(long userId, CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT TcNo, FirstName, LastName, Email, Phone, Membership, CreatedAt, LastLoginAt
+            FROM dbo.Users
+            WHERE UserId = @UserId
+            """;
+
+        await using var connection = await _connections.OpenAsync(ct);
+        return await connection.QuerySingleOrDefaultAsync<UserProfileRow>(
+                   new CommandDefinition(sql, new { UserId = userId }, cancellationToken: ct))
+               ?? throw new NotFoundException("Kullanıcı bulunamadı.");
+    }
+
     public async Task UpdateLastLoginAsync(long userId, CancellationToken ct = default)
     {
         const string sql = "UPDATE dbo.Users SET LastLoginAt = SYSUTCDATETIME() WHERE UserId = @UserId";
