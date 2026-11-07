@@ -42,7 +42,7 @@
 - [x] `V002`: `finance` şeması, audit, soft delete, `ROWVERSION`, bileşik FK ile sahiplik garantisi — log #020
 - [x] Kredi kartı CRUD: sahiplik, `If-Match` ile eşzamanlılık, atomik soft delete — log #021
 - [x] Gelir / gider / abonelik CRUD, `?kind=` filtresi, kart referansı doğrulaması — log #022
-- [ ] Taksit planı ve ödeme takvimi endpoint'i
+- [x] Taksit planları, her okumada hesaplanan ödeme takvimi — log #023
 - [ ] Entegrasyon testleri: kullanıcı izolasyonu, eşzamanlılık, doğrulama
 
 ## Sonraki sprintler

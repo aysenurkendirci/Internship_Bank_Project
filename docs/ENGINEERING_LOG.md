@@ -749,3 +749,37 @@ Gerekirse `UPDLOCK` ile kapatılabilir.
 - aynı version ile ikinci güncelleme → 409
 
 **Commit:** `feat(finance): add CRUD for recurring income, expenses and subscriptions`
+
+---
+
+## #023 — Taksit planları: hesaplanan takvim, saklanmayan veri
+
+**Sprint:** 2
+
+**Kapsam.** `api/finance/installment-plans`: listeleme, getirme, oluşturma, silme. Cevap, her taksidin ekstre
+tarihini, son ödeme gününü ve tutarını içeriyor.
+
+**Karar 1: takvim saklanmıyor, her okumada hesaplanıyor.** Tabloda sadece planın kendisi (tutar, taksit sayısı,
+alışveriş tarihi, kart) duruyor. Taksit satırlarını ayrı bir tabloda saklamak da mümkündü. Ancak o durumda
+kartın kesim günü değiştiğinde saklanan tarihler eskir ve senkronize edilmeleri gerekir. Türetilebilir veriyi
+saklamamak bu tutarsızlık sınıfını tamamen ortadan kaldırıyor. Hesaplama maliyeti ihmal edilebilir: en fazla 36 satır.
+
+**Karar 2: `PUT` yok.** Gerçek hayatta taksitli bir alışverişin taksit sayısı veya tutarı sonradan değişmez.
+Yanlış girilmiş bir plan silinip yeniden ekleniyor. Güncelleme olmadığı için version mekanizması da bu kaynakta
+gereksiz (YAGNI). `ROWVERSION` kolonu tabloda duruyor, ihtiyaç olursa kullanılabilir.
+
+**Karar 3: para birimi istekte yok.** Plan, kartın para biriminde oluşturuluyor. İstemcinin farklı bir para birimi
+gönderip tutarsızlık yaratma ihtimali hiç oluşmuyor.
+
+**Liste performansı.** Planlar listelenirken her plan için ayrı kart sorgusu yapılmıyor (N+1 sorunu). Kullanıcının
+kartları tek sorguyla çekilip sözlüğe konuyor.
+
+**Doğrulama.** Gerçek API'ye karşı:
+- 25 Mart'ta 3 taksitle 1.000 TL → takvim Sprint 1'deki domain testiyle **birebir aynı**
+  (333,34 / 333,33 / 333,33, Mayıs taksidi 1 Haziran'a kaymış).
+- **Kartın kesim günü 20 → 15 yapıldı, plan tekrar okundu:** takvim otomatik olarak yeni kesim günlerine geçti.
+  15 Nisan + 10 = Cumartesi olduğu için son ödeme günü 27 Nisan Pazartesi oldu.
+- Başka kullanıcının kartı → 400, başka kullanıcının planı → 404, 37 taksit → 400.
+- Planı olan kartı silmek → 409. Plan silindikten sonra liste boş döndü.
+
+**Commit:** `feat(finance): add installment plans with computed payment schedules`
