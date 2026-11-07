@@ -21,6 +21,8 @@ public sealed class JwtTokenGenerator : ITokenGenerator
         var key = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");
         var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is missing");
         var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience is missing");
+        var lifetime = TimeSpan.FromMinutes(_config.GetValue<int?>("Jwt:ExpiresMinutes")
+            ?? throw new InvalidOperationException("Jwt:ExpiresMinutes is missing"));
 
         var claims = new List<Claim>
         {
@@ -41,7 +43,7 @@ public sealed class JwtTokenGenerator : ITokenGenerator
             audience: audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
-            expires: DateTime.UtcNow.AddHours(6),
+            expires: DateTime.UtcNow.Add(lifetime),
             signingCredentials: creds
         );
 
