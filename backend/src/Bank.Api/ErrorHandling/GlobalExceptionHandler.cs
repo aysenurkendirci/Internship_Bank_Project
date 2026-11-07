@@ -34,6 +34,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             BadRequestException => (StatusCodes.Status400BadRequest, "Geçersiz istek"),
             NotFoundException => (StatusCodes.Status404NotFound, "Kayıt bulunamadı"),
             ConflictException => (StatusCodes.Status409Conflict, "İşlem mevcut kayıtla çakışıyor"),
+            IdempotencyKeyReusedException => (StatusCodes.Status422UnprocessableEntity, "Idempotency-Key yeniden kullanıldı"),
             AuthenticationFailedException => (StatusCodes.Status401Unauthorized, "Kimlik doğrulama başarısız"),
             _ => (StatusCodes.Status500InternalServerError, "Beklenmeyen bir hata oluştu")
         };

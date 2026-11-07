@@ -1,22 +1,35 @@
+using Bank.Domain.Accounts;
 using Microsoft.Data.SqlClient;
 
 namespace Bank.IntegrationTests.Infrastructure;
 
 public static class TestData
 {
-    /// <summary>There is no account API yet, so balances are seeded directly.</summary>
-    public static async Task AddTryAccountAsync(long userId, decimal balance)
+    /// <summary>
+    /// Accounts are opened empty through the API and there is no deposit endpoint, so funded accounts are seeded
+    /// directly. The IBAN is valid, but uses a different bank code than the API so the two can never collide.
+    /// </summary>
+    public static async Task<(long AccountId, string Iban)> AddAccountAsync(long userId, decimal balance, string currencyCode = "TRY")
     {
+        var iban = Iban.For("99998", Random.Shared.NextInt64(1, 9_999_999_999_999_999)).Value;
+
         await using var connection = new SqlConnection(ApiFactory.ConnectionString);
         await connection.OpenAsync();
 
         await using var command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO dbo.Accounts (UserId, AccountType, CurrencyCode, Iban, Balance)
-            VALUES (@UserId, 'Demand', 'TRY', LEFT(CONCAT('TR', REPLACE(CONVERT(VARCHAR(36), NEWID()), '-', '')), 26), @Balance)
+            OUTPUT INSERTED.AccountId
+            VALUES (@UserId, CASE WHEN @CurrencyCode = 'TRY' THEN 'Demand' ELSE 'ForeignCurrency' END, @CurrencyCode, @Iban, @Balance)
             """;
         command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@CurrencyCode", currencyCode);
+        command.Parameters.AddWithValue("@Iban", iban);
         command.Parameters.AddWithValue("@Balance", balance);
-        await command.ExecuteNonQueryAsync();
+
+        return ((long)(await command.ExecuteScalarAsync())!, iban);
     }
+
+    public static Task<(long AccountId, string Iban)> AddTryAccountAsync(long userId, decimal balance)
+        => AddAccountAsync(userId, balance);
 }

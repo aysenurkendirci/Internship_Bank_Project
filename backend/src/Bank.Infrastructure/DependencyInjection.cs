@@ -1,8 +1,10 @@
+using Bank.Application.Abstractions.Persistence;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure.Persistence;
 using Bank.Infrastructure.Repositories;
 using Bank.Infrastructure.Repositories.Finance;
+using Bank.Infrastructure.Repositories.Payments;
 using Bank.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,10 @@ public static class DependencyInjection
 
         services.AddSingleton(new SqlConnectionFactory(connectionString));
 
+        // Shared by everything in a request that takes part in a unit of work (one connection, one transaction).
+        services.AddScoped<DbSession>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<ICreditCardRepository, CreditCardRepository>();
@@ -26,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IInstallmentPlanRepository, InstallmentPlanRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
+        services.AddScoped<ITransferRepository, TransferRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
