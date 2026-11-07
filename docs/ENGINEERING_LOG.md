@@ -1016,3 +1016,47 @@ ya da sahte hesaplar gerektirirdi.
   sorgular tabloya gitmeden cevaplanabiliyor (covering index).
 
 **Commit:** `build(db): add transaction history and import batch tables`
+
+---
+
+## #030 — Banka ekstresi CSV parser'ı: gerçek dünya formatları
+
+**Sprint:** 5
+
+**İhtiyaç.** Kullanıcılar başka bankalardan aldıkları CSV ekstrelerini yükleyebilmeli. "CSV" tek bir format değil.
+
+**Karşılanan farklılıklar.**
+
+| Sorun | Nasıl ele alındı |
+|---|---|
+| **Encoding.** Türkçe Excel'den kaydedilen CSV UTF-8 değil **Windows-1254** olur. Yanlış okunursa "Ş" bozulur | BOM varsa UTF-8. Yoksa *katı* UTF-8 çözümleme denenir, geçersiz byte dizisinde 1254'e düşülür. .NET Core'da 1254 için `CodePagesEncodingProvider` kaydı gerekiyor |
+| **Ayraç.** Ondalık ayracı virgül olduğu için Türk bankaları genellikle `;` kullanır | Başlık satırında en sık geçen `;`, `,` veya tab seçiliyor |
+| **Tırnaklı alanlar.** `"Migros, Kadıköy"` | Kendi parser'ımı yazmak yerine BCL'deki RFC 4180 uyumlu `TextFieldParser` kullanıldı. Ek paket gerekmiyor |
+| **Başlıklar.** "Tarih"/"Date", "İşlem Açıklaması", büyük-küçük harf | Normalize edilip eşanlamlı listelerle eşleştiriliyor |
+| **Borç/Alacak kolonları.** Bazı bankalar tek bir işaretli tutar yerine iki kolon kullanır | İki düzen de destekleniyor, tek işaretli tutara çevriliyor |
+| **Tutar formatları.** `1.234,56`, `-250,00 TL`, `₺ 1.500`, `1,234.56`, sondaki eksi `250,00-`, Excel'in NBSP binlik ayracı | `StatementAmount`: sondan gelen ayraçtan sonra 1–2 hane varsa o ondalık ayracı |
+| **Tarihler.** `05.03.2026`, `5.3.2026`, `05/03/2026`, `2026-03-05`, saatli | `ParseExact` ile kabul edilen formatların açık listesi |
+
+Hatalı satırlar **satır numarasıyla** raporlanıyor. Dosyanın kabul edilip edilmeyeceğine çağıran karar veriyor (#031).
+
+**Testlerin yakaladığı iki hata.**
+1. **`"1.2.3"` sessizce 12,3 oluyordu.** Son ayraçtan sonra tek hane olduğu için ondalık sayılıyor, kalan noktalar da
+   atılıyordu. Bozuk bir ekstre değeri hata vermek yerine **yanlış bir tutara** dönüşüyordu. Bir finans uygulamasında bu
+   en tehlikeli hata türü. Çözüm: binlik grupları tam üç haneli olmalı, ondalık ayracından farklı karakter olmalı ve
+   tek tür olmalı. `"1.2.3"`, `"12,3,4"`, `"1,234.5.6"` artık reddediliyor.
+2. **Türkçe İ problemi.** İlk kodda `"TARİH".ToLowerInvariant()` sonucunun `"tari̇h"` (i + birleşik nokta) olduğunu
+   **varsaydım** ve o birleşik noktayı silen bir satır yazdım. Testler kırıldı. Tahminle düzeltmek yerine küçük bir
+   programla gerçek davranışı ölçtüm: .NET'in invariant dönüşümü `İ` harfini **hiç değiştirmiyor** (`"TARİH"` → `"tarİh"`,
+   U+0130 aynen kalıyor). Öte yandan `tr-TR` kültürüyle dönüştürmek de `"DESCRIPTION"`'ı `"descrıptıon"` (noktasız ı)
+   yapıyor. Çözüm: NFC normalizasyonu, invariant küçük harf ve Türkçe harflerin (`İ`, `ı` dahil) açıkça ASCII'ye
+   katlanması. Yanlış varsayımı içeren kod yorumu da düzeltildi.
+
+**Küçük ama önemli bir temizlik.** Kaynak kodda `"\u00A0"` yazılmış sanılan yerde aslında **görünmez bir NBSP karakteri**
+vardı. Ekranda iki aynı `Replace(" ", "")` çağrısı gibi görünüyordu. Kodu okuyan biri "gereksiz tekrar" diye birini
+silebilir ve Excel'in binlik ayracı sessizce bozulurdu. Açık `\u00A0` kaçış dizisine çevrildi ve kaynakta literal NBSP
+kalmadığı bir script ile doğrulandı.
+
+**Testler:** `StatementAmountTests` (20 vaka) ve `StatementCsvParserTests` (12 test). Windows-1254 testi metni gerçekten
+1254 ile kodlayıp parser'a veriyor.
+
+**Commit:** `feat(import): parse bank statement CSV exports`

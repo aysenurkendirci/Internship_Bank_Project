@@ -78,7 +78,7 @@
 ## Sprint 5 — İşlem geçmişi: CSV ve sentetik veri
 
 - [x] `V003`: `finance.Transactions`, `finance.ImportBatches`, parmak izi ile mükerrer koruması — log #029
-- [ ] CSV parser: encoding (UTF-8 / Windows-1254), ayraç, Türkçe tutar ve tarih formatları
+- [x] CSV parser: encoding, ayraç, Borç/Alacak, Türkçe tutar/tarih, Türkçe İ — log #030
 - [ ] Import ve listeleme API'si, mükerrer satır tespiti
 - [ ] Deterministik sentetik veri üretici
 
