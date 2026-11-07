@@ -1,4 +1,5 @@
 using Bank.Application.Abstractions.Repositories;
+using Bank.Application.Common.Exceptions;
 using Bank.Contracts.Dashboard;
 using Bank.Infrastructure.Persistence;
 using Dapper;
@@ -51,7 +52,7 @@ public sealed class DashboardRepository : IDashboardRepository
             new CommandDefinition(sql, new { UserId = userId, Take = RecentTransactionCount }, cancellationToken: ct));
 
         var user = await results.ReadSingleOrDefaultAsync<UserSummaryRow>()
-                   ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+                   ?? throw new NotFoundException("Kullanıcı bulunamadı.");
         var totalWealth = await results.ReadSingleAsync<decimal>();
         var cards = await results.ReadAsync<CardRow>();
         var transactions = await results.ReadAsync<TransactionRow>();

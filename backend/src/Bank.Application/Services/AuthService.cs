@@ -1,6 +1,7 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Abstractions.Services;
+using Bank.Application.Common.Exceptions;
 using Bank.Contracts.Auth;
 
 namespace Bank.Application.Services;
@@ -18,31 +19,32 @@ public sealed class AuthService : IAuthService
         _token = token;
     }
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest req)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest req, CancellationToken ct = default)
     {
-        var existing = await _repo.GetUserByTcOrDefaultAsync(req.TcNo);
+        var existing = await _repo.GetUserByTcOrDefaultAsync(req.TcNo, ct);
         if (existing is not null)
-            throw new InvalidOperationException("Bu TC ile kayıt zaten var.");
+            throw new ConflictException("Bu TC kimlik numarası ile kayıtlı bir kullanıcı var.");
 
         var passwordHash = _hasher.Hash(req.Password);
-        var user = await _repo.CreateUserAsync(req, passwordHash);
+        var user = await _repo.CreateUserAsync(req, passwordHash, ct);
 
-        var jwt = _token.Generate(user.UserId, user.Email);
-        return new AuthResponse(user.UserId, $"{user.FirstName} {user.LastName}", jwt);
+        return CreateResponse(user);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest req)
+    public async Task<AuthResponse> LoginAsync(LoginRequest req, CancellationToken ct = default)
     {
-        var user = await _repo.GetUserByTcAsync(req.TcNo);
+        var user = await _repo.GetUserByTcOrDefaultAsync(req.TcNo, ct)
+                   ?? throw new AuthenticationFailedException();
 
-        var cred = await _repo.GetCredentialsAsync(user.UserId);
+        var credentials = await _repo.GetCredentialsAsync(user.UserId, ct);
+        if (!_hasher.Verify(req.Password, credentials.PasswordHash))
+            throw new AuthenticationFailedException();
 
-        if (!_hasher.Verify(req.Password, cred.PasswordHash))
-            throw new UnauthorizedAccessException("Invalid credentials.");
+        await _repo.UpdateLastLoginAsync(user.UserId, ct);
 
-        await _repo.UpdateLastLoginAsync(user.UserId);
-
-        var jwt = _token.Generate(user.UserId, user.Email);
-        return new AuthResponse(user.UserId, $"{user.FirstName} {user.LastName}", jwt);
+        return CreateResponse(user);
     }
+
+    private AuthResponse CreateResponse(UserRow user)
+        => new(user.UserId, $"{user.FirstName} {user.LastName}", _token.Generate(user.UserId, user.Email));
 }

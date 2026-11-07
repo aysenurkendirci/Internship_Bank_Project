@@ -163,3 +163,48 @@ giriş 200 döndü. Yanlış şifre şu an 500 dönüyor: servis doğru exceptio
 `ErrorHandlingMiddleware` bağlı olmadığı için 401'e çevrilmiyor (sıradaki iş).
 
 **Commit:** `fix(security): hash passwords with PBKDF2 instead of storing plain text`
+
+---
+
+## #006 — Hata yönetimi: stack trace sızıntısı ve kullanıcı numaralandırma
+
+**Sprint:** 0 · **Tarih:** 2026-11-07
+
+**Sorun.**
+1. Herhangi bir hata, istemciye **500 ve tam stack trace** olarak dönüyordu (dosya yolları, sınıf adları, istek başlıkları dahil).
+2. Login'de bilinmeyen TC için 404, yanlış şifre için 401 dönüyordu.
+3. Mükerrer kayıt 409 yerine 500 dönüyordu.
+
+**Analiz.**
+- Bir `ErrorHandlingMiddleware` yazılmıştı ama `Program.cs`'te hiç pipeline'a eklenmemişti, yani ölü koddu.
+- Eklenmiş olsaydı bile iki tasarım sorunu vardı:
+  - `InvalidOperationException` → 409 eşlemesi yapıyordu. Bu exception'ı .NET'in kendisi de her türlü
+    programlama hatasında fırlatır. Bir bug "çakışma" gibi görünür ve gizlenirdi.
+  - 500 durumunda `ex.Message` istemciye gönderiliyordu. SQL hata mesajları tablo ve kolon adlarını sızdırır.
+- 404 / 401 ayrımı, saldırganın hangi TC kimlik numaralarının sistemde kayıtlı olduğunu tek tek
+  denemesine izin veriyor (user enumeration). Bankacılıkta bu bir kişisel veri sızıntısı (KVKK).
+
+**Çözüm.**
+- Application katmanına kendi exception hiyerarşisi eklendi: `AppException` ve ondan türeyen
+  `NotFoundException`, `ConflictException`, `AuthenticationFailedException`. İstemciye sadece bu tiplerin
+  mesajı gösteriliyor. Diğer her şey genel bir 500 olarak dönüyor ve loglanıyor.
+- Elle yazılmış middleware silindi. Yerine .NET'in standart mekanizması `IExceptionHandler` +
+  `AddProblemDetails()` kullanıldı. Yanıtlar RFC 9457 formatında (`application/problem+json`) ve bir
+  `traceId` içeriyor. Destek ekibi bu id ile log'daki ilgili isteği bulabiliyor.
+- Login'de bilinmeyen TC ve yanlış şifre aynı `AuthenticationFailedException`'ı fırlatıyor: aynı durum kodu,
+  aynı mesaj.
+- Eşzamanlı iki kayıt isteği "var mı?" kontrolünü birlikte geçebilir (TOCTOU yarışı). Bu durumda
+  gerçek garanti veritabanındaki UNIQUE constraint. Repository, SQL Server'ın 2627/2601 hatalarını
+  `ConflictException`'a çeviriyor.
+- `CancellationToken` artık controller'dan repository'ye kadar her katmanda taşınıyor.
+- Kullanılmayan `GetUserByTcAsync` kaldırıldı (YAGNI). `AuthController` namespace'siz duruyordu, düzeltildi.
+
+**Neden bu yol.** Exception'ları `Result<T>` gibi bir tiple döndürmek de bir seçenekti. Ancak mevcut kod tabanı
+exception tabanlı ve az sayıda beklenen hata türü var. Küçük ve net bir exception hiyerarşisi daha az kod
+ve daha az kavram demek (KISS).
+
+**Doğrulama.** Gerçek API'ye karşı: mükerrer kayıt → 409, yanlış şifre → 401, bilinmeyen TC → 401 (aynı mesaj),
+DB constraint hatası → içinde SQL detayı olmayan genel 500. Son senaryo, girdi validasyonunun eksik
+olduğunu da gösterdi. Geçersiz istek 400 almalı, bu iş Sprint 2'ye eklendi.
+
+**Commit:** `fix(api): return problem details and stop leaking internals on errors`

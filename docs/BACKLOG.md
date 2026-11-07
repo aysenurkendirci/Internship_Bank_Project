@@ -8,12 +8,14 @@
 - [x] Infrastructure katmanını Oracle'dan SQL Server'a taşı — log #004
 - [x] **Şifreler düz metin saklanıyordu**: PBKDF2 ile hash — log #005
 - [x] `CancellationToken`'ı repository → Dapper'a kadar ilet — log #004
-- [ ] `CancellationToken`'ı controller → service → repository zincirinde eksiksiz ilet (AuthService)
+- [x] `CancellationToken`'ı controller → service → repository zincirinde eksiksiz ilet (AuthService) — log #006
+- [x] Hatalar 500 + stack trace dönüyordu: `IExceptionHandler` + ProblemDetails — log #006
+- [x] Login'de bilinmeyen TC için 404 dönüyordu (user enumeration), artık 401 — log #006
 - [ ] `DashboardRepository`'deki sunum mantığını (etiket, ikon, sabit `0.024m`) doğru katmana taşı
 - [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
-- [ ] `ErrorHandlingMiddleware` pipeline'a eklenmemiş: hatalar 500 + stack trace dönüyor (bilgi sızıntısı)
 - [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
-- [ ] Login'de bilinmeyen TC için 404 dönüyor: kullanıcı varlığı sızıyor (user enumeration), 401 olmalı
+- [ ] `CardsController`: aynı servis çağrısı iki kez yapılıyor, kullanılmayan `userId` parse'ı
+- [ ] Boş dosyaları temizle (Domain entity/enum/value object'leri, `RequestLoggingMiddleware`, `ApiResponse`)
 - [ ] Test projeleri (xUnit) ve ilk testler
 - [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
 
@@ -25,7 +27,7 @@
 
 ## Sonraki sprintler
 
-2. CRUD API: validasyon, ProblemDetails, audit kolonları, soft delete, optimistic concurrency
+2. CRUD API: girdi validasyonu (geçersiz istek şu an DB CHECK'e takılıp 500 dönüyor, 400 olmalı), audit kolonları, soft delete, optimistic concurrency
 3. Nakit akışı projeksiyon motoru (3–12 ay, ekstre dönemi bazlı taksit dağıtımı)
 4. Senaryo karşılaştırma (3 / 6 / 9 taksit what-if)
 5. CSV içe aktarma ve deterministik sentetik veri üretici

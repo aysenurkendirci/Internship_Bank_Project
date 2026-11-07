@@ -1,25 +1,22 @@
-
 using Bank.Application.Abstractions.Services;
 using Bank.Contracts.Auth;
 using Microsoft.AspNetCore.Mvc;
 
+namespace Bank.Api.Controllers;
+
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public sealed class AuthController : ControllerBase
 {
-    private readonly IAuthService _auth; //private değişkenlerin başına _ eklenir.
+    private readonly IAuthService _auth;
 
     public AuthController(IAuthService auth) => _auth = auth;
-    //public AuthController(IAuthService auth)
-//{
-  //  _auth = auth;
-//} aynı işi yapar.
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req)
-        => Ok(await _auth.LoginAsync(req));
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req, CancellationToken ct)
+        => Ok(await _auth.LoginAsync(req, ct));
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
-        => Ok(await _auth.RegisterAsync(req));
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req, CancellationToken ct)
+        => Ok(await _auth.RegisterAsync(req, ct));
 }

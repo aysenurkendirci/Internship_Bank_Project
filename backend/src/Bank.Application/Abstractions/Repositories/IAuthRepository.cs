@@ -5,7 +5,6 @@ namespace Bank.Application.Abstractions.Repositories; // Namespace bu olmalı
 
 public interface IAuthRepository
 {
-    Task<UserRow> GetUserByTcAsync(string tcNo, CancellationToken ct = default);
     Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo, CancellationToken ct = default);
     Task UpdateLastLoginAsync(long userId, CancellationToken ct = default);
     Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash, CancellationToken ct = default);

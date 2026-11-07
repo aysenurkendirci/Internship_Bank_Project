@@ -9,7 +9,8 @@ using Bank.Application.Services;
 using Bank.Infrastructure.Repositories;
 using Bank.Infrastructure.Security;
 
-using Bank.Api.Security; 
+using Bank.Api.ErrorHandling;
+using Bank.Api.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -28,6 +29,10 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
+
+// Error responses follow RFC 9457 (application/problem+json)
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // ✅ Swagger (JWT)
 builder.Services.AddSwaggerGen(c =>
@@ -114,6 +119,9 @@ builder.Services.AddAuthorization();
 
 // --- 2) MIDDLEWARE ---
 var app = builder.Build();
+
+// Registered first so it also catches exceptions thrown by later middleware.
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

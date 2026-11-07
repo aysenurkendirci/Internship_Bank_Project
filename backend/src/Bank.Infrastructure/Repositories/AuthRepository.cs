@@ -1,19 +1,21 @@
 using Bank.Application.Abstractions.Repositories;
+using Bank.Application.Common.Exceptions;
 using Bank.Contracts.Auth;
 using Bank.Infrastructure.Persistence;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace Bank.Infrastructure.Repositories;
 
 public sealed class AuthRepository : IAuthRepository
 {
+    // SQL Server error numbers for unique constraint / unique index violations.
+    private const int UniqueConstraintViolation = 2627;
+    private const int UniqueIndexViolation = 2601;
+
     private readonly SqlConnectionFactory _connections;
 
     public AuthRepository(SqlConnectionFactory connections) => _connections = connections;
-
-    public async Task<UserRow> GetUserByTcAsync(string tcNo, CancellationToken ct = default)
-        => await GetUserByTcOrDefaultAsync(tcNo, ct)
-           ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
 
     public async Task<UserRow?> GetUserByTcOrDefaultAsync(string tcNo, CancellationToken ct = default)
     {
@@ -39,7 +41,7 @@ public sealed class AuthRepository : IAuthRepository
         await using var connection = await _connections.OpenAsync(ct);
         return await connection.QuerySingleOrDefaultAsync<CredentialRow>(
                    new CommandDefinition(sql, new { UserId = userId }, cancellationToken: ct))
-               ?? throw new KeyNotFoundException("Kimlik bilgileri bulunamadı.");
+               ?? throw new InvalidOperationException($"No credentials stored for user {userId}.");
     }
 
     public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash, CancellationToken ct = default)
@@ -63,8 +65,17 @@ public sealed class AuthRepository : IAuthRepository
         };
 
         await using var connection = await _connections.OpenAsync(ct);
-        return await connection.QuerySingleAsync<UserRow>(
-            new CommandDefinition(sql, parameters, cancellationToken: ct));
+        try
+        {
+            return await connection.QuerySingleAsync<UserRow>(
+                new CommandDefinition(sql, parameters, cancellationToken: ct));
+        }
+        catch (SqlException ex) when (ex.Number is UniqueConstraintViolation or UniqueIndexViolation)
+        {
+            // The service checks for duplicates first, but two concurrent requests can both pass
+            // that check. The unique constraint is the real guarantee; report it as a conflict.
+            throw new ConflictException("Bu TC kimlik numarası veya e-posta ile kayıtlı bir kullanıcı var.");
+        }
     }
 
     public async Task UpdateLastLoginAsync(long userId, CancellationToken ct = default)
