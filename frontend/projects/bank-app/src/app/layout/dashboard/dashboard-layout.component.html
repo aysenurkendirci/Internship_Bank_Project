@@ -27,6 +27,16 @@
       }
       <button
         type="button"
+        (click)="exportMyData()"
+        [disabled]="exporting()"
+        class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+        title="Hakkınızda tutulan bütün verileri JSON dosyası olarak indirir"
+      >
+        <span class="material-symbols-outlined">download</span>
+        <span class="hidden sm:inline">{{ exporting() ? 'Hazırlanıyor...' : 'Verilerimi indir' }}</span>
+      </button>
+      <button
+        type="button"
         (click)="logout()"
         class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50"
       >

@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { CreditCardRequest } from '../models/finance.models';
+import { AccountApi } from './account.api';
 import { CreditCardsApi, TransactionsApi } from './finance.api';
 
 describe('finance API clients', () => {
@@ -36,6 +37,14 @@ describe('finance API clients', () => {
     const body = call.request.body as FormData;
     expect((body.get('file') as File).name).toBe('ekstre.csv');
     call.flush({});
+  });
+
+  it('downloads the personal data export as a file, not as parsed JSON', () => {
+    TestBed.inject(AccountApi).exportPersonalData().subscribe();
+
+    const call = http.expectOne('/api/me/data-export');
+    expect(call.request.responseType).toBe('blob');
+    call.flush(new Blob(['{}']));
   });
 
   it('only sends the date filters that are set', () => {

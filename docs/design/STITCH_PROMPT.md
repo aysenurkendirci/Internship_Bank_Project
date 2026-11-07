@@ -31,7 +31,8 @@ GENERAL STYLE
 - Every list needs an empty state (one sentence telling the user what to do next) and every page a loading and an error state.
 
 LAYOUT
-Left sidebar on desktop (logo "NeoBank", menu, user name and "Çıkış" at the bottom); on mobile the menu becomes a horizontally
+Left sidebar on desktop (logo "NeoBank", menu, and at the bottom the user name, a "Verilerimi indir" download
+button and "Çıkış"); on mobile the menu becomes a horizontally
 scrollable strip at the top. Menu items with icons:
 Ana Sayfa · Nakit akışı · Taksit senaryosu · Gelir ve giderler · Kartlar ve taksitler · İşlem geçmişi · Analiz
 

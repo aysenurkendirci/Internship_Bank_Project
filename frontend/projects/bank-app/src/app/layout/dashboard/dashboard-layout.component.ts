@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { SessionService } from '../../core/auth/session.service';
+import { AccountApi } from '../../data-access/api/account.api';
 
 interface NavItem {
   readonly path: string;
@@ -17,6 +18,9 @@ interface NavItem {
 export class DashboardLayoutComponent {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly account = inject(AccountApi);
+
+  protected readonly exporting = signal(false);
 
   protected readonly fullName = this.session.fullName;
 
@@ -29,6 +33,23 @@ export class DashboardLayoutComponent {
     { path: '/dashboard/transactions', label: 'İşlem geçmişi', icon: 'receipt_long' },
     { path: '/dashboard/analytics', label: 'Analiz', icon: 'insights' },
   ];
+
+  /** Saves the personal data export as a file; the browser's download handles the rest. */
+  exportMyData(): void {
+    this.exporting.set(true);
+    this.account.exportPersonalData().subscribe({
+      next: (file) => {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'kisisel-verilerim.json';
+        link.click();
+        URL.revokeObjectURL(url);
+        this.exporting.set(false);
+      },
+      error: () => this.exporting.set(false),
+    });
+  }
 
   logout(): void {
     this.session.end();
