@@ -648,3 +648,58 @@ Böylece bir satırın referans ettiği kartın aynı kullanıcıya ait olması 
 etkilemiyor, elle çalıştırılan scriptlerde `sqlcmd -I` kullanılmalı. README'ye not düşüldü.
 
 **Commit:** `build(db): add finance schema for cards, recurring items and installments`
+
+---
+
+## #021 — Kredi kartı CRUD: sahiplik, eşzamanlılık ve bir kültür hatası
+
+**Sprint:** 2
+
+**Kapsam.** `api/finance/credit-cards` üzerinde listeleme, getirme, oluşturma, güncelleme ve silme. Bu ilk CRUD,
+sonraki kaynakların da izleyeceği kalıbı belirliyor.
+
+**Katmanlar.**
+- **Controller:** HTTP'ye özgü kararlar (201 + `Location`, 204, `If-Match` zorunluluğu).
+- **Service:** kontrat ↔ domain eşlemesi ve iş kuralları.
+- **Repository:** SQL ↔ domain eşlemesi.
+
+Domain sınıfı (`CreditCard`) ne HTTP'yi ne SQL'i biliyor.
+
+**Sahiplik (IDOR koruması).** Repository'nin her metodu `userId` alıyor ve her sorgu `WHERE UserId = @UserId`
+içeriyor. Başka kullanıcının kartı için **403 değil 404** dönüyor. 403, "böyle bir kayıt var ama senin değil"
+bilgisini sızdırır.
+
+**Optimistic concurrency.** Senaryo: kullanıcı kartı iki sekmede açıyor, birinde limiti, diğerinde kesim gününü
+değiştiriyor. Önlem alınmazsa son kaydedilen, öncekinin değişikliğini haberi olmadan siler ("lost update").
+- Cevaplar kaydın `version` değerini (`ROWVERSION`'ın base64 hâli) içeriyor.
+- `PUT` bu değeri HTTP standardındaki **`If-Match`** başlığında istiyor. Başlık yoksa **428 Precondition Required**
+  dönüyor, istemci versiyonu "unutarak" veri ezemiyor.
+- `UPDATE ... WHERE RowVersion = @ExpectedVersion` koşullu çalışıyor. Hiçbir satır etkilenmezse servis
+  ayrım yapıyor: kayıt yoksa 404, kayıt var ama sürüm eskiyse **409**.
+
+Version'ın body yerine başlıkta taşınması, POST ve PUT'un aynı istek DTO'sunu kullanmasını sağladı.
+
+**Silme.** Soft delete. Karta bağlı aktif bir taksit veya abonelik varsa 409 dönüyor. Kontrol ve silme
+**aynı `UPDATE ... WHERE NOT EXISTS (...)`** sorgusunda. Ayrı bir "kullanılıyor mu?" sorgusu ile silme arasına
+yeni bir taksit girebilirdi (TOCTOU).
+
+**Para birimi değişikliği.** Kartın para birimi, bağlı kalemler varken değiştirilemiyor. Aksi hâlde TRY taksitleri
+USD bir karta bağlı kalır ve `InstallmentPlan.ScheduleOn` hata verir.
+
+**Bulunan hata: Türkçe sistemde çöken doğrulama.** İlk smoke testte kart oluşturma **500** verdi. Log:
+`0.01 is not a valid value for Decimal`. `[Range(typeof(decimal), "0.01", ...)]`, sınır değerini **sunucunun
+kültürüyle** parse ediyordu. Türkçe'de ondalık ayracı virgül olduğu için `"0.01"` geçersizdi. Bu hata
+İngilizce bir CI sunucusunda hiç görünmez, Türkiye'deki bir üretim sunucusunda ilk istekte ortaya çıkardı.
+Çözüm: `ParseLimitsInInvariantCulture = true` ve `ConvertValueInInvariantCulture = true`.
+
+**Doğrulama.** 13 senaryo iki kullanıcıyla gerçek API'ye karşı çalıştırıldı:
+- oluşturma → 201
+- başka kullanıcı listeleme → boş, getirme/güncelleme/silme → 404
+- `If-Match` yok → 428
+- güncel version → 200, eski version → 409, bozuk version → 400
+- geçersiz body → 400 (Türkçe alan hataları)
+- silme → 204, sonra 404, satır DB'de `DeletedAt` ile duruyor
+
+Bu senaryolar sprint sonunda otomatik entegrasyon testlerine dönüştürülecek.
+
+**Commit:** `feat(finance): add credit card CRUD with ownership and concurrency checks`

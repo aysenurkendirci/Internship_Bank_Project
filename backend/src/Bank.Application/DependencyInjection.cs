@@ -1,5 +1,6 @@
 using Bank.Application.Abstractions.Services;
 using Bank.Application.Services;
+using Bank.Application.Services.Finance;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bank.Application;
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<ICreditCardService, CreditCardService>();
 
         return services;
     }

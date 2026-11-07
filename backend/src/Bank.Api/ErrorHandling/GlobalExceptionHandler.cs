@@ -26,6 +26,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         var (status, title) = exception switch
         {
             DomainException => (StatusCodes.Status400BadRequest, "İş kuralı ihlali"),
+            BadRequestException => (StatusCodes.Status400BadRequest, "Geçersiz istek"),
             NotFoundException => (StatusCodes.Status404NotFound, "Kayıt bulunamadı"),
             ConflictException => (StatusCodes.Status409Conflict, "İşlem mevcut kayıtla çakışıyor"),
             AuthenticationFailedException => (StatusCodes.Status401Unauthorized, "Kimlik doğrulama başarısız"),
