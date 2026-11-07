@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Bank.Api.ErrorHandling;
 using Bank.Api.Health;
+using Bank.Api.Logging;
 using Bank.Api.Security;
 using Bank.Api.Serialization;
 using Bank.Application;
@@ -10,8 +11,24 @@ using Bank.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Formatting.Compact;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Structured logs: in production every line is one JSON object (with CorrelationId, UserId and so on as fields)
+// that a log store can index; in development they stay readable in the console.
+builder.Host.UseSerilog((context, services, logger) =>
+{
+    logger.ReadFrom.Configuration(context.Configuration)
+          .ReadFrom.Services(services)
+          .Enrich.FromLogContext();
+
+    if (context.HostingEnvironment.IsDevelopment())
+        logger.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {CorrelationId} {Message:lj}{NewLine}{Exception}");
+    else
+        logger.WriteTo.Console(new CompactJsonFormatter());
+});
 
 builder.Services
     .AddApplication()
@@ -29,7 +46,10 @@ builder.Services.AddControllers()
     });
 
 // Error responses follow RFC 9457 (application/problem+json)
-builder.Services.AddProblemDetails();
+// Error responses carry the correlation id, so a user can quote it to support.
+builder.Services.AddProblemDetails(options =>
+    options.CustomizeProblemDetails = context =>
+        context.ProblemDetails.Extensions["correlationId"] = context.HttpContext.TraceIdentifier);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddAuthRateLimiting(builder.Configuration);
@@ -101,7 +121,11 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Registered first so it also catches exceptions thrown by later middleware.
+// The correlation id comes first so every later log line, including errors, carries it.
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseSerilogRequestLogging();
+
+// Registered before the rest so it also catches exceptions thrown by later middleware.
 app.UseExceptionHandler();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 
