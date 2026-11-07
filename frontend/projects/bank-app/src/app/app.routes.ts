@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cash-flow/cash-flow-page.component').then((m) => m.CashFlowPageComponent),
       },
       {
+        path: 'scenarios',
+        title: 'Taksit senaryosu',
+        loadComponent: () => import('./features/scenarios/scenarios-page.component').then((m) => m.ScenariosPageComponent),
+      },
+      {
         path: 'cards',
         title: 'Kartlar ve taksitler',
         loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),

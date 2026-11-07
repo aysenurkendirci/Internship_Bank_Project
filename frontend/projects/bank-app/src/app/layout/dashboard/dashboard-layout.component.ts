@@ -23,6 +23,7 @@ export class DashboardLayoutComponent {
   protected readonly navItems: readonly NavItem[] = [
     { path: '/dashboard', label: 'Ana Sayfa', icon: 'grid_view' },
     { path: '/dashboard/cash-flow', label: 'Nakit akışı', icon: 'timeline' },
+    { path: '/dashboard/scenarios', label: 'Taksit senaryosu', icon: 'compare_arrows' },
     { path: '/dashboard/recurring', label: 'Gelir ve giderler', icon: 'event_repeat' },
     { path: '/dashboard/cards', label: 'Kartlar ve taksitler', icon: 'credit_card' },
   ];

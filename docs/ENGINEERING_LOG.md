@@ -1609,3 +1609,34 @@ düşen kullanıcı bunu ilk bakışta görüyor (ADR-0003 §5).
 **Doğrulama.** Production build ve 15 Vitest testi geçiyor. Görsel doğrulama tarayıcı otomasyonu olmadığı için yapılamadı.
 
 **Commit:** `feat(web): add the cash-flow timeline`
+
+---
+
+## #045 — Web: taksit senaryosu karşılaştırma
+
+**Sprint:** 7
+
+**Kapsam.** `/dashboard/scenarios`: "Bu bilgisayarı 3 yerine 6 taksitle alırsam ne olur?" sorusunun arayüzü (#027–#028).
+
+**Akış.** Kart, açıklama ve tarih girilir. Seçenekler satır satır eklenir (en fazla 6, varsayılan 3 ve 6 taksit). **Her seçeneğin kendi
+toplam fiyatı var.** Formda bunun nedeni açıklanıyor ("Satıcılar uzun vadede genellikle daha yüksek fiyat ister"). "İlk fiyatı tüm
+seçeneklere kopyala" kısayolu fiyat aynıysa tekrar yazmayı önlüyor.
+
+**Sonuç ekranı.**
+- **Tablo:** "Almasam" satırı ve her seçenek için aylık taksit, toplam, en ucuz seçeneğe göre fiyat farkı, en yüksek aylık çıkış, en
+  düşük bakiye ve tarihi, eksiye düşülen ay sayısı, dönem sonu bakiye.
+- **Grafik:** seçeneklere göre aylık en düşük bakiye ve sıfır çizgisi.
+- **Öneri yok.** Satırlar girildiği sırada, sıralama veya "en iyi" işareti yok. Altta açık bir not: "Bu karşılaştırma bir öneri
+  değildir." Proje kapsamının (karar destek, tavsiye değil) arayüzdeki karşılığı.
+
+**Renk ve erişilebilirlik.** Seçenekler doğrulanmış kategorik paletin ilk 6 slotunu sırasıyla alıyor. Doğrulama scripti zorunlu bütün
+kontrollerden geçti (en kötü komşu renk körlüğü ayrımı ΔE 9,1, eşik 8). Ama 3 rengin beyaz zemine karşı kontrastı 3:1'in altında kaldı
+(uyarı). Yönerge bu durumda görünür etiket veya tablo istiyor: seri kimliği tablodaki renk karesi ve metinle, lejantla, 4 veya daha az
+seride çizgi sonundaki etiketle veriliyor. Baz senaryo kategorik bir renk almıyor, nötr gri. "Eksiye düşme" yine ikon ve metinle gösteriliyor.
+
+**Paket boyutu.** İkinci grafikli sayfa gelince derleyici ECharts'ı iki sayfanın **paylaştığı** ayrı bir chunk'a taşıdı. Sayfa kodları
+yaklaşık 4 KB'a indi. Grafik kodu bir kez iniyor.
+
+**Gözden geçirmede yakalanan.** Baz satırın etiketi "Almazsam" yazılmıştı, "Almasam" olarak düzeltildi.
+
+**Commit:** `feat(web): compare installment options before buying`
