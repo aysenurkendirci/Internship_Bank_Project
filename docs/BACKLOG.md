@@ -96,7 +96,14 @@
 - [x] Anomali tespiti (robust z-skoru), test seti 36/36, duyarlılık analizi — log #035
 - [x] Tahmin: 3 basit yöntem, backtest ile seçim, kalibre aralık; kâhin referansı ile gürültü tabanı — log #036
 - [x] Analitik API'si: trendler, tekrarlayan ödemeler (takip durumu), anomaliler, tahmin — log #037
-- [ ] Değerlendirme raporu (tez için)
+- [x] Değerlendirme raporu ve yeniden üretme aracı, 50 test profili — log #038, `docs/research/EVALUATION.md`
+
+**Sprint 6 retrospektifi**
+- Teslim: kategori trendi, tekrarlayan ödeme tespiti, anomali tespiti, tahmin, analitik API'si, değerlendirme raporu. Toplam 270 test (227 unit, 43 entegrasyon).
+- Ayar/test ayrımı ve önceden belirlenen kriterler sayesinde sonuçlar dürüst: karşılanmayan kriter (MAPE ≤ %10) gizlenmedi, nedeni (gürültü tabanı) ölçüldü.
+- İki kez test beklentisi yanlış çıktı (medyan 500, eğim 196). İkisinde de kod değil hesap düzeltildi ve hesap teste yorum olarak yazıldı.
+- 10 profilden 50 profile geçince tahmin hatası %17,6'dan %12,4'e indi. Küçük örneklemle sonuç raporlamamak gerekiyor.
+- Sırada: Sprint 7, Angular ekranları.
 
 ## Sonraki sprintler
 

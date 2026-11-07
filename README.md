@@ -65,6 +65,16 @@ dotnet test
   `BankDb_IntegrationTests`, which is dropped and rebuilt from the migrations on every run.
   Point it elsewhere with the `INTEGRATION_TESTS_DB` environment variable.
 
+### Evaluation
+
+The analytics are evaluated on synthetic profiles; every figure in
+[`docs/research/EVALUATION.md`](docs/research/EVALUATION.md) is reproduced by:
+
+```bash
+cd backend
+dotnet run --project tools/Bank.Evaluation -c Release
+```
+
 ### Frontend
 
 ```bash

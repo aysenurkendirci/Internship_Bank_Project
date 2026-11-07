@@ -1372,3 +1372,38 @@ olduğu görüldü. Kod değil beklenti yanlıştı. Testteki beklenen değerin 
 - Başka bir kullanıcı hiçbir şey görmüyor.
 
 **Commit:** `feat(finance): expose analytics endpoints`
+
+---
+
+## #038 — Değerlendirme raporu ve yeniden üretilebilirlik
+
+**Sprint:** 6
+
+**Sorun.** #034–#036'daki ölçümler geçici bir keşif programıyla yapılmıştı. Bir tezde "sonuçlar şunlar" yetmez, "sonuçlar
+şu komutla yeniden üretilir" demek gerekir. Ayrıca #036'daki tahmin ölçümü 10 profile dayanıyordu.
+
+**Çözüm.**
+- `backend/tools/Bank.Evaluation`: rapordaki **bütün** tabloları üreten bir konsol aracı
+  (`dotnet run --project tools/Bank.Evaluation -c Release`). Çözüme dahil olduğu için her build'de derleniyor, kod
+  değiştikçe çürüyemiyor.
+- Nihai değerlendirme **50 test profili** (101–150) ile yapıldı.
+- [`docs/research/EVALUATION.md`](research/EVALUATION.md): veri, yöntem, önceden belirlenen kriterler, sonuçlar, araştırma
+  sorularına cevaplar ve geçerlilik tehditleri.
+
+**#036'ya düzeltme.** 50 profille tahmin sonuçları belirgin şekilde farklı çıktı:
+
+| | 10 profil (#036) | 50 profil |
+|---|---|---|
+| Seçilen yöntemin MAPE'i | %17,6 | **%12,4** |
+| Kâhin | %12,0 | **%10,4** |
+| Fark | 5,6 puan | **~2 puan** |
+| Aralık kapsama | %97 | **%95** |
+
+Profiller arası sapma ±%8,4 puan. 101–110 alt kümesi şanssız bir örneklemdi. #036 kaydı değiştirilmedi. Mühendislik
+günlüğü, o anda ne bilindiğinin kaydıdır. Düzeltme burada yapıldı. Ders: değişkenliği yüksek ölçümlerde örneklem boyutu,
+sonucun kendisi kadar önemli.
+
+**Değişmeyen sonuçlar.** Tekrarlayan ödeme tespiti 450/450 (0 yanlış pozitif), etiketli anomaliler 133/133 (17.022 normal
+işlemde 0 yanlış pozitif). Duyarlılık: varsayılan eşikte market medyanının 8 katı %80, 6 katı %50 oranında yakalanıyor.
+
+**Commit:** `docs(research): add reproducible evaluation of the analytics`
