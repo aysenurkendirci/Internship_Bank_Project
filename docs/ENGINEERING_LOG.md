@@ -1116,3 +1116,38 @@ UTF-8 BOM'du (.NET şablonunun standart çıktısı, zararsız).
 - 2 MB üstü dosya → 413.
 
 **Commit:** `feat(finance): import statement CSVs into transaction history`
+
+---
+
+## #032 — Deterministik sentetik işlem geçmişi
+
+**Sprint:** 5
+
+**İhtiyaç.**
+1. **Demo:** yeni bir kullanıcı boş bir hesapla analitik ekranlarını göremez.
+2. **Ölçüm:** Sprint 6'daki tekrarlayan ödeme ve anomali tespiti, "doğru cevabı" bilinen veriyle test edilmeli.
+
+Gerçek kişisel finans verisi açık veri setlerinde neredeyse yok. Proje tanımı da sentetik profilleri öneriyor.
+
+**Çözüm.** `SyntheticHistoryGenerator`, İstanbul'da maaşlı çalışan bir kişinin geçmişini üretiyor. Her desen bilinçli
+olarak seçildi ve testle kilitlendi:
+
+| Desen | Neden var | Test |
+|---|---|---|
+| Maaş 15'inde, hafta sonuysa **önceki iş günü** | Bordro pratiği | 15 Şubat 2025 Cumartesi → 14 Şubat |
+| Kira, abonelikler, internet: sabit gün, sabit tutar | Tekrarlayan ödeme tespitinin bulması gerekenler | Netflix 12 ay boyunca 5'inde, 229,99 |
+| Doğalgaz kışın ~8 kat yüksek | Mevsimsellik. Trend analizi bunu enflasyondan ayırt etmeli | Ocak > 3 × Temmuz |
+| Market, restoran ve faturalarda aylık ~%2,5 artış | Enflasyon. Kategori trendinde görünmeli | Son çeyrek ortalaması > ilk çeyrek |
+| Ayda %20 ihtimalle 12–35 bin TL elektronik alışverişi, `IsAnomaly = true` | Anomali tespiti için **ground truth** | Normal harcamanın en az 5 katı |
+
+**Belirlenimcilik (determinism).** Aynı `seed` her zaman aynı geçmişi üretiyor, bu bir testle kilitlendi. .NET'te seed
+verilen `Random` örnekleri tam da bu amaçla eski algoritmayı koruyor. Testler, demo ve tezdeki deneyler tekrarlanabilir.
+
+**Aynı yoldan geçen veri.** Üretilen satırlar CSV import'unun kullandığı parmak izi ve toplu yazma yolundan geçiyor
+(`POST /api/finance/transactions/demo?months=12&seed=42`). İki faydası var:
+- Ayrı bir yazma yolu yok, kod tekrarı yok.
+- **Aynı seed ile ikinci çağrı hiçbir şey eklemiyor.** Bu, entegrasyon testiyle doğrulandı.
+
+Import kaydında kaynak `Synthetic` olarak işaretleniyor, böylece demo verisi gerçek ekstrelerden her zaman ayırt edilebilir.
+
+**Commit:** `feat(finance): generate reproducible synthetic transaction history`

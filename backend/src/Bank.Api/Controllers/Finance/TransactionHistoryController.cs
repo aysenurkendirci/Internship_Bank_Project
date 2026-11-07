@@ -27,6 +27,17 @@ public sealed class TransactionHistoryController : ControllerBase
         => Ok(await _history.ListAsync(from, to, page, pageSize, ct));
 
     /// <summary>
+    /// Generates a reproducible demo history (salary, bills, subscriptions, everyday spending and a few
+    /// unusually large purchases) for the last <paramref name="months"/> months.
+    /// </summary>
+    [HttpPost("demo")]
+    public async Task<ActionResult<ImportResultResponse>> GenerateDemo(
+        [FromQuery, Range(1, 24, ErrorMessage = "Süre 1 ile 24 ay arasında olmalıdır.")] int months = 12,
+        [FromQuery] int seed = 42,
+        CancellationToken ct = default)
+        => Ok(await _history.GenerateDemoHistoryAsync(months, seed, ct));
+
+    /// <summary>
     /// Imports a bank statement CSV. Lines already imported are skipped and counted as duplicates,
     /// so uploading the same or an overlapping statement again is safe.
     /// </summary>

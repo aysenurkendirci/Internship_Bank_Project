@@ -80,7 +80,14 @@
 - [x] `V003`: `finance.Transactions`, `finance.ImportBatches`, parmak izi ile mükerrer koruması — log #029
 - [x] CSV parser: encoding, ayraç, Borç/Alacak, Türkçe tutar/tarih, Türkçe İ — log #030
 - [x] Import (parmak izi, bulk copy, ya hep ya hiç) ve sayfalı listeleme — log #031
-- [ ] Deterministik sentetik veri üretici
+- [x] Deterministik sentetik veri üretici, ground truth anomaliler — log #032
+
+**Sprint 5 retrospektifi**
+- Teslim: işlem geçmişi şeması, CSV import, sayfalı listeleme, sentetik veri. Toplam 223 test (186 unit, 37 entegrasyon).
+- Türkçe I problemi iki kez yakalandı: önce başlıklarda, sonra parmak izinde. İkincisinde aynı çözüm ortak bir fonksiyona çıkarıldı.
+- `"1.2.3"` gibi bozuk değerlerin sessizce yanlış bir tutara dönüşmesi, finans uygulamasındaki en tehlikeli hata türü. Test olmasa fark edilmeyecekti.
+- Süreç notu: araç zinciri ` ` gibi kaçış dizilerini görünmez karakterlere çeviriyordu. Kaynak taraması bir kontrol adımı olarak eklendi.
+- Sırada: Sprint 6, analitik (kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, tahmin).
 
 ## Sonraki sprintler
 

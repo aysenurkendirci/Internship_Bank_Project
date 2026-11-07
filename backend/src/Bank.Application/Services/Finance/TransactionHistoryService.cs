@@ -1,8 +1,10 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Abstractions.Services;
+using Bank.Application.Common;
 using Bank.Application.Common.Exceptions;
 using Bank.Application.Imports;
+using Bank.Application.Synthetic;
 using Bank.Contracts.Finance;
 
 namespace Bank.Application.Services.Finance;
@@ -15,11 +17,13 @@ public sealed class TransactionHistoryService : ITransactionHistoryService
 
     private readonly ITransactionHistoryRepository _history;
     private readonly ICurrentUser _currentUser;
+    private readonly TimeProvider _time;
 
-    public TransactionHistoryService(ITransactionHistoryRepository history, ICurrentUser currentUser)
+    public TransactionHistoryService(ITransactionHistoryRepository history, ICurrentUser currentUser, TimeProvider time)
     {
         _history = history;
         _currentUser = currentUser;
+        _time = time;
     }
 
     /// <remarks>
@@ -36,13 +40,35 @@ public sealed class TransactionHistoryService : ITransactionHistoryService
                 .Select(e => $"Satır {e.LineNumber}: {e.Message}")
                 .ToList());
 
-        var fingerprints = TransactionFingerprint.For(parsed.Lines);
-        var transactions = parsed.Lines
+        return await StoreAsync("Csv", fileName, parsed.Lines, ct);
+    }
+
+    /// <remarks>
+    /// Generated lines go through the same fingerprinting as uploaded files, so calling this twice
+    /// with the same seed adds nothing the second time.
+    /// </remarks>
+    public async Task<ImportResultResponse> GenerateDemoHistoryAsync(int months, int seed, CancellationToken ct = default)
+    {
+        var to = BusinessDate.Today(_time).AddDays(-1);
+        var from = new DateOnly(to.Year, to.Month, 1).AddMonths(-(months - 1));
+
+        var lines = SyntheticHistoryGenerator.Generate(from, to, seed)
+            .Select((t, i) => new StatementLine(i + 1, t.Date, t.Description, t.Amount, t.Category))
+            .ToList();
+
+        return await StoreAsync("Synthetic", fileName: null, lines, ct);
+    }
+
+    private async Task<ImportResultResponse> StoreAsync(
+        string source, string? fileName, IReadOnlyList<StatementLine> lines, CancellationToken ct)
+    {
+        var fingerprints = TransactionFingerprint.For(lines);
+        var transactions = lines
             .Select((line, i) => new HistoryTransaction(
                 line.Date, line.Description, line.Amount, StatementCurrency, line.Category, fingerprints[i]))
             .ToList();
 
-        var outcome = await _history.ImportAsync(_currentUser.UserId, "Csv", fileName, transactions, ct);
+        var outcome = await _history.ImportAsync(_currentUser.UserId, source, fileName, transactions, ct);
 
         return new ImportResultResponse(outcome.BatchId, outcome.TotalRows, outcome.ImportedRows, outcome.DuplicateRows);
     }
