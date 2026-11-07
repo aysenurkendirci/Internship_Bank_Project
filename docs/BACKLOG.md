@@ -94,7 +94,7 @@
 - [x] Analitik temeli (`HistoryEntry`, `YearMonth`, `Statistics`) ve kategori trendleri — log #033
 - [x] Tekrarlayan ödeme tespiti; test seti precision/recall 1,00 (sentetik veri, sınırları belgeli) — log #034
 - [x] Anomali tespiti (robust z-skoru), test seti 36/36, duyarlılık analizi — log #035
-- [ ] Tahmin ve güven aralığı, backtest ile yöntem karşılaştırması
+- [x] Tahmin: 3 basit yöntem, backtest ile seçim, kalibre aralık; kâhin referansı ile gürültü tabanı — log #036
 - [ ] Analitik API'si
 - [ ] Değerlendirme raporu (tez için)
 

@@ -1284,3 +1284,54 @@ hesaplamıştım, ama taban çizgisi işaretlenen alışverişin kendisini de i�
 7. sıraya kayması, robust istatistiğin neden seçildiğini de gösteriyor.
 
 **Commit:** `feat(domain): flag unusually large purchases with a robust z-score`
+
+---
+
+## #036 — Harcama tahmini: basit yöntemler yeterli mi?
+
+**Sprint:** 6
+
+**Araştırma sorusu.** "Basit istatistiksel tahminler kişisel nakit akışı planlamasında yeterli olabilir mi?"
+
+**Neyi tahmin ediyoruz?** Projeksiyon (#025) sadece bilinen sabit kalemleri içeriyor: kira, maaş, taksit. Market, restoran ve ulaşım gibi
+günlük değişken harcamaları göstermediği için **olduğundan iyimser**. `EverydaySpending` bu harcamaların aylık toplamını çıkarıyor:
+tekrarlayan ödemeler (#034) hariç, çünkü projeksiyon onları zaten kesin olarak biliyor; tek seferlik anomaliler (#035) hariç, çünkü
+"tipik ayı" bozarlar.
+
+**Yöntemler.** Bilinçli olarak basit ve açıklanabilir: **naif** (geçen ay), **hareketli ortalama** (son 3 ay), **doğrusal trend**
+(son 6 aya en küçük kareler doğrusu).
+
+**Yöntem seçimi ve belirsizlik: rolling-origin backtest.** Her geçmiş ay, sadece ondan önceki aylar kullanılarak tahmin ediliyor ve
+gerçekleşenle kıyaslanıyor. En düşük MAPE'li yöntem kullanılıyor. "Neden bu yöntem?" sorusunun cevabı bir sayı. %95 aralık:
+`tahmin ± 1,96 × RMSE × √h`. √h genişlemesi hataların bağımsız olduğunu varsayan bir yaklaşım. Bu yüzden ölçülen kapsama oranıyla
+birlikte raporlanıyor.
+
+**"Yeterli" tanımı ölçümden önce kondu:** MAPE ≤ %10 **ve** %95 aralığın kapsama oranı ≥ %80.
+
+**Sonuç** (test seed'leri 101–110, 24 aylık geçmiş, 7.–24. aylar için tek adımlı tahmin):
+
+| | MAPE | %95 aralık kapsama |
+|---|---|---|
+| Naif | %18,9 | %96 |
+| **Hareketli ortalama** (10 profilin 8'inde seçildi) | **%17,6** | **%97** |
+| Doğrusal trend | %22,4 | %97 |
+| *Kâhin (gerçek beklenen değeri biliyor)* | *%12,0* | – |
+
+**Yorum.**
+1. **Önceden konan MAPE ≤ %10 eşiği karşılanmadı.** Bunu gizlemek yerine nedenini ölçtüm. **Kâhin referansı:** her ayın gerçek
+   beklenen değeri 300 bağımsız profilin ortalamasıyla yaklaşık olarak bulundu. Gerçek beklenen değeri bilen kusursuz bir tahminci bile
+   **%12** hata yapıyor. Bu, market alışverişlerinin sayısındaki ve tutarındaki rastgelelikten gelen **indirgenemez gürültü**. Yani
+   %10 eşiği bu veri için ulaşılamaz bir hedefti. Benim önceden koyduğum kriter gerçekçi değildi.
+2. Basit hareketli ortalama bu tabanın yaklaşık 5,6 puan üzerinde. Daha karmaşık yöntemlerin kazanabileceği alan bu 5,6 puanla sınırlı.
+3. **Aralıklar iyi kalibre** (%95 hedefe karşı %96–97). Önceden konan ikinci kriter karşılandı ve bir testle kilitlendi.
+4. **Tez için cevap:** basit yöntemler tek bir sayı olarak "gelecek ay 18.400 TL harcayacaksın" demekte orta düzeyde kalıyor. Ama
+   "15.000 ile 22.000 TL arasında harcayacaksın" demekte **güvenilir**. Planlama için doğru olan, noktasal tahmin değil aralık göstermek.
+5. Doğrusal trend, enflasyona rağmen en kötü sonucu verdi. 6 aylık pencerede gürültü eğimi yanıltıyor. Basit trend kestirimi,
+   gürültülü kısa serilerde riskli.
+6. Ayar seed'lerinde (1–10) en iyi MAPE %11,7, test seed'lerinde %17,6. 10 profil varyansı güvenilir ölçmek için az. Değerlendirme
+   raporunda daha fazla profil kullanılacak.
+
+**Hata ayıklama notu.** Bir test 204 bekledi, kod 196 buldu. Elle yeniden hesaplandı (eğim 330/17,5, kesişim 82,86) ve doğru değerin 196
+olduğu görüldü. Kod değil beklenti yanlıştı. Testteki beklenen değerin yanına hesabın kendisi yorum olarak yazıldı.
+
+**Commit:** `feat(domain): forecast everyday spending with backtested simple methods`
