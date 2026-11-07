@@ -39,7 +39,7 @@
 ## Sprint 2 — Kalıcılık ve CRUD API
 
 - [x] Girdi doğrulaması (400), TCKN checksum, `DomainException` → 400 — log #019
-- [ ] `V002`: `finance` şeması (kart, düzenli kalem, taksit planı), audit kolonları, soft delete, `ROWVERSION`
+- [x] `V002`: `finance` şeması, audit, soft delete, `ROWVERSION`, bileşik FK ile sahiplik garantisi — log #020
 - [ ] Kredi kartı CRUD
 - [ ] Gelir / gider / abonelik CRUD
 - [ ] Taksit planı ve ödeme takvimi endpoint'i

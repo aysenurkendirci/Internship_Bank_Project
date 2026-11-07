@@ -607,3 +607,44 @@ bash `Ayşe` içindeki `ş` harfini UTF-8 olarak göndermemişti. Test gövdeler
 girişmemek önemliydi.
 
 **Commit:** `feat(api): validate request payloads and map domain errors to 400`
+
+---
+
+## #020 — Kişisel finans şeması ve veritabanı seviyesinde sahiplik garantisi
+
+**Sprint:** 2
+
+**İhtiyaç.** Sprint 1'deki domain modellerinin (kart, düzenli kalem, taksit planı) kalıcı olarak saklanması.
+
+**Tasarım kararları.**
+- **Ayrı `finance` şeması.** Kullanıcının kendi girdiği finans verisi, bankacılık çekirdeğinden (`dbo.Accounts`,
+  `dbo.Cards`) ayrı tutuldu. `dbo.Cards` (bankanın verdiği kart) ile `finance.CreditCards` (kullanıcının takip
+  ettiği herhangi bir bankanın kartı) farklı kavramlar. Ayrı şema bu sınırı görünür kılıyor.
+- **Her tabloda bankacılık standardı kolonlar:**
+  - `UserId`: her sorgu sahibine göre filtrelenecek.
+  - `CreatedAt` / `UpdatedAt`: denetim izi.
+  - `DeletedAt`: soft delete. Finansal kayıtlar fiziksel olarak silinmez, geçmiş analizler ve denetim için korunur.
+  - `RowVersion`: SQL Server'ın her güncellemede otomatik değiştirdiği değer. Optimistic concurrency için
+    kullanılacak (#022).
+- **Domain kuralları `CHECK` constraint olarak tekrarlandı.** Bu kasıtlı bir tekrar. Veritabanına sadece uygulama
+  yazmaz, ileride import scriptleri veya elle düzeltmeler de yazacak. Son savunma hattı veritabanı.
+- **Filtered index'ler** (`WHERE DeletedAt IS NULL`): sorgular neredeyse her zaman silinmemiş kayıtları istiyor.
+  İndeks sadece onları içerdiği için daha küçük kalıyor.
+
+**Kritik karar: çapraz kullanıcı referansı.** Bir kullanıcı, başka bir kullanıcının kart ID'sini tahmin edip kendi
+aboneliğine bağlamaya çalışabilir (IDOR'un bir türevi). Bunu sadece uygulama kodunda kontrol etmek, ilk
+unutulan kontrol noktasında açık bırakır. Çözüm:
+- `CreditCards` üzerinde `UNIQUE (CreditCardId, UserId)`.
+- Kartı referans eden tablolarda **bileşik foreign key** `(CreditCardId, UserId) → CreditCards (CreditCardId, UserId)`.
+
+Böylece bir satırın referans ettiği kartın aynı kullanıcıya ait olması **veritabanı tarafından garanti ediliyor**.
+
+**Doğrulama.** Migration uygulandıktan sonra doğrudan SQL ile denendi:
+- A kullanıcısının, B'nin kartına bağlı abonelik eklemesi → `FK_RecurringCashFlows_CreditCards` ihlali, reddedildi.
+- Karta bağlı gelir eklemek → `CK_RecurringCashFlows_IncomeNotOnCard` ihlali, reddedildi.
+
+**Not.** Doğrulama sırasında `sqlcmd` "QUOTED_IDENTIFIER" hatası verdi. Filtered index'li tablolara yazmak
+`QUOTED_IDENTIFIER ON` gerektiriyor. `sqlcmd` varsayılan olarak `OFF` çalışıyor, SqlClient ise `ON`. Uygulamayı
+etkilemiyor, elle çalıştırılan scriptlerde `sqlcmd -I` kullanılmalı. README'ye not düşüldü.
+
+**Commit:** `build(db): add finance schema for cards, recurring items and installments`

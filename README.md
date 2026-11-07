@@ -36,6 +36,9 @@ Schema changes are added as new numbered scripts under
 `backend/src/Bank.Database/Migrations/` (`V002__...sql`). An applied script is never edited.
 
 > `TrustServerCertificate=True` in the connection string is for local development only.
+>
+> When running scripts by hand with `sqlcmd`, pass `-I`: tables with filtered indexes
+> require `QUOTED_IDENTIFIER ON`, which `sqlcmd` disables by default.
 
 ### Backend
 
