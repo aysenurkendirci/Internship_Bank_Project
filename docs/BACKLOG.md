@@ -19,7 +19,7 @@
 - [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı — log #009
 - [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
 - [ ] Test projeleri (xUnit) ve ilk testler
-- [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
+- [x] `System.Security.Cryptography.Pkcs` açığı kapatıldı, build 0 uyarı — log #011
 
 ## Sprint 1 — Finansal domain modeli
 

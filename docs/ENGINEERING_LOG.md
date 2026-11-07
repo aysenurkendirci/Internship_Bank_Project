@@ -334,3 +334,29 @@ endpoint bu kuralı otomatik olarak alıyor.
 **Doğrulama.** `/api/transactions/recent` yanıtında `"createdAt":"2026-11-07T12:50:22.459Z"` görüldü.
 
 **Commit:** `fix(api): serialise timestamps as UTC`
+
+---
+
+## #011 — Transitive bağımlılıkta yüksek önem dereceli güvenlik açığı
+
+**Sprint:** 0
+
+**Sorun.** Build her seferinde NU1903 (yüksek) ve NU1902 (orta) uyarıları veriyordu:
+`System.Security.Cryptography.Pkcs` 9.0.x, GHSA-846f-f764-76mx ve GHSA-2fmv-rv2c-59x7.
+
+**Analiz.** `dotnet nuget why` ile zincir çıkarıldı: paketi doğrudan kullanmıyoruz, `Microsoft.Data.SqlClient`
+getiriyor (API tarafında 7.1.1, migrator tarafında DbUp üzerinden 6.1.4). SqlClient'ın daha yeni bir
+sürümü olmadığı için üst paketi yükseltmek bir seçenek değildi.
+
+**Çözüm.** Infrastructure ve Database projelerine yamalı sürüm (10.0.14) doğrudan referans olarak eklendi.
+NuGet'in "en yakın kazanır" kuralı gereği transitive sürüm bununla eziliyor. Referansın yanına neden orada
+olduğunu ve ne zaman kaldırılabileceğini açıklayan bir yorum yazıldı. Yorum olmazsa biri onu
+"kullanılmayan paket" sanıp silebilir.
+
+**Doğrulama.** `dotnet list package --vulnerable --include-transitive` artık tüm projeler için temiz.
+Build 0 uyarı veriyor. Migrator ve login uçtan uca çalıştırıldı.
+
+**Neden önemli.** Uyarılar sürekli göründüğünde ekip onları görmezden gelmeye başlar ve gerçekten yeni
+bir uyarı çıktığında fark edilmez. Sıfır uyarılı bir build bu yüzden tutulmaya değer bir standart.
+
+**Commit:** `build(deps): override vulnerable transitive Pkcs package`
