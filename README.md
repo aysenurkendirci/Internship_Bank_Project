@@ -26,7 +26,7 @@ The analytics are evaluated on held-out synthetic profiles; method, results and 
 | Layer | Technology |
 |---|---|
 | Backend | .NET 10, ASP.NET Core Web API, Dapper, Clean Architecture (`Domain` ← `Application` ← `Infrastructure` / `Api`) |
-| Database | SQL Server, versioned migrations with DbUp |
+| Database | SQL Server, versioned migrations with DbUp, temporal tables for a full change history of user data |
 | Frontend | Angular 21 (standalone, signals, zoneless), Tailwind CSS, Apache ECharts |
 | Tests | xUnit + NSubstitute, integration tests on a real SQL Server via `WebApplicationFactory`, Vitest |
 | Security | PBKDF2 password hashing, JWT, rate-limited auth endpoints, RFC 9457 problem details, security headers, masked personal data in logs |

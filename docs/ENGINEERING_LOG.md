@@ -1859,3 +1859,32 @@ check, hiç olmamasından daha kötü, çünkü yanlış bir güven veriyor. Ayr
 ready 503 döndü, live 200'de kaldı.
 
 **Commit:** `feat(ops): add liveness and readiness health checks`
+
+---
+
+## #054 — Değişiklik geçmişi: temporal tablolar
+
+**Sprint:** 8
+
+Soft delete (#020) silinen kaydı koruyordu, ama güncellenen bir kaydın eski hâli kayboluyordu. Kartın limiti 50.000'den 75.000'e
+çıkınca 50.000 hiçbir yerde kalmıyordu. Bir bankada "bu kaydı ne zaman, neyden neye değiştirdi?" sorusu bir denetim sorusudur ve
+cevapsız kalmamalı.
+
+İlk aklıma gelen, her repository metodunun yanına bir "audit tablosuna yaz" satırı eklemekti. Bundan vazgeçtim: bu tür kod, yeni bir
+güncelleme metodu yazıldığında en kolay unutulan satırdır. Ayrıca aynı transaction'da yazılmazsa audit kaydı ile asıl veri birbirinden
+kopabilir.
+
+Bunun yerine SQL Server'ın **system-versioned temporal table** özelliğini kullandım (`V004`). Kart, düzenli kalem ve taksit planı
+tablolarında her `UPDATE` ve `DELETE`'te eski satırı veritabanı kendisi, aynı transaction içinde geçmiş tablosuna kopyalıyor. Soft
+delete de bir güncelleme olduğu için o da kayda giriyor. Uygulama kodunda tek satır değişmedi. Dönem kolonları `HIDDEN`, bu yüzden
+mevcut sorgular hiç etkilenmedi.
+
+Migration'ı önce içinde veri olan geliştirme veritabanına uyguladım: mevcut satırlar varsayılan değerlerle sorunsuz dönüştü.
+İki entegrasyon testi ekledim:
+- Kart oluşturuldu, limiti değiştirildi, silindi. Geçmiş tablosunda iki eski sürüm duruyor: 50.000 ve 75.000.
+- `FOR SYSTEM_TIME AS OF` ile değişiklikten önceki an sorgulandı. Kart o anda hâlâ 50.000 limitliydi.
+
+İşlem geçmişi tablosu (`finance.Transactions`) bilerek temporal yapılmadı: o satırlar ekstreden gelen değişmez kayıtlar, hiç
+güncellenmiyorlar.
+
+**Commit:** `feat(db): keep a full change history of user finance data`
