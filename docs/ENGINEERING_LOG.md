@@ -1973,3 +1973,130 @@ kullanan unit testti (`AuthCommandTests` oldu). Yeni testler: geçersiz bir iste
 
 **Commit'ler:** `feat(application): add a MediatR pipeline with validation and timing`, `refactor(auth): ...`, `refactor(finance): ...`,
 `refactor(planning): ...`, `refactor(history): ...`, `refactor(analytics): ...`
+
+---
+
+## #058 — Para transferi: idempotency, kilitler ve çift taraflı kayıt
+
+**Sprint:** 9
+
+Bankacılık tarafının en önemli eksiği buydu: hesaplar vardı ama aralarında para hareket edemiyordu. Transferi yazarken üç soruya
+cevap aradım.
+
+**1. İstek iki kez gelirse ne olur?** Mobil uygulama "Gönder"e basıldıktan sonra cevabı alamazsa isteği tekrarlar. Sunucu ilkini
+işlemişse para iki kez gider. Çözüm `Idempotency-Key` başlığı. İstemci her transfer için bir anahtar üretiyor ve tekrarlarda aynısını
+gönderiyor. `payments.Transfers` tablosunda `(UserId, IdempotencyKey)` benzersiz. Aynı anahtarla gelen ikinci istek, yeni bir transfer
+yerine ilkinin sonucunu `Idempotent-Replayed: true` başlığıyla alıyor. Anahtarın yanında isteğin SHA-256 özeti de saklanıyor. Aynı
+anahtar farklı bir tutarla gelirse 422 dönüyor. Eski sonucu döndürmek, yeni isteğin hiç çalışmadığını gizlerdi. Özet hesaplanırken
+alıcı adı katlanıyor ve tutar sabit biçimde yazılıyor, böylece "ayse yilmaz" ile "AYŞE YILMAZ" aynı istek sayılıyor.
+
+**2. Aynı bakiyeye iki istek aynı anda gelirse?** 100 TL'lik hesaptan aynı anda gelen iki 80 TL'lik transfer, kilit olmadan ikisi de
+"bakiye yeterli" görüp geçebilir. Hesap satırları transaction boyunca `UPDLOCK` ile kilitleniyor. İkinci istek, birincinin commit'ini
+bekliyor ve güncel bakiyeyi görüyor. Idempotency anahtarı da `UPDLOCK, HOLDLOCK` ile kilitleniyor. `HOLDLOCK` satır henüz yokken
+de anahtar aralığını kilitliyor, böylece aynı anahtarla eşzamanlı gelen tekrarlar birbirini bekliyor.
+
+**3. A→B ve B→A aynı anda olursa?** İki transfer hesapları ters sırada kilitlerse birbirini sonsuza kadar bekler (deadlock). Hesaplar
+her zaman id'ye göre artan sırada, tek tek kilitleniyor.
+
+Testler bu üç durumu gerçekten yarıştırıyor: 100 TL'ye 30'ar TL'lik on paralel transfer (tam üçü geçmeli), on çift ters yönlü paralel
+transfer (hepsi geçmeli, toplam korunmalı) ve aynı anahtarla beş eşzamanlı tekrar (para bir kez gitmeli). Testlerin gerçekten koruduğunu
+görmek için kilit ipuçlarını koddan bilerek sildim: üç test de kırıldı.
+
+Kayıt tarafında her transfer `payments.LedgerEntries`'e bir borç ve bir alacak olarak yazılıyor, her satırda işlem sonrası bakiye var.
+Veritabanı her transfer için tek borç ve tek alacak olmasını, bakiyenin hiçbir zaman eksiye düşmemesini constraint olarak da koruyor.
+Domain tarafında `FundsTransfer` iki hesabı da kontrol etmeden hiçbir bakiyeyi değiştirmiyor. İlk sürümde alıcı hesap dondurulmuşsa,
+gönderen bellekte borçlandırıldıktan sonra hata atılıyordu. Bunu birim testi yakaladı.
+
+Bir de alıcı adı kontrolü var: FAST ve EFT'de olduğu gibi yazılan ad hesap sahibiyle eşleşmezse transfer reddediliyor. Mod-97'yi geçen
+ama yanlış kişiye ait bir IBAN'a karşı son kontrol bu. IBAN'ın kendisi ise hiçbir hesaba bakılmadan, kontrol basamaklarıyla doğrulanıyor.
+
+Transaction, `ITransactionalCommand` ile işaretlenen command'lar için MediatR pipeline'ında açılıyor. Handler normal biterse commit
+ediliyor, herhangi bir exception'da geri alınıyor. Repository'ler açık transaction'ı istek kapsamındaki `DbSession`'dan okuyor.
+
+**Commit'ler:** `feat(domain): model accounts, Turkish IBANs and transfer rules`, `build(db): add transfers and a double-entry ledger`,
+`feat(application): run marked commands inside one database transaction`, `feat(payments): open accounts and transfer money between them`
+
+---
+
+## #059 — Kart ayarları: diğer branch'ten uyarlama
+
+**Sprint:** 9
+
+GitHub'daki Eylül çizgisinde kartlar için temassız/internet kullanımı ayarı vardı. Kodu doğrudan almak yerine bu mimariye uyarladım.
+Oradaki `Card` entity'si kuralları setter'larla değiştiriyordu (`ToggleContactless`). Burada `BankCard` domain nesnesi kuralları kendisi
+koruyor: iptal edilmiş kart değiştirilemez ve geri açılamaz, aylık limit günlük limitten küçük olamaz. Bloke etme ve bloke kaldırma da
+eklendi, ikisi de güvenlik olayı olarak loglanıyor.
+
+O entity'nin bilerek almadığım bir kısmı da vardı: tam kart numarası ve CVV tutuyordu. PCI DSS, CVV'nin yetkilendirmeden sonra hiçbir
+şekilde saklanmamasını şart koşuyor. Bu projede baştan beri sadece son dört hane tutuluyor.
+
+**Commit:** `feat(cards): let customers change card settings and block a card`
+
+---
+
+## #060 — Transactional outbox ve RabbitMQ
+
+**Sprint:** 9
+
+Transfer olduğunda başka sistemlerin (bildirim, dolandırıcılık izleme) haberdar olması gerekiyor. İlk akla gelen, transferden sonra
+mesajı doğrudan RabbitMQ'ya göndermek. Ama bunun iki kötü sonu var: transfer commit edilir, broker o an çalışmıyordur ve olay kaybolur.
+Ya da mesaj gider, ardından transaction geri alınır ve olmamış bir transfer duyurulmuş olur.
+
+Outbox ile olay, transferle aynı transaction'da `messaging.OutboxMessages` tablosuna yazılıyor. Bir arka plan servisi bekleyen satırları
+sırayla RabbitMQ'ya iletiyor. Testler, reddedilen bir transferin olay bırakmadığını ve tekrarlanan isteğin ikinci bir olay üretmediğini
+doğruluyor.
+
+Kararlar:
+- **En az bir kez teslim.** Yayıncı mesajı gönderip satırı işaretlemeden önce durursa mesaj tekrar gider. Tüketiciler `MessageId` ile
+  tekrarları ayıklamalı. Tam olarak bir kez teslim, broker ile veritabanı arasında dağıtık transaction ister ve buna değmez.
+- **Publisher confirms.** Mesaj ancak broker onayladıktan sonra gönderilmiş sayılıyor.
+- **Sıra korunuyor.** Bir mesaj gönderilemezse batch orada duruyor. Sonraki olayları önce göndermek sıralarını bozardı.
+- **Birden fazla API örneği.** Satırlar `UPDLOCK, READPAST` ile alınıyor: iki yayıncı aynı satırı göndermek yerine işi paylaşıyor.
+- **Olayda kişisel veri yok.** `TransferCompleted` sadece id ve tutar taşıyor. Ad veya IBAN'a ihtiyaç duyan tüketici onu kendisi istiyor,
+  böylece kişisel veri her kuyruğa kopyalanmıyor.
+
+Bu makinede Docker olmadığı için gerçek bir broker'la deneyemedim. Yayıncının testi `RABBITMQ_HOST` tanımlıysa çalışıyor. CI'da bir
+RabbitMQ container'ı başlatılıyor, ilk push'ta orada koşacak. Outbox'ın geri kalanı (yazma, sıra, hata sonrası tekrar) sahte bir
+yayıncıyla gerçek SQL Server'a karşı test ediliyor.
+
+**Commit'ler:** `build(db): add a transactional outbox table`, `feat(messaging): publish transfer events to RabbitMQ through the outbox`
+
+---
+
+## #061 — Yapısal log ve correlation id
+
+**Sprint:** 9
+
+Bir kullanıcı "transferim hata verdi" dediğinde, o isteğin log satırlarını bulmanın bir yolu yoktu. Artık her istek bir
+`X-Correlation-Id` alıyor. Bu id isteğin ürettiği her log satırında, cevap başlığında ve hata cevabının gövdesinde (`correlationId`) var.
+Kullanıcının hata ekranında gördüğü id ile destek ekibi doğrudan ilgili satırlara gidebilir.
+
+Çağıran taraf (bir gateway ya da mobil uygulama) kendi id'sini gönderirse korunuyor, böylece bir istek birden fazla sistemde aynı id ile
+izlenebiliyor. Ama sadece bir id'ye benziyorsa: harf, rakam ve `._-`, 8–64 karakter. Başka her şey yenisiyle değiştiriliyor, aksi
+hâlde başlığa yazılan metin log'a enjekte edilebilirdi.
+
+Log'lar Serilog ile production'da satır başına bir JSON nesnesi olarak yazılıyor. Böylece bir log deposunda `CorrelationId` ya da
+`TransferId` alanına göre aranabiliyor. Development'ta okunabilir metin olarak kalıyor.
+
+**Commit:** `feat(api): structured logging with a correlation id per request`
+
+---
+
+## #062 — Docker Compose ve proxy arkasında rate limit
+
+**Sprint:** 9
+
+`docker compose up --build` SQL Server, RabbitMQ, migration'ları çalıştıran tek seferlik bir container, API ve nginx arkasındaki web
+uygulamasını ayağa kaldırıyor. API'nin dışarıya açık portu yok, migration'lar başarıyla bitmeden başlamıyor. Gizli değerler commit
+edilmeyen bir `.env` dosyasından geliyor (`.env.example` hangilerinin gerektiğini listeliyor).
+
+Compose dosyasını yazarken bir hata yakaladım: nginx arkasında her istek proxy'nin adresinden geliyor. IP başına çalışan giriş sınırı
+(#049) bütün kullanıcıları tek kişi sayardı ve on başarısız denemeden sonra herkes kilitlenirdi. API artık `ReverseProxy:Enabled`
+açıkken istemci adresini `X-Forwarded-For`'dan okuyor. Ayar varsayılan olarak kapalı, çünkü API'ye doğrudan erişilebilen bir ortamda
+bu başlığa güvenmek, saldırganın kendi rate limit kovasını seçmesine izin verirdi. Compose'da açık, çünkü orada API'ye sadece nginx
+ulaşabiliyor.
+
+Docker bu makinede kurulu olmadığı için compose'u çalıştıramadım. CI her push'ta image'ları build ediyor, bozuk bir Dockerfile orada
+ortaya çıkacak. Sistemin bir bütün olarak container'larda ayağa kalktığını henüz görmedim.
+
+**Commit'ler:** `feat(api): read the client address from a trusted reverse proxy`, `build: run the whole system with docker compose`

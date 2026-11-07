@@ -37,6 +37,7 @@ doğrulamak gerekiyor.
 | 6 | Analitik | Trend, tekrarlayan ödeme, anomali, tahmin ve bunların ölçülmesi |
 | 7 | Web arayüzü | Bozuk build'in onarımı, sekiz ekran, bileşen tabanlı yapı |
 | 8 | Güvenlik, KVKK ve operasyon | Rate limiting, güvenlik başlıkları, maskeli log, token'da veri azaltma, temporal tablolarla değişiklik geçmişi, "verilerimi indir" (KVKK erişim hakkı), health check'ler, CI |
+| 9 | Mimari ve bankacılık çekirdeği | CQRS (MediatR + FluentValidation), hesaplar ve IBAN, idempotent para transferi ve çift taraflı kayıt, kart ayarları, outbox + RabbitMQ, yapısal log, Docker Compose |
 
 ## En öğretici on sorun
 
@@ -68,7 +69,7 @@ doğrulamak gerekiyor.
 
 ## Ölçülen sonuçlar
 
-**Testler:** 232 unit test, 55 entegrasyon testi (gerçek SQL Server), 31 frontend testi. Build sıfır uyarı ile geçiyor ve CI
+**Testler:** 270 unit test, 84 entegrasyon testi (gerçek SQL Server; biri RabbitMQ gerektiriyor ve sadece CI'da koşuyor), 31 frontend testi. Build sıfır uyarı ile geçiyor ve CI
 uyarıyı hata sayıyor.
 
 **Analitik değerlendirmesi** ([EVALUATION.md](analytics/EVALUATION.md)). Geliştirme sırasında bakılmamış 50 sentetik profilde yapıldı,
@@ -104,6 +105,7 @@ Evet. En net örnek: ayın 1'inde kira, 15'inde maaş olan bir kullanıcının a
 - **Görsel tasarım.** Ekranlar işlevsel ve bileşenlere ayrılmış durumda. Görsel tasarım Google Stitch'te yapılacak
   ([prompt](design/STITCH_PROMPT.md)).
 - Ekranlar henüz bir tarayıcıda gözle kontrol edilmedi.
+- **Docker Compose ve RabbitMQ.** Yazıldı ve CI'a bağlandı, ama bu makinede Docker olmadığı için henüz çalışırken görülmedi.
 
 ## Çıkardığım dersler
 

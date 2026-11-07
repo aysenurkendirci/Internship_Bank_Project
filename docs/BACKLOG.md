@@ -149,12 +149,21 @@ Hedef: projeyi bir bankanın backend'ine benzer hâle getirmek. Uygulama katman�
 hesaplar arası para transferi çift taraflı kayıtla ekleniyor.
 
 - [x] Uygulama katmanı CQRS'e geçti: MediatR handler'ları, FluentValidation ve süre ölçen pipeline — ADR-0006, log #057
-- [ ] Hesaplar: kullanıcının hesapları, TR IBAN doğrulaması
-- [ ] Para transferi: çift taraflı kayıt (ledger), idempotency anahtarı, eşzamanlı isteklerde bakiye güvenliği
-- [ ] Kart ayarları: temassız / internet kullanımı ve limitler
-- [ ] Transactional outbox ve RabbitMQ ile olay yayını
-- [ ] Yapısal log (Serilog) ve istek bazlı correlation id
-- [ ] Docker Compose ile tek komutla ayağa kalkan ortam
+- [x] Hesaplar: hesap açma, TR IBAN üretimi ve doğrulaması, ledger'dan hesap ekstresi — log #058
+- [x] Para transferi: çift taraflı kayıt (ledger), idempotency anahtarı, eşzamanlı isteklerde bakiye güvenliği — log #058
+- [x] Kart ayarları: temassız / internet kullanımı, limitler, geçici bloke — log #059
+- [x] Transactional outbox ve RabbitMQ ile olay yayını — log #060
+- [x] Yapısal log (Serilog) ve istek bazlı correlation id — log #061
+- [x] Docker Compose ile tek komutla ayağa kalkan ortam; proxy arkasında doğru istemci adresi — log #062
+- [ ] Docker Compose'un ve RabbitMQ testinin ilk kez çalıştırılması (bu makinede Docker yok; CI'da koşacak)
+
+**Sprint 9 retrospektifi**
+- CQRS geçişinde 55 HTTP entegrasyon testi hiç değişmedi ve her adımda yeşil kaldı. Davranışı HTTP seviyesinde kilitleyen testler,
+  büyük bir refactor'ü güvenli kılan şey oldu.
+- En değerli testler yine "bozulunca kırılan" testler oldu: kilit ipuçları silinince üç eşzamanlılık testi de kırıldı.
+- Eylül çizgisinden kart ayarları uyarlandı. O kod okunurken iki şey fark edildi: MediatR'ın yeni sürümlerinin lisansı değişmiş,
+  kart entity'si CVV tutuyordu. İkisi de bilinçli olarak alınmadı.
+- Docker olmadan yazılan compose ve RabbitMQ kısmı henüz çalışırken görülmedi. Bu açıkça yazılı ve CI'a bağlandı.
 
 ## Sonraki sprintler
 
