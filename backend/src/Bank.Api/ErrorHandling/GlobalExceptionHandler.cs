@@ -1,13 +1,16 @@
+using System.Text.Json;
 using Bank.Application.Common.Exceptions;
 using Bank.Domain.Common;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.Api.ErrorHandling;
 
 /// <summary>
 /// Translates exceptions into RFC 9457 problem details responses.
-/// Only <see cref="AppException"/> and <see cref="DomainException"/> messages reach the client;
-/// both are written for end users. Any other exception becomes a
+/// Only <see cref="AppException"/> and <see cref="DomainException"/> messages and validation messages reach
+/// the client; all of them are written for end users. Any other exception becomes a
 /// generic 500 so stack traces, SQL errors and internal names are never leaked.
 /// </summary>
 internal sealed class GlobalExceptionHandler : IExceptionHandler
@@ -25,6 +28,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
     {
         var (status, title) = exception switch
         {
+            ValidationException => (StatusCodes.Status400BadRequest, "Geçersiz istek"),
             DomainException => (StatusCodes.Status400BadRequest, "İş kuralı ihlali"),
             ImportRejectedException => (StatusCodes.Status400BadRequest, "Dosya içe aktarılamadı"),
             BadRequestException => (StatusCodes.Status400BadRequest, "Geçersiz istek"),
@@ -39,16 +43,23 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
 
         context.Response.StatusCode = status;
 
+        // Validation failures use the same field -> messages shape as ASP.NET's own model validation,
+        // so clients handle both the same way.
+        var details = exception is ValidationException validation
+            ? new HttpValidationProblemDetails(validation.Errors
+                .GroupBy(e => JsonNamingPolicy.CamelCase.ConvertName(e.PropertyName))
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()))
+            : new ProblemDetails();
+
+        details.Status = status;
+        details.Title = title;
+        details.Detail = exception is AppException or DomainException ? exception.Message : null;
+
         var problem = new ProblemDetailsContext
         {
             HttpContext = context,
             Exception = exception,
-            ProblemDetails =
-            {
-                Status = status,
-                Title = title,
-                Detail = exception is AppException or DomainException ? exception.Message : null
-            }
+            ProblemDetails = details
         };
 
         if (exception is ImportRejectedException rejected)

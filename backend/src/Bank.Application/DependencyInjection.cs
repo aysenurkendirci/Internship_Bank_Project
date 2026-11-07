@@ -1,6 +1,8 @@
 using Bank.Application.Abstractions.Services;
+using Bank.Application.Common.Behaviors;
 using Bank.Application.Services;
 using Bank.Application.Services.Finance;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bank.Application;
@@ -9,6 +11,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        // Logging wraps validation so rejected requests are timed and logged too.
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssembly(assembly);
+            config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
+        services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ICreditCardService, CreditCardService>();
