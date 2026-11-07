@@ -1,7 +1,6 @@
 using Bank.Contracts.Auth;
-using System.Threading.Tasks;
 
-namespace Bank.Application.Abstractions.Repositories; // Namespace bu olmalı
+namespace Bank.Application.Abstractions.Repositories;
 
 public interface IAuthRepository
 {
@@ -11,19 +10,17 @@ public interface IAuthRepository
     Task<CredentialRow> GetCredentialsAsync(long userId, CancellationToken ct = default);
 }
 
-public sealed class UserRow // Burayı record'dan class'a çevirmiştik
+public sealed class UserRow
 {
-    public UserRow() { }
-    public long UserId { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string TcNo { get; set; } = string.Empty;
+    public long UserId { get; init; }
+    public string Email { get; init; } = string.Empty;
+    public string FirstName { get; init; } = string.Empty;
+    public string LastName { get; init; } = string.Empty;
+    public string TcNo { get; init; } = string.Empty;
 }
 
 public sealed class CredentialRow
 {
-    public CredentialRow() { }
-    public long UserId { get; set; }
-    public string PasswordHash { get; set; } = string.Empty;
+    public long UserId { get; init; }
+    public string PasswordHash { get; init; } = string.Empty;
 }

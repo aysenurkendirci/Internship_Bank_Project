@@ -1,9 +1,8 @@
 using Bank.Contracts.Dashboard;
 
-namespace Bank.Application.Abstractions.Services;
+namespace Bank.Application.Abstractions.Repositories;
 
-public interface IDashboardService
+public interface IDashboardRepository
 {
-    Task<DashboardResponse> GetDashboardAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<TransactionItem>> GetRecentTransactionsAsync(CancellationToken ct = default);
+    Task<DashboardResponse> GetDashboardAsync(long userId, CancellationToken ct = default);
 }
