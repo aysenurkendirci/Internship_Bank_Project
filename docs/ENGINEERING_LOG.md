@@ -450,3 +450,31 @@ verilirse verilsin, payların toplamı yuvarlanmış toplama eşit olmalı ve he
 durumlar: kuruşun parça sayısından az olduğu durum (0,05 TL / 3 → 0,03 + 0,01 + 0,01) ve iade gibi negatif tutarlar.
 
 **Commit:** `feat(domain): split money into cent-exact shares`
+
+---
+
+## #015 — Tekrarlayan ödemeler: ay sonu kayması
+
+**Sprint:** 1
+
+**Sorun.** Maaş, kira, abonelik gibi düzenli ödemeler "her ayın X'i" şeklinde tanımlanır. Ama her ayın
+31'i yoktur. Asıl tuzak şu: bir sonraki tarihi bir **önceki tarihten** hesaplayan naif bir uygulama
+`31 Oca → 28 Şub → 28 Mar → 28 Nis …` üretir. Şubat'tan sonra ödeme yılın geri kalanında ayın 28'ine
+kayar ve nakit akışı takvimi gerçeği yansıtmaz.
+
+**Çözüm.** `RecurrenceRule` (sıklık, aralık, başlangıç, opsiyonel bitiş) her tekrarı **başlangıç tarihinden**
+hesaplıyor: n. tekrar = `StartDate.AddMonths(n × Interval)`. .NET'in `AddMonths` metodu geçersiz günü
+ayın son gününe sabitliyor, böylece sonuç `31 Oca → 28 Şub → 31 Mar → 30 Nis` oluyor.
+Aynı yaklaşım 29 Şubat'ta başlayan yıllık tekrarları da doğru ele alıyor: artık yıl olmayan yıllarda
+28 Şubat'a düşüyor, artık yıllarda tekrar 29'a dönüyor.
+
+**Doğrulama.** Kod geçici olarak "önceki tarihten hesapla" şekline çevrildi. Test tam olarak beklenen
+hatayı gösterdi (`Beklenen 31.03.2026, Gerçek 28.03.2026, 28.04.2026, 28.05.2026`). Kod geri yüklendi.
+
+**Kapsam kararları (YAGNI).**
+- Sıklıklar: haftalık, aylık, yıllık ve "her N'de bir" aralığı. "Ayın son iş günü" gibi kurallar şu an
+  gereksinimlerde yok.
+- Tatil ve hafta sonu kaydırması tekrarlama kuralının değil, ödemeyi yapan kurumun kuralı. Bu yüzden
+  kredi kartı son ödeme gününde ayrıca ele alınacak.
+
+**Commit:** `feat(domain): add recurrence rule for repeating payments`

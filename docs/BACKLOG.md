@@ -25,7 +25,7 @@
 
 - [x] `Money` ve `Currency` value object'leri — log #013
 - [ ] Gelir, düzenli gider, abonelik, kredi kartı (ekstre kesim / son ödeme günü), taksit planı, planlanan harcama
-- [ ] Tekrarlama kuralı (aylık, yıllık, ayın son günü vb.)
+- [x] Tekrarlama kuralı: haftalık/aylık/yıllık, ay sonu kayması olmadan — log #015
 
 ## Sonraki sprintler
 
