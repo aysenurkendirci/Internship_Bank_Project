@@ -19,6 +19,16 @@
     </p>
   </section>
 
+  @if (outlook(); as projection) {
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="section-title">Önümüzdeki 3 ay</h2>
+        <a routerLink="/dashboard/cash-flow" class="btn-link">Nakit akışına git</a>
+      </div>
+      <app-projection-summary [projection]="projection" />
+    </section>
+  }
+
   @if (data.cards.length > 0) {
     <section class="mb-10">
       <h2 class="text-xl font-black text-slate-900 mb-4">Kartlarım</h2>

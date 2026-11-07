@@ -44,7 +44,8 @@ SCREENS
    "Bireysel / Kurumsal", button "KAYIT OL". Field-level error messages under inputs.
 
 2. Ana Sayfa (dashboard)
-   Greeting "Merhaba, Ayşe". Big total figure "Toplam varlık (TL hesaplar)". Horizontal row of bank cards (card type,
+   Greeting "Merhaba, Ayşe". Big total figure "Toplam varlık (TL hesaplar)". Section "Önümüzdeki 3 ay" with a
+   "Nakit akışına git" link and the same three stat tiles as the cash-flow screen. Horizontal row of bank cards (card type,
    **** **** **** 4242, balance, Sanal/Fiziksel tag). "Son işlemler" list (icon in/out, title, category · date, amount,
    green for incoming). "Hesaplarım" column: account type, balance in its own currency, IBAN, status badge "Aktif".
 
