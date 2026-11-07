@@ -3,7 +3,7 @@ using Bank.Application.Synthetic;
 using Bank.Domain.Analytics;
 using Bank.Domain.Common;
 
-// Reproduces every figure in docs/research/EVALUATION.md.
+// Reproduces every figure in docs/analytics/EVALUATION.md.
 // Usage: dotnet run --project tools/Bank.Evaluation -c Release
 //
 // Seeds 1–10 were used while developing the analytics; seeds 101–150 were held out and are only used here.

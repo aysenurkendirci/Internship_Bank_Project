@@ -18,8 +18,8 @@ and lets you compare installment options before you buy.
 | **Analytics** | Category trends, recurring payment detection (with one-click tracking), anomaly detection with a robust z-score, and an everyday-spending forecast shown as a 95% range. |
 | **Synthetic data** | A reproducible profile generator (seeded) for demos and for evaluating the analytics against known answers. |
 
-The analytics are evaluated on held-out synthetic profiles; method, results and threats to validity are in
-[`docs/research/EVALUATION.md`](docs/research/EVALUATION.md).
+The analytics are evaluated on held-out synthetic profiles; method, results and known limitations are in
+[`docs/analytics/EVALUATION.md`](docs/analytics/EVALUATION.md).
 
 ## Tech stack
 
@@ -87,7 +87,7 @@ cd frontend && npx ng test --watch=false
 - CI (`.github/workflows/ci.yml`) runs both against a SQL Server container, plus the web build and specs.
 
 ```bash
-# Evaluation of the analytics (writes the tables in docs/research/EVALUATION.md)
+# Evaluation of the analytics (writes the tables in docs/analytics/EVALUATION.md)
 cd backend && dotnet run --project tools/Bank.Evaluation -c Release
 ```
 
@@ -95,7 +95,7 @@ cd backend && dotnet run --project tools/Bank.Evaluation -c Release
 
 - [`docs/ENGINEERING_LOG.md`](docs/ENGINEERING_LOG.md) — every problem found and how it was solved, in order
 - [`docs/adr/`](docs/adr/) — architecture decisions (database, projection assumptions, session hardening, right to erasure)
-- [`docs/research/EVALUATION.md`](docs/research/EVALUATION.md) — evaluation of the analytics
+- [`docs/analytics/EVALUATION.md`](docs/analytics/EVALUATION.md) — evaluation of the analytics
 - [`docs/REPORT.md`](docs/REPORT.md) — project summary
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — sprint backlog and retrospectives
 - [`docs/design/STITCH_PROMPT.md`](docs/design/STITCH_PROMPT.md) — prompt for the visual design

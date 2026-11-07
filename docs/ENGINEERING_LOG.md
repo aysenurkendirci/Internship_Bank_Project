@@ -560,7 +560,7 @@ Tutarlılık kontrolleri: plan başka bir karta uygulanamıyor, kartın para bir
 **Testlerden çıkan gerçek hayat bulgusu.** 25 Mart 2026'da 3 taksitle yapılan 1.000 TL'lik bir alışverişte
 Mayıs taksidinin son ödeme günü (30 Mayıs) Cumartesi'ye denk geliyor ve 1 Haziran'a kayıyor. Haziran
 taksidi de 30 Haziran'da. Sonuç: **Haziran'da iki taksit ödemesi, Mayıs'ta hiç yok.** Ay bazında bütçe yapan bir
-kullanıcı bunu fark etmez. Bu, projenin araştırma sorusunun ("gelecekteki yük daha erken görünür
+kullanıcı bunu fark etmez. Bu, projenin çıkış sorusunun ("gelecekteki yük daha erken görünür
 hale getirilebilir mi?") küçük ama somut bir örneği. Bu durum ayrı bir testle kilitlendi.
 
 **Kapsam kararları.**
@@ -846,7 +846,7 @@ Varsayımlar ayrı bir karar kaydında: [ADR-0003](adr/0003-cash-flow-projection
 
 **Neden "en düşük bakiye"?** Kira 1'inde, maaş 15'inde olan bir kullanıcı için Mart ayı **+25.000 TL net** ile
 kapanıyor, ama bakiye 1–15 Mart arasında **−15.000 TL**'de. Sadece ay sonu rakamlarına bakan bir özet bu baskıyı
-hiç göstermez. Test: `Month_ClosingPositive_CanStillDipBelowZeroMidMonth`. Bu, araştırma sorusunun ("finansal
+hiç göstermez. Test: `Month_ClosingPositive_CanStillDipBelowZeroMidMonth`. Bu, projenin çıkış sorusunun ("finansal
 baskı daha erken görünür hale getirilebilir mi?") doğrudan bir cevabı.
 
 **Testler (14).** Her varsayım bir testle kilitlendi:
@@ -1141,7 +1141,7 @@ olarak seçildi ve testle kilitlendi:
 | Ayda %20 ihtimalle 12–35 bin TL elektronik alışverişi, `IsAnomaly = true` | Anomali tespiti için **ground truth** | Normal harcamanın en az 5 katı |
 
 **Belirlenimcilik (determinism).** Aynı `seed` her zaman aynı geçmişi üretiyor, bu bir testle kilitlendi. .NET'te seed
-verilen `Random` örnekleri tam da bu amaçla eski algoritmayı koruyor. Testler, demo ve tezdeki deneyler tekrarlanabilir.
+verilen `Random` örnekleri tam da bu amaçla eski algoritmayı koruyor. Testler, demo ve değerlendirmedeki ölçümler tekrarlanabilir.
 
 **Aynı yoldan geçen veri.** Üretilen satırlar CSV import'unun kullandığı parmak izi ve toplu yazma yolundan geçiyor
 (`POST /api/finance/transactions/demo?months=12&seed=42`). İki faydası var:
@@ -1223,7 +1223,7 @@ Eşiği sonuca göre ayarlamak, sonucu olduğundan iyi gösterirdi.
 Kira, spor salonu ve abonelikler **sabit**, elektrik, doğalgaz ve su **değişken** olarak doğru sınıflandırıldı. Haftalık İstanbulkart
 dolumu ve market alışverişleri (ayda birden fazla) doğru şekilde elendi.
 
-**Geçerlilik tehdidi (tezde belirtilmeli).** Sentetik veri gerçek veriden daha düzenli: abonelikler her ay tam aynı gün ve tutarla
+**Sınır (raporda açıkça yazılmalı).** Sentetik veri gerçek veriden daha düzenli: abonelikler her ay tam aynı gün ve tutarla
 geliyor. %100 sonucu gerçek dünya performansı olarak sunulmamalı. Bu yüzden gerçek hayattaki bozulmalar ayrı testlerle denendi:
 - **zam gelen abonelik** → hâlâ tespit ediliyor, "değişken" olarak
 - **atlanan bir ay** → tolere ediliyor
@@ -1291,7 +1291,7 @@ hesaplamıştım, ama taban çizgisi işaretlenen alışverişin kendisini de i�
 
 **Sprint:** 6
 
-**Araştırma sorusu.** "Basit istatistiksel tahminler kişisel nakit akışı planlamasında yeterli olabilir mi?"
+**Soru.** "Basit istatistiksel tahminler kişisel nakit akışı planlamasında yeterli olabilir mi?"
 
 **Neyi tahmin ediyoruz?** Projeksiyon (#025) sadece bilinen sabit kalemleri içeriyor: kira, maaş, taksit. Market, restoran ve ulaşım gibi
 günlük değişken harcamaları göstermediği için **olduğundan iyimser**. `EverydaySpending` bu harcamaların aylık toplamını çıkarıyor:
@@ -1324,7 +1324,7 @@ birlikte raporlanıyor.
    %10 eşiği bu veri için ulaşılamaz bir hedefti. Benim önceden koyduğum kriter gerçekçi değildi.
 2. Basit hareketli ortalama bu tabanın yaklaşık 5,6 puan üzerinde. Daha karmaşık yöntemlerin kazanabileceği alan bu 5,6 puanla sınırlı.
 3. **Aralıklar iyi kalibre** (%95 hedefe karşı %96–97). Önceden konan ikinci kriter karşılandı ve bir testle kilitlendi.
-4. **Tez için cevap:** basit yöntemler tek bir sayı olarak "gelecek ay 18.400 TL harcayacaksın" demekte orta düzeyde kalıyor. Ama
+4. **Ürün için sonuç:** basit yöntemler tek bir sayı olarak "gelecek ay 18.400 TL harcayacaksın" demekte orta düzeyde kalıyor. Ama
    "15.000 ile 22.000 TL arasında harcayacaksın" demekte **güvenilir**. Planlama için doğru olan, noktasal tahmin değil aralık göstermek.
 5. Doğrusal trend, enflasyona rağmen en kötü sonucu verdi. 6 aylık pencerede gürültü eğimi yanıltıyor. Basit trend kestirimi,
    gürültülü kısa serilerde riskli.
@@ -1379,7 +1379,7 @@ olduğu görüldü. Kod değil beklenti yanlıştı. Testteki beklenen değerin 
 
 **Sprint:** 6
 
-**Sorun.** #034–#036'daki ölçümler geçici bir keşif programıyla yapılmıştı. Bir tezde "sonuçlar şunlar" yetmez, "sonuçlar
+**Sorun.** #034–#036'daki ölçümler geçici bir keşif programıyla yapılmıştı. "Sonuçlar şunlar" demek yetmez, "sonuçlar
 şu komutla yeniden üretilir" demek gerekir. Ayrıca #036'daki tahmin ölçümü 10 profile dayanıyordu.
 
 **Çözüm.**
@@ -1387,8 +1387,8 @@ olduğu görüldü. Kod değil beklenti yanlıştı. Testteki beklenen değerin 
   (`dotnet run --project tools/Bank.Evaluation -c Release`). Çözüme dahil olduğu için her build'de derleniyor, kod
   değiştikçe çürüyemiyor.
 - Nihai değerlendirme **50 test profili** (101–150) ile yapıldı.
-- [`docs/research/EVALUATION.md`](research/EVALUATION.md): veri, yöntem, önceden belirlenen kriterler, sonuçlar, araştırma
-  sorularına cevaplar ve geçerlilik tehditleri.
+- [`docs/analytics/EVALUATION.md`](analytics/EVALUATION.md): veri, yöntem, önceden belirlenen kriterler, sonuçlar, ürünün iki
+  sorusuna cevaplar ve sonuçların sınırları.
 
 **#036'ya düzeltme.** 50 profille tahmin sonuçları belirgin şekilde farklı çıktı:
 
@@ -1591,7 +1591,7 @@ doğrulanmadı**. Akışların bağlı olduğu API davranışı entegrasyon test
 renk körlüğü ayrımı ΔE 24,7 (eşik 8), normal görüşte ΔE 33,6, beyaz zemine karşı kontrast ≥ 3:1. Kırmızı sadece "sıfırın altı"
 durumu için ayrıldı ve **hiçbir zaman tek başına kullanılmıyor**: tabloda ikon ve "Eksiye düşüyor" metniyle birlikte gösteriliyor.
 
-**Araştırma sorusunun arayüzdeki karşılığı.** Üçüncü stat kartı "Bakiyenin eksiye düştüğü ay" sayısını, altında "Ay sonu artıda olsa
+**Ana sorunun arayüzdeki karşılığı.** Üçüncü stat kartı "Bakiyenin eksiye düştüğü ay" sayısını, altında "Ay sonu artıda olsa
 bile ay içinde" notuyla gösteriyor. Tabloda "Ay sonu" ve "Ay içi en düşük" kolonları yan yana. Ayı artıda kapatıp ortasında eksiye
 düşen kullanıcı bunu ilk bakışta görüyor (ADR-0003 §5).
 

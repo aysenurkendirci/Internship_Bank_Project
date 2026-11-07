@@ -4,7 +4,7 @@
 
 ## Bağlam
 
-Projenin araştırma sorusu şu: geçmiş ödeme davranışı ile gelecekteki yükümlülükler birlikte gösterildiğinde
+Projenin çıkış noktası şu soru: geçmiş ödeme davranışı ile gelecekteki yükümlülükler birlikte gösterildiğinde
 finansal baskı daha erken görünür hale getirilebilir mi? Bunun için kullanıcının bilinen gelir, gider, abonelik,
 kart ve taksitlerinden gelecek aylar için bir nakit akışı takvimi üretiliyor.
 

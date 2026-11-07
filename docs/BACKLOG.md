@@ -59,7 +59,7 @@
 
 **Sprint 3 retrospektifi**
 - Teslim: projeksiyon motoru ve API'si. Toplam 130 test (109 unit, 21 entegrasyon).
-- Araştırma sorusuna ilk somut cevap: ayı artıda kapatan bir kullanıcının ay içinde eksiye düştüğü gün tespit edilebiliyor.
+- Projenin ana sorusuna ilk somut cevap: ayı artıda kapatan bir kullanıcının ay içinde eksiye düştüğü gün tespit edilebiliyor.
 - Mutation testi, ADR'de yazılı olup testle korunmayan bir varsayımı (aynı gün sıralaması) ortaya çıkardı.
 - Sırada: Sprint 4, senaryo karşılaştırma ("3 yerine 6 taksit alırsam ne olur?"). Motor saf bir fonksiyon olduğu için senaryo, girdiye eklenen geçici bir plan olarak çalıştırılabilecek.
 
@@ -96,7 +96,7 @@
 - [x] Anomali tespiti (robust z-skoru), test seti 36/36, duyarlılık analizi — log #035
 - [x] Tahmin: 3 basit yöntem, backtest ile seçim, kalibre aralık; kâhin referansı ile gürültü tabanı — log #036
 - [x] Analitik API'si: trendler, tekrarlayan ödemeler (takip durumu), anomaliler, tahmin — log #037
-- [x] Değerlendirme raporu ve yeniden üretme aracı, 50 test profili — log #038, `docs/research/EVALUATION.md`
+- [x] Değerlendirme raporu ve yeniden üretme aracı, 50 test profili — log #038, `docs/analytics/EVALUATION.md`
 
 **Sprint 6 retrospektifi**
 - Teslim: kategori trendi, tekrarlayan ödeme tespiti, anomali tespiti, tahmin, analitik API'si, değerlendirme raporu. Toplam 270 test (227 unit, 43 entegrasyon).

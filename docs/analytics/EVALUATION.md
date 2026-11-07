@@ -88,7 +88,7 @@ Temiz profillere her ay, market medyanının **k katı** tutarında bir market a
 **Kâhin referansı.** Her ayın gerçek beklenen değeri, 300 bağımsız profilin ortalamasıyla yaklaşık olarak bulundu.
 Gerçek beklenen değeri bilen kusursuz bir tahminci bile %10,4 hata yapıyor. Bu, verinin indirgenemez gürültüsü.
 
-## 4. Araştırma sorularına cevaplar
+## 4. Projenin iki sorusuna cevaplar
 
 **S1. Geçmiş ödeme davranışı ve gelecekteki yükümlülükler birlikte gösterildiğinde finansal baskı daha erken
 görünür hale getirilebilir mi?**
@@ -114,7 +114,7 @@ Kısmen, ve doğru biçimde sunulduğunda evet:
 - Doğrusal trend, verideki enflasyona rağmen hareketli ortalamadan kötü ve en değişken sonucu verdi. Kısa ve gürültülü
   serilerde trend kestirimi riskli.
 
-## 5. Geçerlilik tehditleri
+## 5. Sonuçların sınırları
 
 1. **Sentetik veri gerçekten daha düzenli.** Abonelikler her ay tam aynı gün ve tutarla geliyor, harcama tutarları sınırlı
    (uniform) dağılıyor. Tespit sonuçları (precision/recall = 1,0) gerçek dünya performansı olarak sunulmamalı. Gerçek

@@ -71,7 +71,7 @@ doğrulamak gerekiyor.
 **Testler:** 232 unit test, 55 entegrasyon testi (gerçek SQL Server), 31 frontend testi. Build sıfır uyarı ile geçiyor ve CI
 uyarıyı hata sayıyor.
 
-**Analitik değerlendirmesi** ([EVALUATION.md](research/EVALUATION.md)). Geliştirme sırasında bakılmamış 50 sentetik profilde yapıldı,
+**Analitik değerlendirmesi** ([EVALUATION.md](analytics/EVALUATION.md)). Geliştirme sırasında bakılmamış 50 sentetik profilde yapıldı,
 kabul kriterleri ölçümden önce yazıldı:
 
 | Bileşen | Sonuç |
@@ -83,7 +83,7 @@ kabul kriterleri ölçümden önce yazıldı:
 Önceden koyduğum "MAPE ≤ %10" kriteri karşılanmadı. Bunu gizlemek yerine nedenini ölçtüm: gerçek ortalamayı bilen kusursuz bir tahminci
 bile %10,4'te kalıyor. Yani kriter bu veri için ulaşılamazdı.
 
-## Araştırma sorularına kısa cevaplar
+## Projenin iki sorusuna kısa cevaplar
 
 **Geçmiş ödeme davranışı ile gelecekteki yükümlülükler birlikte gösterildiğinde finansal baskı daha erken görünür olur mu?**
 Evet. En net örnek: ayın 1'inde kira, 15'inde maaş olan bir kullanıcının ayı +25.000 TL ile kapanırken, 1–15 arası bakiyesi
