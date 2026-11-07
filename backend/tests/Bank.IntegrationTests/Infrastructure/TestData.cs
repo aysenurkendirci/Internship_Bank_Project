@@ -30,6 +30,25 @@ public static class TestData
         return ((long)(await command.ExecuteScalarAsync())!, iban);
     }
 
+    /// <summary>Cards are issued by the bank, not through this API, so they are seeded too.</summary>
+    public static async Task<long> AddCardAsync(long userId, long accountId, string status = "Active")
+    {
+        await using var connection = new SqlConnection(ApiFactory.ConnectionString);
+        await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO dbo.Cards (UserId, AccountId, CardLastFour, CardType, Status, DailyLimit, MonthlyLimit)
+            OUTPUT INSERTED.CardId
+            VALUES (@UserId, @AccountId, '4242', 'Debit', @Status, 5000, 50000)
+            """;
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@AccountId", accountId);
+        command.Parameters.AddWithValue("@Status", status);
+
+        return (long)(await command.ExecuteScalarAsync())!;
+    }
+
     public static Task<(long AccountId, string Iban)> AddTryAccountAsync(long userId, decimal balance)
         => AddAccountAsync(userId, balance);
 }

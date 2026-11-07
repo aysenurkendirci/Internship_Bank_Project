@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IRecurringCashFlowRepository, RecurringCashFlowRepository>();
         services.AddScoped<IInstallmentPlanRepository, InstallmentPlanRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
 
