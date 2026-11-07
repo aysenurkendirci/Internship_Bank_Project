@@ -1736,3 +1736,37 @@ Ekranların görünüşü değişmedi, sadece içleri düzenlendi. Build ve 25 f
 
 **Commit'ler:** `refactor(web): split the cash-flow page…`, `…break the scenario page…`, `…split cards page…`,
 `…split recurring items page…`, `refactor(web): split transactions page into upload and list`
+
+---
+
+## #049 — Giriş denemelerine sınır ve güvenlik başlıkları
+
+**Sprint:** 8
+
+Sprint 8'e en çok canımı sıkan açıkla başladım: login ucu, bir saldırganın şifre ya da TC listesi denemesine hiçbir sınır koymuyordu.
+#006'da "bilinmeyen TC" ile "yanlış şifre" aynı cevabı veriyor hale gelmişti, bu yüzden kimin kayıtlı olduğu sızmıyor. Ama aynı
+kullanıcı için dakikada binlerce şifre denemek hâlâ mümkündü.
+
+**Rate limiting.** .NET'in kendi `RateLimiter`'ı ile `/api/auth` altındaki uçlara IP başına sabit pencereli bir sınır koydum
+(varsayılan dakikada 10 deneme, ikisi de `appsettings` üzerinden ayarlanabiliyor). Sınır aşılınca 429, `Retry-After` başlığı ve
+diğer hatalarla aynı biçimde Türkçe bir ProblemDetails dönüyor. Ek paket gerekmedi.
+
+Bir not düştüm, çünkü canlıda kolayca atlanabilecek bir ayrıntı: bölümleme `RemoteIpAddress`'e göre. Uygulama bir reverse proxy'nin
+arkasına konursa bütün istekler proxy'nin adresinden geliyormuş gibi görünür ve tek bir kişi herkesi kilitleyebilir. O durumda önce
+forwarded header'ların açılması gerekiyor. Bu, sınıfın belgesinde yazılı.
+
+**Testlerde bir pürüz.** Entegrasyon testleri onlarca kullanıcıyı aynı "adresten" saniyeler içinde kaydediyor. Limit açıldığında
+hepsi 429'a takılırdı. Ana test host'unda limiti çok yüksek tuttum. Limiti test eden sınıf ise `WithWebHostBuilder` ile limiti 3 olan
+**ayrı bir host** açıyor: 3 deneme 401, 4. deneme 429. Testler birbirini etkilemiyor.
+
+**Güvenlik başlıkları.** Kişisel finans verisi dönen bir API için temel set:
+- `Cache-Control: no-store`: bakiye ve işlemler ortak bir bilgisayarda, çıkış yaptıktan sonra tarayıcı önbelleğinde kalmasın.
+- `X-Content-Type-Options: nosniff`: tarayıcı JSON cevabı başka bir türmüş gibi yorumlamasın.
+- `X-Frame-Options: DENY` ve `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`: API'nin döndüğü hiçbir şey bir
+  çerçeveye gömülmek ya da script çalıştırmak için değil. Sadece geliştirmede açık olan Swagger script'e ihtiyaç duyduğu için CSP'nin
+  dışında.
+- `Referrer-Policy: no-referrer`: URL'lerdeki id'ler başka sitelere sızmasın.
+
+Başlıklar `OnStarting` ile ekleniyor, yani 401 gibi hata cevaplarında da var. Bu da bir testle kontrol ediliyor.
+
+**Commit:** `feat(security): throttle auth endpoints and add security headers`

@@ -1,11 +1,14 @@
+using Bank.Api.Security;
 using Bank.Application.Abstractions.Services;
 using Bank.Contracts.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Bank.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting(AuthRateLimiting.Policy)]
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;

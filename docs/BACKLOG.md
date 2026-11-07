@@ -125,6 +125,12 @@
 - Türkçe ekler ("20'si", "2026'dan") küçük ama gerçek bir sorundu. Ek gerektirmeyen ifadeler seçmek, ek kuralları kodlamaktan daha sağlam.
 - Eksik kalan: ekranlar bir tarayıcıda gözle kontrol edilmedi. Görsel tasarım Stitch'ten gelince yapılacak.
 
+## Sprint 8 — Güvenlik ve KVKK
+
+- [x] Giriş uçlarında IP başına rate limiting, güvenlik başlıkları, `no-store` — log #049
+- [ ] Giriş denemelerinin güvenlik kaydı (TC maskeli)
+- [ ] Token'da kişisel veri azaltma
+- [ ] Refresh token + HttpOnly cookie (kapsam dışı kalırsa ADR ile kayıt)
+
 ## Sonraki sprintler
 
-8. Güvenlik ve KVKK: refresh token, rate limiting, loglarda PII maskeleme, audit log

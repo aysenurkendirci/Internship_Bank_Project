@@ -31,6 +31,8 @@ builder.Services.AddControllers()
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.AddAuthRateLimiting(builder.Configuration);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -97,6 +99,7 @@ var app = builder.Build();
 
 // Registered first so it also catches exceptions thrown by later middleware.
 app.UseExceptionHandler();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -106,6 +109,7 @@ if (app.Environment.IsDevelopment())
 
 // Order matters: CORS must answer preflight requests before authentication rejects them.
 app.UseCors("AllowAngular");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
