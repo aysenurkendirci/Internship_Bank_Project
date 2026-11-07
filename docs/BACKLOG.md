@@ -14,7 +14,7 @@
 - [x] Dashboard sunum mantığı istemciye taşındı, uydurma `%32 Faiz` / `0.024` kaldırıldı — log #008
 - [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
 - [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
-- [ ] `CardsController`: aynı servis çağrısı iki kez yapılıyor, kullanılmayan `userId` parse'ı
+- [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı
 - [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
 - [ ] Test projeleri (xUnit) ve ilk testler
 - [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
