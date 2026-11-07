@@ -1,6 +1,6 @@
-using Bank.Application.Imports;
+using Bank.Domain.Common;
 
-namespace Bank.UnitTests.Imports;
+namespace Bank.UnitTests.Domain;
 
 public sealed class TextFoldingTests
 {

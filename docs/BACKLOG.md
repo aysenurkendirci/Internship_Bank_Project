@@ -92,7 +92,7 @@
 ## Sprint 6 — Analitik
 
 - [x] Analitik temeli (`HistoryEntry`, `YearMonth`, `Statistics`) ve kategori trendleri — log #033
-- [ ] Tekrarlayan ödeme tespiti (abonelik / fatura ayrımı)
+- [x] Tekrarlayan ödeme tespiti; test seti precision/recall 1,00 (sentetik veri, sınırları belgeli) — log #034
 - [ ] Anomali tespiti (robust z-skoru), sentetik veride precision/recall
 - [ ] Tahmin ve güven aralığı, backtest ile yöntem karşılaştırması
 - [ ] Analitik API'si

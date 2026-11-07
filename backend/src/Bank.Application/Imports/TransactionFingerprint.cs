@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Bank.Domain.Common;
 
 namespace Bank.Application.Imports;
 

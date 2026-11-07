@@ -1186,3 +1186,50 @@ Mart–Ağustos arası bakılırsa düşüş görünür. Mevsimsellik ayrıştı
 dokümantasyonunda ve raporda belirtilecek.
 
 **Commit:** `feat(domain): add category spending trends`
+
+---
+
+## #034 — Tekrarlayan ödeme tespiti
+
+**Sprint:** 6
+
+**İhtiyaç.** Kullanıcılar aboneliklerinin ve faturalarının hepsini elle girmez. Çoğu zaman unuttukları aboneliklerin farkında
+bile değildirler. Geçmişten "bunları her ay düzenli ödüyorsun" diye önerebilmek, projeksiyonun (#025) eksiksiz olması için şart.
+
+**Kurallar.** Aynı yönde (gelir veya gider) bir satıcı şu koşulları sağlarsa tekrarlayan sayılıyor:
+1. En az **3 ayda** görülmüş ve **ayda en fazla bir kez**. Market alışverişi bu kuralla eleniyor.
+2. İlk ve son göründüğü ay arasındaki ayların **en az %75'inde** var. Atlanan bir ay tolere ediliyor.
+3. Ayın günü tutarlı: gün değerlerinin **MAD'ı ≤ 3**. Maaşın hafta sonu kaymasıyla 13–15 arasında oynaması tolere ediliyor.
+   Ortalama yerine medyan ve MAD kullanıldığı için tek bir istisnai gün sonucu bozmuyor.
+
+Tutarlar medyanın ±%5'i içindeyse **sabit** (abonelik, kira), değilse **değişken** (fatura). Satıcı adları #031'deki Türkçe katlama
+ile karşılaştırılıyor. `TextFolding` saf bir metin kuralı olduğu ve artık domain'de de gerektiği için Application'dan Domain'e
+taşındı (`git mv` ile, geçmiş korundu).
+
+**Değerlendirme yöntemi (overfitting'e karşı).**
+- Eşikler sentetik profillerin **1–10** seed'leriyle ayarlandı.
+- Son değerlendirme **daha önce hiç bakılmamış 101–110** seed'lerinde yapıldı.
+- Kabul eşiği (precision ve recall ≥ 0,95) test yazılmadan **önce** belirlendi.
+
+Eşiği sonuca göre ayarlamak, sonucu olduğundan iyi gösterirdi.
+
+**Sonuç.**
+
+| Veri seti | Doğru pozitif | Yanlış pozitif | Kaçırılan | Precision | Recall |
+|---|---|---|---|---|---|
+| Ayar (seed 1–10) | 90 | 0 | 0 | 1,00 | 1,00 |
+| **Test (seed 101–110)** | 90 | 0 | 0 | **1,00** | **1,00** |
+
+Kira, spor salonu ve abonelikler **sabit**, elektrik, doğalgaz ve su **değişken** olarak doğru sınıflandırıldı. Haftalık İstanbulkart
+dolumu ve market alışverişleri (ayda birden fazla) doğru şekilde elendi.
+
+**Geçerlilik tehdidi (tezde belirtilmeli).** Sentetik veri gerçek veriden daha düzenli: abonelikler her ay tam aynı gün ve tutarla
+geliyor. %100 sonucu gerçek dünya performansı olarak sunulmamalı. Bu yüzden gerçek hayattaki bozulmalar ayrı testlerle denendi:
+- **zam gelen abonelik** → hâlâ tespit ediliyor, "değişken" olarak
+- **atlanan bir ay** → tolere ediliyor
+- **farklı yazımlar** (`MİGROS`/`MIGROS`) → tek seri
+- **rastgele günlerde aylık harcama** → elendi
+- **aynı ay içinde iade + tekrar çekim** → **tespit edilemiyor**. Bu bilinen bir sınır ve bir testle belgelendi. İadeleri eşleyip
+  düşen bir ön işleme adımı ile çözülebilir.
+
+**Commit:** `feat(domain): detect recurring payments in transaction history`

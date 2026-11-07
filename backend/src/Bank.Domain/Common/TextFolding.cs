@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Bank.Application.Imports;
+namespace Bank.Domain.Common;
 
 /// <summary>
 /// Reduces text to a form where spelling variants of the same word compare equal:
