@@ -1,0 +1,38 @@
+@if (chart(); as option) {
+  <app-chart class="h-64 mb-6" [option]="option" label="Kategorilere göre toplam harcama. Aylık ayrıntı aşağıdaki tabloda." />
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[720px]">
+      <thead class="text-left text-slate-400 uppercase text-[11px]">
+        <tr>
+          <th class="py-2">Kategori</th>
+          @for (month of monthLabels(); track month) {
+            <th class="text-right">{{ month }}</th>
+          }
+          <th class="text-right">Pay</th>
+          <th class="text-right">Son ay</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of trends().categories; track category.category) {
+          <tr class="border-t border-slate-100 font-semibold text-slate-700">
+            <td class="py-2">{{ category.category }}</td>
+            @for (amount of category.monthlySpending; track $index) {
+              <td class="text-right">{{ amount | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}</td>
+            }
+            <td class="text-right">{{ category.share | percent: '1.0-0' }}</td>
+            <td class="text-right">
+              @if (category.changeFromPreviousMonth === null) {
+                —
+              } @else {
+                {{ category.changeFromPreviousMonth > 0 ? '+' : '' }}{{ category.changeFromPreviousMonth | percent: '1.0-0' }}
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <app-empty-state>Bu dönemde harcama yok. İşlem geçmişi sayfasından bir ekstre yükleyin.</app-empty-state>
+}

@@ -1661,3 +1661,43 @@ yaklaşık 4 KB'a indi. Grafik kodu bir kez iniyor.
 - Kabul edilen format sayfada tek cümleyle anlatılıyor: gerekli kolonlar, ayraçlar, kodlama.
 
 **Commit:** `feat(web): import statements and browse transaction history`
+
+---
+
+## #047 — Web: bileşen tabanlı yapı ve analitik paneli
+
+**Sprint:** 7
+
+**Karar: container / presentational ayrımı.** İlk yazılan sayfalar tek ve büyük birer şablondu: veri yükleme, durum, form ve gösterim aynı
+dosyadaydı. Frontend iki katmana ayrılıyor:
+
+| Katman | Sorumluluk | Kural |
+|---|---|---|
+| **Sayfa (container)** | API çağrısı, durum (signal), kullanıcı eylemlerinin sonucu | Görsel ayrıntı az |
+| **Sunum bileşeni** | Sadece gösterim | Sadece `input()` alır, `output()` ile olay bildirir, API'yi bilmez, `OnPush` |
+| **Ortak UI** (`shared/ui`) | Bütün sayfalarda aynı parçalar | `PageHeader`, `Notice`, `StatTile`, `EmptyState` |
+
+**Neden.**
+- **Tek sorumluluk:** bir bileşen ya veri yönetir ya gösterir.
+- **Test edilebilirlik:** sunum bileşenleri API veya mock servis olmadan, sadece girdi verilerek test ediliyor
+  (`RecurringPaymentsComponent`: takipteki ödemeye buton gösterilmiyor, butona basınca doğru ödeme bildiriliyor).
+- **Tasarım değişikliğine dayanıklılık:** görsel tasarım daha sonra Google Stitch'te yapılacak. Parçalara ayrılmış ekranlarda yeni tasarım
+  bileşen bileşen uygulanabilir, veri ve davranış kodu etkilenmez.
+- **Tutarlılık:** hata kutusu, boş durum ve stat kartı her sayfada aynı bileşen. `StatTile` kritik değeri her zaman ikonla da gösteriyor
+  (renk tek başına anlam taşımıyor). Bu bir testle kilitlendi.
+
+**Analitik paneli** (`/dashboard/analytics`) bu yapıyla yazıldı. Container dört analizi yüklüyor, dört sunum bileşeni gösteriyor:
+- `CategoryTrends`: kategori toplamları (tek serili yatay sütun) ve aylık tablo.
+- `RecurringPayments`: tespit edilen düzenli ödemeler. Takipte olmayanlar için **"Takibe al"**: tek tıkla düzenli kalem oluşturuluyor
+  (sabit tutarlı → abonelik, değişken → gider, gelen → gelir) ve projeksiyona giriyor. Unutulmuş abonelik böylece nakit akışında
+  görünüyor. Analiz ile planlama arasındaki köprü bu.
+- `Anomalies`: "Tüm harcamalar için tipik tutarın (612 ₺) 24 katı" gibi açıklamalarla.
+- `SpendingForecast`: tahmin **aralık olarak** gösteriliyor ("14.800 – 21.300 ₺"). Değerlendirmenin sonucu (#038) arayüze yansıdı: basit
+  yöntemler aralıkta güvenilir, tek sayıda orta düzeyde. Yöntemlerin geçmiş isabeti katlanabilir bir tabloda.
+
+**Bölümler bağımsız yükleniyor.** 6 aydan az geçmiş varsa tahmin 400 döner (#037). Bu durumda sadece tahmin bölümü bilgi notu gösteriyor,
+diğer üç analiz çalışmaya devam ediyor.
+
+**Doğrulama.** Production build. 19 Vitest testi (4 yeni bileşen testi dahil).
+
+**Commit:** `feat(web): add the analytics page as composed components`

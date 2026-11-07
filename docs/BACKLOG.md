@@ -115,7 +115,9 @@
 - [x] Nakit akışı zaman çizelgesi: stat kartları, bakiye grafiği, aylık tablo, ekstre detayı — log #044
 - [x] Taksit senaryosu: seçenek başına fiyat, karşılaştırma tablosu, en düşük bakiye grafiği, öneri yok — log #045
 - [x] İşlem geçmişi: CSV yükleme (satır hataları), demo verisi, filtre ve sayfalama — log #046
-- [ ] Analitik paneli
+- [x] Ortak UI bileşenleri ve container/presentational yapı; analitik paneli ("Takibe al" köprüsü) — log #047
+- [ ] Mevcut sayfaları bileşenlere ayır: nakit akışı, senaryo, kartlar, düzenli kalemler, işlemler
+- [ ] Google Stitch için tasarım prompt'u
 
 ## Sonraki sprintler
 

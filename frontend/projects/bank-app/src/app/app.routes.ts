@@ -41,6 +41,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),
       },
       {
+        path: 'analytics',
+        title: 'Analiz',
+        loadComponent: () => import('./features/analytics/analytics-page.component').then((m) => m.AnalyticsPageComponent),
+      },
+      {
         path: 'transactions',
         title: 'İşlem geçmişi',
         loadComponent: () =>
