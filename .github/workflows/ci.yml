@@ -65,6 +65,18 @@ jobs:
       - name: Integration tests
         run: dotnet test tests/Bank.IntegrationTests -c Release --no-build
 
+  # The images are not run here, but building them catches a broken Dockerfile before anyone needs it.
+  images:
+    runs-on: ubuntu-latest
+    env:
+      SQL_SA_PASSWORD: "Ci_Only_Passw0rd!"
+      JWT_KEY: "ci-only-signing-key-that-is-long-enough-123"
+      RABBITMQ_PASSWORD: "ci-only"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose build
+
   frontend:
     runs-on: ubuntu-latest
 
