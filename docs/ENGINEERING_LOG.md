@@ -870,3 +870,40 @@ baskı daha erken görünür hale getirilebilir mi?") doğrudan bir cevabı.
 Bu deney, "testler geçiyor" ile "testler koruyor" arasındaki farkı somut olarak gösterdi.
 
 **Commit:** `feat(domain): add cash-flow projection engine`
+
+---
+
+## #026 — Projeksiyon API'si: "bugün" hangi gün?
+
+**Sprint:** 3
+
+**Kapsam.** `GET /api/finance/projection?months=1..12` (varsayılan 6). Kullanıcının kartlarını, düzenli kalemlerini,
+taksit planlarını ve aktif TL hesaplarının toplam bakiyesini toplayıp `CashFlowProjector`'a veriyor. Servisin işi sadece
+veri toplamak ve sonucu kontrata çevirmek. Bütün projeksiyon kuralları domain'de kalıyor.
+
+**Sorun 1: sunucu saati ile müşteri günü farklı.** Sunucular UTC çalışır. Türkiye UTC+3'tür. Gece 00:30'da İstanbul'da
+yeni gün başlamışken UTC'de hâlâ önceki günün 21:30'u. `DateTime.UtcNow.Date` kullanılsaydı, her gece 00:00–03:00
+arasında projeksiyon bir gün geriden başlardı ve kullanıcının zaten geçmiş bir günü "gelecek" olarak görünürdü.
+- *Çözüm:* `BusinessDate.Today` tarihi `Europe/Istanbul` saat diliminde hesaplıyor. Sınır durumlar testlerle kilitlendi:
+  31 Mart 21:30 UTC → 1 Nisan, 20:59 UTC → 31 Mart.
+
+**Sorun 2: saate bağlı kod test edilemez.** `DateTime.Now` doğrudan çağrılsaydı, projeksiyon testi bugün geçer, yarın
+başka sonuç üretirdi.
+- *Çözüm:* Uygulama saati .NET'in `TimeProvider` soyutlamasından alıyor (`TimeProvider.System` olarak kayıtlı).
+  Entegrasyon testlerinde API'nin saati Microsoft'un `FakeTimeProvider`'ı ile 31 Mart 2026'ya sabitlendi. Kendi
+  sahte saat sınıfımı yazmak yerine resmi paket tercih edildi.
+
+**Başlangıç bakiyesi.** Aktif TL hesaplarının toplamı. Henüz bir hesap API'si olmadığı için entegrasyon testi bakiyeyi
+doğrudan SQL ile ekliyor. Bu, testte açıkça yorumla belirtildi.
+
+**Doğrulama (entegrasyon testi, gerçek DB).** Hesapta 5.000 TL, ayın 1'inde 20.000 TL kira, 15'inde 45.000 TL maaş,
+25 Mart'ta 3 taksitli 1.000 TL laptop ile 3 aylık projeksiyon:
+- Ufuk 1 Nisan – 30 Haziran.
+- Kart ödemeleri: Nisan 333,34 / Mayıs 0 / Haziran 666,66.
+- **Nisan net olarak artıda kapanıyor, ama 1 Nisan'da bakiye −15.000 TL'ye düşüyor** (`BalanceGoesNegative = true`,
+  `IsDeficit = false`).
+- 30 Nisan'daki kart ödemesinin içeriği "Laptop (1/3)".
+- Başka bir kullanıcının projeksiyonunda bu verilerin hiçbiri görünmüyor.
+- `months=0` ve `months=13` → 400.
+
+**Commit:** `feat(finance): expose cash-flow projection endpoint`

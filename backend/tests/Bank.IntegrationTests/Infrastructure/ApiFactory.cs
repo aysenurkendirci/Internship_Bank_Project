@@ -1,7 +1,10 @@
 using Bank.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Bank.IntegrationTests.Infrastructure;
 
@@ -14,7 +17,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private const string DatabaseName = "BankDb_IntegrationTests";
 
-    private static readonly string ConnectionString =
+    /// <summary>
+    /// The API's clock is pinned so date-dependent results (projections) are reproducible:
+    /// 09:00 UTC on 31 March 2026 is 12:00 in Istanbul, so "today" is 31 March.
+    /// </summary>
+    public static readonly DateTimeOffset Now = new(2026, 3, 31, 9, 0, 0, TimeSpan.Zero);
+
+    public static readonly string ConnectionString =
         Environment.GetEnvironmentVariable("INTEGRATION_TESTS_DB")
         ?? $"Server=localhost;Database={DatabaseName};Trusted_Connection=True;TrustServerCertificate=True";
 
@@ -37,6 +46,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:BankDb", ConnectionString);
         builder.UseSetting("Jwt:Key", "integration-tests-signing-key-0123456789abcdef");
+        builder.ConfigureTestServices(services => services.AddSingleton<TimeProvider>(new FakeTimeProvider(Now)));
     }
 
     private static void DropDatabase()

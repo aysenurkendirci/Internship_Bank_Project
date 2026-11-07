@@ -12,6 +12,9 @@ public static class TestUsers
     private static int _sequence;
 
     public static async Task<HttpClient> CreateAuthenticatedClientAsync(this ApiFactory factory)
+        => (await factory.CreateUserAsync()).Client;
+
+    public static async Task<(HttpClient Client, long UserId)> CreateUserAsync(this ApiFactory factory)
     {
         var client = factory.CreateClient();
         var registration = NewRegistration();
@@ -21,7 +24,7 @@ public static class TestUsers
 
         var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.Token);
-        return client;
+        return (client, auth.UserId);
     }
 
     public static RegisterRequest NewRegistration()

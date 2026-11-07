@@ -55,7 +55,13 @@
 ## Sprint 3 — Nakit akışı projeksiyonu
 
 - [x] Projeksiyon motoru: kart ödemeleri son ödeme gününde, en düşük bakiye, yük oranı — ADR-0003, log #025
-- [ ] Projeksiyon API'si: başlangıç bakiyesi, `TimeProvider` ile test edilebilir "bugün"
+- [x] Projeksiyon API'si, İstanbul saatine göre iş günü, `TimeProvider` — log #026
+
+**Sprint 3 retrospektifi**
+- Teslim: projeksiyon motoru ve API'si. Toplam 130 test (109 unit, 21 entegrasyon).
+- Araştırma sorusuna ilk somut cevap: ayı artıda kapatan bir kullanıcının ay içinde eksiye düştüğü gün tespit edilebiliyor.
+- Mutation testi, ADR'de yazılı olup testle korunmayan bir varsayımı (aynı gün sıralaması) ortaya çıkardı.
+- Sırada: Sprint 4, senaryo karşılaştırma ("3 yerine 6 taksit alırsam ne olur?"). Motor saf bir fonksiyon olduğu için senaryo, girdiye eklenen geçici bir plan olarak çalıştırılabilecek.
 
 ## Sonraki sprintler
 
