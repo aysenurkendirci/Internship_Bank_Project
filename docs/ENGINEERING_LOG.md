@@ -1505,3 +1505,28 @@ bir dosyadan geliyordu. Bütçeyi yükseltmek belirtiyi gizlerdi, nedeni ortadan
   kullanılmayan `elegant-gradient-*`) silindi. Inter fontu yükleniyor, sayfa başlığı ve viewport meta etiketi düzeltildi.
 
 **Commit:** `feat(web): add the app shell with Turkish formatting and drop non-functional UI`
+
+---
+
+## #042 — Web: finans API katmanı
+
+**Sprint:** 7
+
+**Kapsam.** Backend'in finans kontratlarının TypeScript karşılıkları (`finance.models.ts`) ve kaynak başına bir API servisi:
+`CreditCardsApi`, `RecurringCashFlowsApi`, `InstallmentPlansApi`, `PlanningApi` (projeksiyon ve senaryo), `TransactionsApi`,
+`AnalyticsApi`.
+
+**Kurallar.**
+- **Ekran bileşenleri `HttpClient`'ı görmez.** URL'ler, query parametreleri, multipart yükleme ve `If-Match` başlığı sadece bu katmanda.
+  Bir endpoint değişirse tek bir dosya değişiyor.
+- **Tarihler string olarak kalıyor (`IsoDate`).** `"2026-03-25"`'i `new Date()` ile çevirmek, tarayıcı bunu UTC gece yarısı olarak
+  yorumladığı için bazı saat dilimlerinde bir önceki güne kaydırır. Takvim tarihi bir saat değil, bir gündür. Gösterim sırasında
+  `DatePipe` ile biçimleniyor.
+- **`If-Match` tırnaklı gönderiliyor** (`"AAAAAAAAB9Q="`). HTTP'de entity tag'leri tırnaklıdır ve backend iki biçimi de kabul ediyor (#021).
+
+**Testler (Vitest + `HttpTestingController`).**
+- güncellemede version'ın tırnaklı `If-Match` başlığı olarak gönderilmesi
+- CSV'nin `file` alanında multipart olarak yüklenmesi
+- sadece dolu tarih filtrelerinin query'ye eklenmesi
+
+**Commit:** `feat(web): add typed clients for the finance API`
