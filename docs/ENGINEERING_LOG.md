@@ -1407,3 +1407,33 @@ sonucun kendisi kadar önemli.
 işlemde 0 yanlış pozitif). Duyarlılık: varsayılan eşikte market medyanının 8 katı %80, 6 katı %50 oranında yakalanıyor.
 
 **Commit:** `docs(research): add reproducible evaluation of the analytics`
+
+---
+
+## #039 — Frontend: bozuk production build'in onarımı ve temizlik
+
+**Sprint:** 7
+
+**Sorun.** `ng build` başından beri başarısızdı (#008'de tespit edilmişti): `app.scss exceeded maximum budget (12.79 kB > 8 kB)`.
+
+**Kök neden.** `main.ts` `AppComponent`'i başlatıyordu, ama yanında hiç kullanılmayan ikinci bir kök bileşen (`App`: `app.ts`,
+`app.html`, `app.scss`) duruyordu. Onun **bileşen** stilinde `@tailwind base/components/utilities` direktifleri vardı. Angular her
+`.ts` dosyasını derlediği için Tailwind'in bütün CSS'i o bileşenin stiline gömülüyor ve bileşen stil bütçesini aşıyordu. Hata ölü
+bir dosyadan geliyordu. Bütçeyi yükseltmek belirtiyi gizlerdi, nedeni ortadan kaldırmak gerekiyordu.
+
+**Bulunan diğer kalıntılar ve yapılanlar.**
+
+| Bulgu | Yapılan |
+|---|---|
+| İkinci kök bileşen ve "Hello, bank-app" bekleyen şablon testi | Silindi |
+| `AuthService` ile `AuthApi` aynı işi yapıyordu. `AuthService` `{ email, password }` gönderiyordu, backend `tcNo` bekliyor | `AuthService` silindi, `AuthApi` kullanılıyor. `LoginRequest` modeli backend'e uyduruldu |
+| `http://localhost:5164` dört ayrı yerde sabit kodluydu. Proxy dosyası vardı ama kullanılmıyordu | Bütün istekler göreli (`/api/...`). Dev server proxy'si `angular.json`'a bağlandı. Canlıda API aynı origin'den sunulur, yani bundle'a host adı gömülmüyor ve CORS gerekmiyor |
+| Interceptor her istekte token varlığını, **guard ise token'ın kendisini** `console.log` ile basıyordu | Kaldırıldı. Tarayıcı konsolu, eklentilerin ve ekran paylaşımının görebildiği bir yer |
+| Kullanılmayan `app.config.ts`, `// ...existing code...` kalıntıları | `main.ts` artık Angular'ın standart `appConfig` kalıbını kullanıyor |
+| `angular.json` var olmayan `ui` ve `data-access` kütüphane projelerini tanımlıyordu. `tsconfig` paths ve Tailwind content listesi de onları gösteriyordu | Kaldırıldı |
+| Tailwind v3 (kullanılan) ile `@tailwindcss/cli` v4 (kullanılmayan) ve `ng-packagr` aynı anda kuruluydu | Kullanılmayan paketler kaldırıldı |
+| Proje zoneless (Angular 21 varsayılanı) ama bileşenler durumu düz alanlarda tutuyordu | `appConfig`'e not düşüldü. Yeni bileşenler signal kullanacak, eskiler sonraki commit'lerde dönüştürülecek |
+
+**Doğrulama.** `ng build bank-app` ilk kez başarılı: başlangıç paketi 296 KB (aktarım 80 KB), hata ve uyarı yok.
+
+**Commit:** `fix(web): repair the production build and remove dead code`

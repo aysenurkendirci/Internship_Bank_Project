@@ -105,9 +105,18 @@
 - 10 profilden 50 profile geçince tahmin hatası %17,6'dan %12,4'e indi. Küçük örneklemle sonuç raporlamamak gerekiyor.
 - Sırada: Sprint 7, Angular ekranları.
 
+## Sprint 7 — Web arayüzü
+
+- [x] Production build onarıldı; ölü kod, kopyalar, sabit URL'ler, token log'ları kaldırıldı — log #039
+- [ ] Oturum yönetimi ve ProblemDetails hata eşleyicisi
+- [ ] Uygulama kabuğu ve `tr-TR` locale
+- [ ] Finans API katmanı
+- [ ] Kartlar ve düzenli kalemler
+- [ ] Nakit akışı zaman çizelgesi
+- [ ] Taksit senaryosu karşılaştırma
+- [ ] İşlemler: CSV yükleme, demo verisi
+- [ ] Analitik paneli
+
 ## Sonraki sprintler
 
-7. Angular ekranları
-   - [ ] **Production build `main`'de bozuk**: `app.scss` bütçeyi aşıyor
-   - [ ] `app.ts` / `app.component.ts` kopyası, `// ...existing code...` kalıntıları, `console.log`'lar
-   - [ ] Para/tarih formatı için `tr-TR` locale8. Güvenlik ve KVKK: refresh token, rate limiting, loglarda PII maskeleme, audit log
+8. Güvenlik ve KVKK: refresh token, rate limiting, loglarda PII maskeleme, audit log

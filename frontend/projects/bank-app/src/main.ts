@@ -1,17 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { AppComponent } from './app/app.component';
-import { routes } from './app/app.routes';
+import { appConfig } from './app/config/app.config';
 
-import { API_BASE_URL } from './app/core/api/api-base-url.token';
-import { authInterceptor } from './app/core/auth/auth-interceptor';
-
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: API_BASE_URL, useValue: 'http://localhost:5164' },
-  ],
-}).catch(console.error);
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));

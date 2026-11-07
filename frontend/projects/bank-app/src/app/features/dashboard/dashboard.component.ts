@@ -31,12 +31,11 @@ private loadDashboardData(): void {
   this.loading = true;
   this.api.getDashboard().subscribe({
     next: (res) => {
-      console.log('Gelen Dashboard Verisi:', res); 
       this.vm = res;
       this.loading = false;
     },
-    error: (err) => {
-      console.error('Hata oluştu:', err);
+    error: () => {
+      this.error = 'Panel verileri yüklenemedi.';
       this.loading = false;
     }
   });

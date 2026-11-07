@@ -3,7 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
-import { AuthService } from '../../../../core/auth/auth.service';
+import { AuthApi } from '../../../../data-access/api/auth.api';
 
 import { InputComponent } from '../../../../shared/input/input.component';
 import { ButtonComponent } from '../../../../shared/button/button.component';
@@ -16,7 +16,7 @@ import { ButtonComponent } from '../../../../shared/button/button.component';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private auth = inject(AuthApi);
   private router = inject(Router);
 
   loading = false;

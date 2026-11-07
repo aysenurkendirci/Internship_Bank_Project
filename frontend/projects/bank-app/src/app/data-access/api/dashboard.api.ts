@@ -1,16 +1,14 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '../../core/api/api-base-url.token';
+
 import { DashboardResponse } from '../models/dashboard.models';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardApi {
-  private http = inject(HttpClient);
-  private baseUrl = inject(API_BASE_URL);
+  private readonly http = inject(HttpClient);
 
   getDashboard(): Observable<DashboardResponse> {
-    // Merkezi modeli kullanarak tip güvenliğini sağlıyoruz
-    return this.http.get<DashboardResponse>(`${this.baseUrl}/api/dashboard`);
+    return this.http.get<DashboardResponse>('/api/dashboard');
   }
 }
