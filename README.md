@@ -136,7 +136,7 @@ cd frontend && npx ng test --watch=false
 ## Documentation
 
 - [`docs/ENGINEERING_LOG.md`](docs/ENGINEERING_LOG.md) — every problem found and how it was solved, in order
-- [`docs/adr/`](docs/adr/) — architecture decisions
+- [`docs/adr/`](docs/adr/) — architecture decisions (CQRS, idempotent transfers and locking, double-entry ledger, outbox, ...)
 - [`docs/REPORT.md`](docs/REPORT.md) — project summary
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — sprint backlog and retrospectives
 - [`docs/analytics/EVALUATION.md`](docs/analytics/EVALUATION.md) — evaluation of the analytics

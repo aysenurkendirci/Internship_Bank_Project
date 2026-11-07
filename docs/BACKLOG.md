@@ -155,6 +155,7 @@ hesaplar arası para transferi çift taraflı kayıtla ekleniyor.
 - [x] Transactional outbox ve RabbitMQ ile olay yayını — log #060
 - [x] Yapısal log (Serilog) ve istek bazlı correlation id — log #061
 - [x] Docker Compose ile tek komutla ayağa kalkan ortam; proxy arkasında doğru istemci adresi — log #062
+- [x] Transfer, ledger ve outbox kararları ADR olarak yazıldı — ADR-0007, 0008, 0009
 - [ ] Docker Compose'un ve RabbitMQ testinin ilk kez çalıştırılması (bu makinede Docker yok; CI'da koşacak)
 
 **Sprint 9 retrospektifi**
