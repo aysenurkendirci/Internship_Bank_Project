@@ -239,3 +239,42 @@ Ortasında `/` olan gitignore desenleri kök dizine sabitlenir. `**/` önekiyle 
 `git check-ignore -v` ile doğrulandı.
 
 **Commit:** `chore: remove personal tooling config, empty files and template leftovers`
+
+---
+
+## #008 — Dashboard API'si sunum kararları ve uydurma değerler döndürüyordu
+
+**Sprint:** 0 · **Tarih:** 2026-11-07
+
+**Sorun.**
+- `DashboardRepository` hesap tipinden Türkçe etiket ("Vadesiz TL"), ikon adı (`bank`, `trend`, `wallet`)
+  ve açıklama metni üretiyordu.
+- Her vadeli hesap için "%32 Faiz" yazıyordu. Bu değer hiçbir veriye dayanmıyordu.
+- `WealthChangeRate` her kullanıcı için sabit `0.024` dönüyordu. Ekranda "+2.4%" olarak gösteriliyordu.
+- Frontend tüm bakiyelerin önüne `₺` koyuyordu, yani 900 USD "₺900" olarak görünüyordu.
+- Frontend statü rengini `'Aktif'` değerine göre seçiyordu ama API bu değeri hiç döndürmüyordu.
+
+**Analiz.** Repository'nin görevi veriyi getirmek. Ekranda nasıl görüneceğine karar vermek onun
+sorumluluğu değil (Single Responsibility). İkon adının API'de olması, web'e özgü bir kararın
+kontrata sızması demek: iOS uygulaması SF Symbols kullanacak ve `trend` gibi bir değer onun için anlamsız.
+Asıl ciddi sorun ise uydurma değerler. Bir finans uygulamasında gerçek olmayan bir faiz oranı ya da
+varlık değişimi göstermek kullanıcıyı yanıltır. Proje tanımı da bunu açıkça yasaklıyor: sistem sadece
+kullanıcının kendi verisini görselleştirecek.
+
+**Çözüm.**
+- `AccountItem` artık ham veri taşıyor: `AccountType`, `CurrencyCode`, `Iban`, `Balance`, `Status`.
+- `WealthChangeRate` kontrattan çıkarıldı. Gerçek değişim oranı bakiye geçmişi gerektiriyor. Bu,
+  Sprint 6'daki trend analizinde gerçek veriyle hesaplanacak.
+- Etiket ve ikon eşlemesi frontend'de tek bir dosyada (`account-display.ts`) toplandı. Eşleme
+  `Record<AccountType, …>` tipiyle yazıldı. Yeni bir hesap tipi eklenip eşlemesi unutulursa kod derlenmiyor.
+- Bakiyeler hesabın kendi para birimiyle gösteriliyor (`currency` pipe + `currencyCode`).
+
+**Neden bu yol.** Etiketleri API'de tutup çoklu dil desteği eklemek de mümkündü. Ancak etiket, ikon ve renk
+platforma özgü kararlar. API'nin kontratı ne kadar ham ve kararlı olursa web ve iOS istemcileri o kadar
+bağımsız gelişebilir.
+
+**Ek bulgu.** Doğrulama sırasında frontend production build'inin **bu değişiklikten önce de** başarısız
+olduğu görüldü: `app.scss` boyut bütçesini aşıyor. Değişiklikler geri alınarak aynı hata tekrar üretildi.
+Web sprint'inin ilk işi olarak backlog'a eklendi.
+
+**Commit:** `refactor(dashboard): return raw account data and drop fabricated figures`

@@ -29,9 +29,6 @@
         <span class="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter">
           ₺{{ data.totalWealth | number: '1.2-2' }}
         </span>
-        <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-black border border-emerald-100">
-          +{{ (data.wealthChangeRate * 100) | number: '1.1-1' }}%
-        </span>
       </div>
     </div>
 
@@ -120,21 +117,18 @@
         <div *ngFor="let acc of data.accounts" class="bg-white p-6 rounded-[32px] border border-slate-50 shadow-sm transition-hover">
           <div class="flex items-center justify-between mb-5">
             <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-              <span class="material-symbols-outlined text-xl">
-                {{ acc.iconType === 'bank' ? 'account_balance' : (acc.iconType === 'trend' ? 'trending_up' : 'wallet') }}
-              </span>
+              <span class="material-symbols-outlined text-xl">{{ accountTypeDisplay[acc.accountType].icon }}</span>
             </div>
-            <span *ngIf="acc.subtitle" 
-                  [ngClass]="acc.status === 'Aktif' ? 'text-emerald-500 bg-emerald-50' : 'text-slate-400 bg-slate-50'"
+            <span [ngClass]="acc.status === 'Active' ? 'text-emerald-500 bg-emerald-50' : 'text-slate-400 bg-slate-50'"
                   class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-              {{ acc.subtitle }}
+              {{ accountStatusLabels[acc.status] }}
             </span>
           </div>
           
           <div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ acc.accountName }}</p>
-            <p class="text-2xl font-black text-slate-900 tracking-tighter">₺{{ acc.balance | number:'1.2-2' }}</p>
-            <p class="text-[10px] font-bold text-slate-400 mt-2 opacity-60 tracking-widest">{{ acc.accountNo }}</p>
+            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ accountTypeDisplay[acc.accountType].label }}</p>
+            <p class="text-2xl font-black text-slate-900 tracking-tighter">{{ acc.balance | currency: acc.currencyCode : 'symbol-narrow' : '1.2-2' }}</p>
+            <p class="text-[10px] font-bold text-slate-400 mt-2 opacity-60 tracking-widest">{{ acc.iban }}</p>
           </div>
         </div>
       </div>

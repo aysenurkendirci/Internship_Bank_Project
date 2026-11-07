@@ -11,7 +11,7 @@
 - [x] `CancellationToken`'ı controller → service → repository zincirinde eksiksiz ilet (AuthService) — log #006
 - [x] Hatalar 500 + stack trace dönüyordu: `IExceptionHandler` + ProblemDetails — log #006
 - [x] Login'de bilinmeyen TC için 404 dönüyordu (user enumeration), artık 401 — log #006
-- [ ] `DashboardRepository`'deki sunum mantığını (etiket, ikon, sabit `0.024m`) doğru katmana taşı
+- [x] Dashboard sunum mantığı istemciye taşındı, uydurma `%32 Faiz` / `0.024` kaldırıldı — log #008
 - [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
 - [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
 - [ ] `CardsController`: aynı servis çağrısı iki kez yapılıyor, kullanılmayan `userId` parse'ı
@@ -33,4 +33,6 @@
 5. CSV içe aktarma ve deterministik sentetik veri üretici
 6. Analitik: kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, güven aralıklı tahmin
 7. Angular ekranları
-8. Güvenlik ve KVKK: refresh token, rate limiting, loglarda PII maskeleme, audit log
+   - [ ] **Production build `main`'de bozuk**: `app.scss` bütçeyi aşıyor
+   - [ ] `app.ts` / `app.component.ts` kopyası, `// ...existing code...` kalıntıları, `console.log`'lar
+   - [ ] Para/tarih formatı için `tr-TR` locale8. Güvenlik ve KVKK: refresh token, rate limiting, loglarda PII maskeleme, audit log

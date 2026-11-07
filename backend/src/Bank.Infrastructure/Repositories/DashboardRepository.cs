@@ -41,7 +41,7 @@ public sealed class DashboardRepository : IDashboardRepository
             WHERE a.UserId = @UserId
             ORDER BY t.CreatedAt DESC;
 
-            SELECT AccountId, AccountType, Iban, Balance, Status
+            SELECT AccountId, AccountType, CurrencyCode, Iban, Balance, Status
             FROM dbo.Accounts
             WHERE UserId = @UserId
             ORDER BY AccountId;
@@ -61,7 +61,6 @@ public sealed class DashboardRepository : IDashboardRepository
         return new DashboardResponse(
             new UserSummary(user.UserId, user.FirstName, user.Membership),
             totalWealth,
-            0.024m,
             cards.Select(c => new CardItem(
                 c.CardId,
                 $"**** **** **** {c.CardLastFour}",
@@ -82,22 +81,11 @@ public sealed class DashboardRepository : IDashboardRepository
             )).ToList(),
             accounts.Select(a => new AccountItem(
                 a.AccountId,
-                a.AccountType switch
-                {
-                    "Demand" => "Vadesiz TL",
-                    "Time" => "Vadeli Mevduat",
-                    _ => "Dolar Hesabı"
-                },
+                a.AccountType,
+                a.CurrencyCode,
                 a.Iban,
                 a.Balance,
-                a.Status,
-                a.AccountType == "Time" ? "%32 Faiz" : "Aktif",
-                a.AccountType switch
-                {
-                    "Demand" => "bank",
-                    "Time" => "trend",
-                    _ => "wallet"
-                }
+                a.Status
             )).ToList()
         );
     }
@@ -139,6 +127,7 @@ public sealed class DashboardRepository : IDashboardRepository
     {
         public long AccountId { get; init; }
         public string AccountType { get; init; } = "";
+        public string CurrencyCode { get; init; } = "";
         public string Iban { get; init; } = "";
         public decimal Balance { get; init; }
         public string Status { get; init; } = "";

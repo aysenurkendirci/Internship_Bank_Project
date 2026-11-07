@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DashboardApi } from '../../data-access/api/dashboard.api';
 import { DashboardResponse } from '../../data-access/models/dashboard.models';
+import { ACCOUNT_STATUS_LABELS, ACCOUNT_TYPE_DISPLAY } from './account-display';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -17,7 +18,10 @@ export class DashboardComponent implements OnInit {
 
   loading = false;
   error?: string;
-  vm?: DashboardResponse; 
+  vm?: DashboardResponse;
+
+  protected readonly accountTypeDisplay = ACCOUNT_TYPE_DISPLAY;
+  protected readonly accountStatusLabels = ACCOUNT_STATUS_LABELS;
 
   ngOnInit(): void {
     this.loadDashboardData();
