@@ -507,3 +507,36 @@ kartlı kalemleri ilgili ekstreye aktaracak.
 bakış açısından işaretli: gelir pozitif, çıkışlar negatif. Projeksiyon motoru bu değerleri doğrudan toplayabilecek.
 
 **Commit:** `feat(domain): model recurring income, expenses and subscriptions`
+
+---
+
+## #017 — Kredi kartı harcaması paranın çıktığı gün değildir
+
+**Sprint:** 1
+
+**Sorun.** Çoğu bütçe uygulaması kartla yapılan harcamayı harcama gününde "para çıktı" olarak gösterir.
+Gerçekte para, **ekstrenin son ödeme gününde** hesaptan çıkar. 25 Mart'ta yapılan bir harcama, kesim günü
+20 olan bir kartta Nisan ekstresine girer ve Mayıs başında ödenir. Projenin temel sorusu ("gelecek aylarda
+nakit akışım nasıl olacak?") bu ayrım olmadan yanlış cevaplanır.
+
+**Çözüm.** `CreditCard` ekstre döngüsünü modelliyor:
+- `StatementDateFor(harcamaTarihi)`: kesim günü dahil öncesindeki harcamalar bu ayın ekstresine, sonrakiler
+  gelecek ayın ekstresine. Aralık → Ocak yıl geçişi dahil.
+- `NextStatementDate`: kesim günü 31 olan kart Şubat'ta 28'inde, Mart'ta tekrar 31'inde kesiyor. Tarih her
+  seferinde `StatementDay`'den hesaplandığı için kısa bir ay sonraki kesimleri kaydırmıyor (#015'teki
+  tuzağın aynısı).
+- `DueDateFor(kesimTarihi)`: kesim + `PaymentDueDays`. Cumartesi veya Pazar'a denk gelirse Pazartesi'ye kayıyor.
+
+**Kapsam kararları.**
+- **Resmi tatiller modellenmedi.** Tatil takvimi (dini bayramlar her yıl değişir) ayrı bir veri kaynağı
+  gerektiriyor. Sınıf belgesinde bu sınır açıkça yazılı. Projeksiyon bir karar destek aracı olduğu için
+  tatil kaynaklı birkaç günlük kaymanın aylık görünüme etkisi sınırlı.
+- **Son ödeme süresi kart bazında parametre** (1–30 gün). Bankalar arasında farklılık gösterdiği için sabit
+  kodlanmadı.
+- **Kesim günü yapılan harcama o ekstreye dahil.** Bu kural bankadan bankaya ve işlem saatine göre değişebilir.
+  Tek ve açık bir kural seçilip testle kilitlendi.
+
+**Test notu.** Hafta sonu testleri için tarihlerin hangi güne denk geldiği önceden kontrol edildi
+(15 Nis 2026 + 10 = Cumartesi, 16 Nis + 10 = Pazar, ikisi de 27 Nis Pazartesi'ye kaymalı).
+
+**Commit:** `feat(domain): model credit card statement and due dates`

@@ -25,7 +25,7 @@
 
 - [x] `Money` ve `Currency` value object'leri — log #013
 - [x] Gelir, düzenli gider, abonelik (`RecurringCashFlow`) — log #016
-- [ ] Kredi kartı ekstre döngüsü (kesim günü, son ödeme günü)
+- [x] Kredi kartı ekstre döngüsü: kesim, son ödeme, hafta sonu kaydırma — log #017
 - [ ] Taksit planı
 - [x] Tekrarlama kuralı: haftalık/aylık/yıllık, ay sonu kayması olmadan — log #015
 
