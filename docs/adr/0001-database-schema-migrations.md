@@ -1,6 +1,6 @@
 # ADR-0001: Oracle şemasını versiyonlu migration scriptleriyle yönetmek
 
-**Durum:** Yerine geçildi → [ADR-0002](0002-sql-server-instead-of-oracle.md) · **Tarih:** 2026-11-07
+**Durum:** Yerine geçildi → [ADR-0002](0002-sql-server-instead-of-oracle.md)
 
 ## Bağlam
 

@@ -1,6 +1,6 @@
 # ADR-0002: Oracle yerine SQL Server, şema yönetimi DbUp ile
 
-**Durum:** Kabul edildi · **Tarih:** 2026-11-07 · **Yerine geçtiği karar:** [ADR-0001](0001-database-schema-migrations.md)
+**Durum:** Kabul edildi · **Yerine geçtiği karar:** [ADR-0001](0001-database-schema-migrations.md)
 
 ## Bağlam
 
