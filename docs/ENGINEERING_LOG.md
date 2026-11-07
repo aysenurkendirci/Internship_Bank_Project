@@ -278,3 +278,28 @@ olduğu görüldü: `app.scss` boyut bütçesini aşıyor. Değişiklikler geri 
 Web sprint'inin ilk işi olarak backlog'a eklendi.
 
 **Commit:** `refactor(dashboard): return raw account data and drop fabricated figures`
+
+---
+
+## #009 — Yapısal düzeltmeler: dosya düzeni, DI kompozisyonu, yok sayılan ayar
+
+**Sprint:** 0 · **Tarih:** 2026-11-07
+
+Tek tek küçük ama birlikte kod tabanının okunabilirliğini ve doğruluğunu etkileyen sorunlar.
+
+| Sorun | Etki | Çözüm |
+|---|---|---|
+| `IDashboardRepository.cs` içinde `IDashboardService` vardı, `IDashboardService.cs` içinde de tersi. `IAuthService` ise namespace'iyle uyuşmayan bir klasördeydi. | Bir tipi dosya adından bulmak imkânsızdı. | Her interface namespace'iyle aynı klasöre, kendi adını taşıyan dosyaya taşındı. Geçmiş korunsun diye `git mv` kullanıldı. |
+| `CardsController` her istekte dashboard'u **iki kez** yüklüyor, parse ettiği `userId`'yi kullanmıyordu. | Her kart isteği iki kat DB yükü demekti. | Tek çağrıya indirildi. Kullanıcı zaten `ICurrentUser` üzerinden çözülüyor. |
+| Tüm DI kayıtları `Program.cs`'teydi. | API projesi her katmanın somut sınıflarını bilmek zorundaydı (Dependency Inversion ihlali). | `AddApplication()` ve `AddInfrastructure()` extension metotları eklendi. `Program.cs` artık sadece katmanları bir araya getiriyor (composition root). |
+| `Jwt:ExpiresMinutes = 60` tanımlıydı ama kod token'ı sabit **6 saat** geçerli üretiyordu. | Konfigürasyon yok sayılıyordu. Çalınan bir token 6 kat daha uzun süre kullanılabilirdi. | Ayar okunuyor, eksikse uygulama açılmıyor. Üretilen token decode edilerek `exp - nbf = 60 dk` doğrulandı. |
+
+**Öğrenilen.** "Ayar var" ile "ayar kullanılıyor" aynı şey değil. Güvenlik açısından kritik
+konfigürasyonlar (token süresi, anahtar) uygulamanın gerçek çıktısı üzerinden doğrulanmalı.
+Bu yüzden token'ı decode edip sürenin gerçekten 60 dakika olduğunu kontrol ettim.
+
+**Commit'ler:**
+`refactor(application): align interface files with their names and namespaces`,
+`fix(api): stop loading the dashboard twice in CardsController`,
+`refactor(api): let each layer register its own services`,
+`fix(auth): honour the configured JWT lifetime`

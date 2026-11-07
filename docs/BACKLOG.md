@@ -12,9 +12,11 @@
 - [x] Hatalar 500 + stack trace dönüyordu: `IExceptionHandler` + ProblemDetails — log #006
 - [x] Login'de bilinmeyen TC için 404 dönüyordu (user enumeration), artık 401 — log #006
 - [x] Dashboard sunum mantığı istemciye taşındı, uydurma `%32 Faiz` / `0.024` kaldırıldı — log #008
-- [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
+- [x] Interface dosyaları adları ve namespace'leriyle hizalandı — log #009
+- [x] DI kayıtları katmanlara dağıtıldı (`AddApplication`, `AddInfrastructure`) — log #009
+- [x] JWT süresi konfigürasyonu yok sayılıyordu (6 saat yerine 60 dk) — log #009
 - [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
-- [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı
+- [x] `CardsController`: çift servis çağrısı ve kullanılmayan claim parse kaldırıldı — log #009
 - [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
 - [ ] Test projeleri (xUnit) ve ilk testler
 - [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
