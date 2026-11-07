@@ -38,7 +38,7 @@ public sealed record Money : IComparable<Money>
     /// <summary>
     /// Splits the amount into <paramref name="parts"/> cent-exact shares whose sum equals the
     /// rounded total. Dividing naively loses cents (1000 / 3 = 333.33 × 3 = 999.99); the
-    /// remainder is added to the first share, as banks do for the first installment.
+    /// remainder is added to the first share so that every later installment is identical.
     /// </summary>
     public IReadOnlyList<Money> Allocate(int parts)
     {

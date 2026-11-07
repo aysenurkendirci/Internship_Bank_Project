@@ -441,9 +441,9 @@ tutmamasına yol açar. Muhasebede bu bir mutabakat (reconciliation) hatasıdır
 2. Pay, kuruşa **aşağı** (sıfıra doğru) yuvarlanıyor: 333,33.
 3. Kalan (`toplam - pay × parça`) ilk paya ekleniyor: **333,34 + 333,33 + 333,33 = 1.000,00**.
 
-**Neden ilk taksit?** Türkiye'de bankaların kart taksitlerinde yaygın uygulaması, yuvarlama farkının ilk
-taksite eklenmesidir. Farkı son taksite eklemek de geçerli bir alternatif. Önemli olan kuralın tek bir
-yerde tanımlı ve tutarlı olması.
+**Neden ilk taksit?** Farkın hangi taksite ekleneceği bankadan bankaya değişebilir. İlk veya son taksit
+ikisi de geçerli seçenekler. Bu projede ilk taksit seçildi: kullanıcı farkı en baştan görür ve sonraki
+taksitler eşit kalır. Önemli olan kuralın tek bir yerde tanımlı, belgelenmiş ve testle kilitlenmiş olması.
 
 **Test stratejisi.** Tek bir örnek yerine bir **değişmez (invariant)** test edildi: hangi tutar ve parça sayısı
 verilirse verilsin, payların toplamı yuvarlanmış toplama eşit olmalı ve her pay tam kuruş olmalı. Uç
