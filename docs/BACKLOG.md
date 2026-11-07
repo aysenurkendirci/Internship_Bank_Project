@@ -4,10 +4,13 @@
 
 - [x] Kök `.gitignore`, build çıktılarını takipten çıkar — log #001
 - [x] JWT secret'ını kaynak koddan çıkar — log #002
-- [ ] Oracle şemasını migration scriptlerine al (DbUp, baseline `V001`) — ADR-0001
+- [x] Şemayı versiyonla: SQL Server + DbUp, baseline `V001` — ADR-0002, log #003
+- [ ] Infrastructure katmanını Oracle'dan SQL Server'a taşı
+- [ ] **Şifreler düz metin saklanıyor**: `PasswordHasher` gerçek hash kullanmalı (PBKDF2)
 - [ ] `CancellationToken`'ı `OracleExecutor` → Dapper'a kadar ilet
 - [ ] `DashboardRepository`'deki sunum mantığını (etiket, ikon, sabit `0.024m`) doğru katmana taşı
-- [ ] `IDashboardService` dosya yolu ↔ namespace uyuşmazlığını düzelt
+- [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
+- [ ] `ErrorHandlingMiddleware` yazılmış ama pipeline'a eklenmemiş
 - [ ] Test projeleri (xUnit) ve ilk testler
 - [ ] `System.Security.Cryptography.Pkcs` 8.0.1 açığı (NU1903), transitive bağımlılığı yükselt
 

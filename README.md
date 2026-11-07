@@ -13,7 +13,7 @@ months and lets users compare spending scenarios.
 | Layer    | Technology                                   |
 |----------|----------------------------------------------|
 | Backend  | .NET 10, ASP.NET Core Web API, Dapper        |
-| Database | Oracle (PL/SQL packages)                     |
+| Database | SQL Server, schema migrations with DbUp      |
 | Frontend | Angular, Tailwind CSS                        |
 | Auth     | JWT bearer tokens                            |
 
@@ -21,6 +21,21 @@ Backend follows Clean Architecture: `Domain` ← `Application` ← `Infrastructu
 with request/response DTOs in `Contracts`.
 
 ## Local setup
+
+### Database
+
+Requires a local SQL Server instance reachable with Windows Authentication.
+The migrator creates `BankDb` if it does not exist and applies pending scripts:
+
+```bash
+cd backend
+dotnet run --project src/Bank.Database
+```
+
+Schema changes are added as new numbered scripts under
+`backend/src/Bank.Database/Migrations/` (`V002__...sql`). An applied script is never edited.
+
+> `TrustServerCertificate=True` in the connection string is for local development only.
 
 ### Backend
 
