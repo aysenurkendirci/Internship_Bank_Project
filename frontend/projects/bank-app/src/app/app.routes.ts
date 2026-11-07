@@ -26,6 +26,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'cash-flow',
+        title: 'Nakit akışı',
+        loadComponent: () => import('./features/cash-flow/cash-flow-page.component').then((m) => m.CashFlowPageComponent),
+      },
+      {
         path: 'cards',
         title: 'Kartlar ve taksitler',
         loadComponent: () => import('./features/cards/cards-page.component').then((m) => m.CardsPageComponent),

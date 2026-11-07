@@ -1,0 +1,158 @@
+<header class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="page-title">Nakit akışı</h1>
+    <p class="page-subtitle">Bilinen gelir, gider, abonelik ve kart ekstrelerinizden yarından itibaren hesaplanır.</p>
+  </div>
+  <div class="flex gap-2" role="group" aria-label="Projeksiyon süresi">
+    @for (h of horizons; track h) {
+      <button type="button" [ngClass]="months() === h ? 'btn-primary' : 'btn-secondary'" [attr.aria-pressed]="months() === h"
+              (click)="selectHorizon(h)">{{ h }} ay</button>
+    }
+  </div>
+</header>
+
+@if (error(); as message) {
+  <p class="notice-error mb-6" role="alert">{{ message }}</p>
+}
+
+@if (projection(); as p) {
+  @if (p.excludedItems.length > 0) {
+    <p class="notice-info mb-6">
+      Para birimi TL olmadığı için hesaba katılmayanlar: {{ p.excludedItems.join(', ') }}.
+    </p>
+  }
+
+  <!-- Headline figures -->
+  <section class="grid gap-4 sm:grid-cols-3 mb-8">
+    <div class="panel">
+      <p class="field-label">Başlangıç bakiyesi</p>
+      <p class="text-3xl font-black text-slate-900 mt-2">{{ p.openingBalance | currency }}</p>
+      <p class="text-sm font-semibold text-slate-400 mt-1">Aktif TL hesaplarınız</p>
+    </div>
+    <div class="panel">
+      <p class="field-label">Dönemin en düşük bakiyesi</p>
+      @if (lowest(); as low) {
+        <p class="text-3xl font-black mt-2" [ngClass]="low.lowestBalance < 0 ? 'text-red-600' : 'text-slate-900'">
+          {{ low.lowestBalance | currency }}
+        </p>
+        @if (low.lowestBalanceDate) {
+          <p class="text-sm font-semibold text-slate-400 mt-1">{{ low.lowestBalanceDate | date: 'd MMMM y' }}</p>
+        }
+      }
+    </div>
+    <div class="panel">
+      <p class="field-label">Bakiyenin eksiye düştüğü ay</p>
+      <p class="text-3xl font-black mt-2 flex items-center gap-2" [ngClass]="monthsBelowZero() > 0 ? 'text-red-600' : 'text-slate-900'">
+        @if (monthsBelowZero() > 0) { <span class="material-symbols-outlined" aria-hidden="true">warning</span> }
+        {{ monthsBelowZero() }} / {{ p.months.length }}
+      </p>
+      <p class="text-sm font-semibold text-slate-400 mt-1">Ay sonu artıda olsa bile ay içinde</p>
+    </div>
+  </section>
+
+  <!-- Daily balance -->
+  @if (balanceChart(); as option) {
+    <section class="panel mb-8">
+      <h2 class="section-title mb-1">Tahmini bakiye</h2>
+      <p class="text-sm font-semibold text-slate-400 mb-4">Kırmızı çizgi sıfır. Altına inen her gün hesap eksidedir.</p>
+      <app-chart class="h-72" [option]="option" [label]="balanceSummary()" />
+    </section>
+  }
+
+  <!-- Monthly in / out -->
+  @if (monthlyChart(); as option) {
+    <section class="panel mb-8">
+      <h2 class="section-title mb-4">Aylık gelir ve çıkış</h2>
+      <app-chart class="h-64" [option]="option" label="Aylık gelir ve toplam çıkış karşılaştırması. Ayrıntılar aşağıdaki tabloda." />
+    </section>
+  }
+
+  <!-- Monthly table: also the accessible view of both charts -->
+  <section class="panel mb-8 overflow-x-auto">
+    <h2 class="section-title mb-4">Aylık özet</h2>
+    <table class="w-full text-sm min-w-[720px]">
+      <thead class="text-left text-slate-400 uppercase text-[11px]">
+        <tr>
+          <th class="py-2">Ay</th>
+          <th class="text-right">Gelir</th>
+          <th class="text-right">Çıkış</th>
+          <th class="text-right">Kart ödemeleri</th>
+          <th class="text-right">Net</th>
+          <th class="text-right">Ay sonu</th>
+          <th class="text-right">Ay içi en düşük</th>
+          <th class="text-right">Yük oranı</th>
+          <th class="pl-4">Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of p.months; track m.year * 100 + m.month) {
+          <tr class="border-t border-slate-100 font-semibold text-slate-700">
+            <td class="py-3">{{ monthLabel(m) }}</td>
+            <td class="text-right">{{ m.income | currency }}</td>
+            <td class="text-right">{{ m.outflows | currency }}</td>
+            <td class="text-right">{{ m.cardPayments | currency }}</td>
+            <td class="text-right" [ngClass]="m.net < 0 ? 'text-red-600' : ''">{{ m.net | currency }}</td>
+            <td class="text-right">{{ m.closingBalance | currency }}</td>
+            <td class="text-right" [ngClass]="m.lowestBalance < 0 ? 'text-red-600' : ''">{{ m.lowestBalance | currency }}</td>
+            <td class="text-right">{{ m.burdenRatio === null ? '—' : (m.burdenRatio | percent: '1.0-0') }}</td>
+            <td class="pl-4">
+              @if (m.balanceGoesNegative) {
+                <span class="inline-flex items-center gap-1 text-red-600">
+                  <span class="material-symbols-outlined text-base" aria-hidden="true">warning</span>
+                  Eksiye düşüyor
+                </span>
+              } @else {
+                <span class="text-slate-400">Sorun yok</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <p class="text-xs font-semibold text-slate-400 mt-3">
+      Yük oranı: ayın toplam çıkışı / ayın geliri. Kart ödemeleri ekstrenin tamamının ödendiği varsayımıyla hesaplanır.
+    </p>
+  </section>
+
+  <!-- Movements -->
+  <section class="panel">
+    <h2 class="section-title mb-4">Hareketler</h2>
+    @if (p.entries.length === 0) {
+      <p class="text-slate-500 font-semibold">Bu dönemde hareket yok. Gelir, gider veya kart ekleyerek başlayın.</p>
+    }
+    <ul class="divide-y divide-slate-100">
+      @for (entry of p.entries; track $index) {
+        <li class="py-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-slate-400 w-24">{{ entry.date | date: 'd MMM y' }}</span>
+              <span class="font-bold text-slate-800">{{ entry.description }}</span>
+              <span class="badge bg-slate-100 text-slate-600">{{ kindLabels[entry.kind] }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              @if (entry.charges.length > 0) {
+                <button type="button" class="btn-link" (click)="toggleStatement(entry.date + entry.description)"
+                        [attr.aria-expanded]="openStatement() === entry.date + entry.description">
+                  {{ entry.charges.length }} kalem
+                </button>
+              }
+              <span class="font-black" [ngClass]="entry.amount < 0 ? 'text-slate-900' : 'text-emerald-600'">
+                {{ entry.amount | currency }}
+              </span>
+            </div>
+          </div>
+          @if (openStatement() === entry.date + entry.description) {
+            <ul class="mt-2 ml-28 text-sm text-slate-600 space-y-1">
+              @if (entry.statementDate) {
+                <li class="text-xs text-slate-400 font-bold">Ekstre kesimi: {{ entry.statementDate | date: 'd MMMM y' }}</li>
+              }
+              @for (charge of entry.charges; track $index) {
+                <li class="flex justify-between max-w-md"><span>{{ charge.description }}</span><span>{{ charge.amount | currency }}</span></li>
+              }
+            </ul>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

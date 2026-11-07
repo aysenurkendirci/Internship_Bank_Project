@@ -1568,3 +1568,44 @@ bölünüyor (kart sayfası 3,5 KB, sıkıştırılmış). Geliştirme ortamınd
 doğrulanmadı**. Akışların bağlı olduğu API davranışı entegrasyon testleriyle (#024) güvence altında.
 
 **Commit:** `feat(web): manage cards, installment plans and recurring items`
+
+---
+
+## #044 — Web: nakit akışı zaman çizelgesi
+
+**Sprint:** 7
+
+**Kapsam.** `/dashboard/cash-flow`: projeksiyon motorunun (#025) arayüzü. 3, 6 veya 12 ay seçilebiliyor.
+
+**Bilgi tasarımı: her verinin işine göre bir form.**
+
+| Veri | Form | Gerekçe |
+|---|---|---|
+| Başlangıç bakiyesi, dönemin en düşük bakiyesi, eksiye düşülen ay sayısı | Stat kartları | Tek başlık sayılarıdır, grafik gerekmez |
+| Gün gün bakiye | Tek serili basamak çizgi, sıfırda kırmızı çizgi | Değişim zaman içinde. Bakiye harekete kadar sabit kaldığı için basamak çizgi. Tek seri olduğu için lejant yok, başlık adlandırıyor |
+| Aylık gelir ve çıkış | Gruplu sütun, iki seri, tek eksen | Aynı birimde iki büyüklük. İkinci bir y-ekseni yok |
+| Aylık özet | Tablo | Ayrıntı ve aynı zamanda grafiklerin erişilebilir karşılığı |
+| Hareketler | Liste. Kart ekstresi açıldığında satırları görünüyor | "Bu 563 TL neden?" sorusunun cevabı |
+
+**Renk.** Seriler kategorik paletin ilk iki slotu (mavi, turuncu). Renkler göz kararı değil, bir doğrulama scriptiyle seçildi:
+renk körlüğü ayrımı ΔE 24,7 (eşik 8), normal görüşte ΔE 33,6, beyaz zemine karşı kontrast ≥ 3:1. Kırmızı sadece "sıfırın altı"
+durumu için ayrıldı ve **hiçbir zaman tek başına kullanılmıyor**: tabloda ikon ve "Eksiye düşüyor" metniyle birlikte gösteriliyor.
+
+**Araştırma sorusunun arayüzdeki karşılığı.** Üçüncü stat kartı "Bakiyenin eksiye düştüğü ay" sayısını, altında "Ay sonu artıda olsa
+bile ay içinde" notuyla gösteriyor. Tabloda "Ay sonu" ve "Ay içi en düşük" kolonları yan yana. Ayı artıda kapatıp ortasında eksiye
+düşen kullanıcı bunu ilk bakışta görüyor (ADR-0003 §5).
+
+**Teknik kararlar.**
+- **`ChartComponent`:** ECharts için ince bir sarmalayıcı. Grafiği ilk render'dan sonra oluşturuyor (boyutlu bir eleman gerekir),
+  girdi değişince seçenekleri yeniden uyguluyor, `ResizeObserver` ile kabın boyutunu izliyor ve bileşen yok edilirken grafiği temizliyor.
+- **Tree-shaking:** `echarts` paketinin tamamı yerine sadece çizgi, sütun ve gerekli bileşenler içe aktarılıyor. Paket tam sürümle
+  sabitlendi (`6.1.0`).
+- **Paket boyutu ödünleşimi:** grafik kodu nakit akışı chunk'ını 168 KB'a (sıkıştırılmış) çıkarıyor. Sayfa lazy-load edildiği için
+  başlangıç paketi 84 KB'ta kalıyor, grafik kodu sadece grafikli sayfa açılınca iniyor.
+- **Gün gün bakiye istemcide hesaplanıyor** (`runningBalance`): API hareketleri zaten sıralı gönderiyor (aynı gün çıkışlar önce,
+  ADR-0003 §4). Kuruşlar tamsayı olarak toplanıyor, uzun toplamlarda kayan nokta kayması olmuyor. 3 testle kilitlendi.
+- Grafiklerin `aria-label`'ı içerik özetini veriyor ("En düşük bakiye −15.000 ₺, 1 Nisan 2026").
+
+**Doğrulama.** Production build ve 15 Vitest testi geçiyor. Görsel doğrulama tarayıcı otomasyonu olmadığı için yapılamadı.
+
+**Commit:** `feat(web): add the cash-flow timeline`

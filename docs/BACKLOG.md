@@ -112,7 +112,7 @@
 - [x] Uygulama kabuğu, çıkış, `tr-TR` para/tarih formatı, sahte öğeler kaldırıldı — log #041
 - [x] Finans API katmanı: tipli modeller, kaynak başına servis, `If-Match` — log #042
 - [x] Kartlar, taksitler ve düzenli kalemler ekranları; 409'da yeniden yükleme — log #043
-- [ ] Nakit akışı zaman çizelgesi
+- [x] Nakit akışı zaman çizelgesi: stat kartları, bakiye grafiği, aylık tablo, ekstre detayı — log #044
 - [ ] Taksit senaryosu karşılaştırma
 - [ ] İşlemler: CSV yükleme, demo verisi
 - [ ] Analitik paneli
