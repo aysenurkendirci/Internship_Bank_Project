@@ -1,4 +1,4 @@
-﻿using DbUp;
+﻿using Bank.Database;
 using Microsoft.Extensions.Configuration;
 
 // Applies pending migration scripts to the target database and exits.
@@ -18,18 +18,7 @@ var configuration = new ConfigurationBuilder()
 var connectionString = configuration.GetConnectionString("BankDb")
     ?? throw new InvalidOperationException("Connection string 'BankDb' is missing.");
 
-// Creating the database is a local-development convenience. In shared environments
-// the database is provisioned upfront and this login would not have CREATE DATABASE rights.
-EnsureDatabase.For.SqlDatabase(connectionString);
-
-var upgrader = DeployChanges.To
-    .SqlDatabase(connectionString)
-    .WithScriptsEmbeddedInAssembly(typeof(Program).Assembly)
-    .WithTransactionPerScript()
-    .LogToConsole()
-    .Build();
-
-var result = upgrader.PerformUpgrade();
+var result = DatabaseMigrator.Migrate(connectionString);
 
 if (!result.Successful)
 {
