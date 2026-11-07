@@ -1335,3 +1335,40 @@ birlikte raporlanıyor.
 olduğu görüldü. Kod değil beklenti yanlıştı. Testteki beklenen değerin yanına hesabın kendisi yorum olarak yazıldı.
 
 **Commit:** `feat(domain): forecast everyday spending with backtested simple methods`
+
+---
+
+## #037 — Analitik API'si
+
+**Sprint:** 6
+
+**Kapsam.** `api/finance/analytics` altında dört salt-okunur endpoint:
+
+| Endpoint | Ne döndürüyor |
+|---|---|
+| `category-trends?months=6` | Son N tamamlanmış ayın kategori bazında harcaması, payı, değişimi, eğimi |
+| `recurring-payments` | Tespit edilen tekrarlayan ödemeler, sabit/değişken ayrımı, bir sonraki beklenen tarih ve **zaten takipte mi?** bilgisi |
+| `anomalies?months=6` | Son N aydaki olağandışı harcamalar ve açıklamaları ("Tüm harcamalardaki tipik tutarın 24 katı") |
+| `forecast?months=3` | Günlük harcama tahmini, %95 aralığı ve üç yöntemin backtest sonuçları |
+
+**Tasarım kararları.**
+- **Sadece tamamlanmış aylar.** Ayın 10'unda bu ayın market harcamasını geçen ayın tamamıyla kıyaslamak "%70 düşüş" gibi yanlış bir
+  tablo çizer. Trend ve tahmin son tamamlanmış ayda bitiyor.
+- **Anomali taban çizgisi 12 ay.** "Son 1 ayın anomalileri" istense bile neyin olağandışı olduğu kullanıcının bir yıllık alışkanlıklarına
+  göre belirleniyor. Sadece birkaç haftalık veriyle karar verilmiyor.
+- **Kısa geçmişte tahmin yok.** 6 aydan az tamamlanmış ay varsa 400 dönüyor ve gerekçe açıkça yazılıyor. Az veriyle üretilmiş güvenilmez
+  bir tahmin, tahmin olmamasından daha kötü. Geçmiş, ilk işlemin olduğu aydan başlıyor, öncesi sıfır harcamalı aylarla doldurulmuyor.
+- **"Takipte mi?" eşleşmesi.** Kullanıcının yazdığı ad ("Netflix") ile ekstre metni ("NETFLIX.COM") nadiren aynı. Türkçe katlama
+  sonrası birinin diğerini içermesi yeterli sayılıyor. Takipte olmayan tekrarlayan ödemeler, projeksiyona eklenmesi gereken adaylar.
+  Unutulmuş bir abonelik projeksiyonu yanıltır. Bu bir sezgisel kural (heuristic). Yanlış eşleşme ihtimali belgelendi.
+- **Tavsiye yok.** Controller dokümantasyonunda açıkça yazılı: analitik desenleri tarif ediyor, finansal ürün veya karar önermiyor.
+
+**Doğrulama (6 entegrasyon testi, gerçek DB, uçtan uca: üretici → import → depolama → analitik → HTTP).**
+- Trendler tam olarak Eylül 2025 – Şubat 2026 aylarını kapsıyor. En büyük kategori Konut.
+- Netflix "sabit, 229,99" olarak bulundu. "Netflix" adlı bir kalem eklenince **takipte** görünüyor. Spotify takipte değil.
+  Doğalgaz "değişken", maaş "gelir".
+- **İşaretlenen her anomali, üreticinin enjekte ettiği bir elektronik alışverişi.** Başka hiçbir şey işaretlenmedi.
+- Tahmin 11 tamamlanmış aya dayanıyor ve Mart–Mayıs 2026 için aralık veriyor. 3 aylık geçmişle 400 dönüyor.
+- Başka bir kullanıcı hiçbir şey görmüyor.
+
+**Commit:** `feat(finance): expose analytics endpoints`

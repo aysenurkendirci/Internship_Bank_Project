@@ -70,6 +70,24 @@ public sealed class TransactionHistoryRepository : ITransactionHistoryRepository
         return new ImportOutcome(batchId, transactions.Count, imported, duplicates);
     }
 
+    public async Task<IReadOnlyList<StoredHistoryTransaction>> ListRangeAsync(
+        long userId, DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        const string sql = """
+            SELECT TransactionId, BookingDate, Description, Amount, Direction, CurrencyCode, Category
+            FROM finance.Transactions
+            WHERE UserId = @UserId AND DeletedAt IS NULL AND BookingDate BETWEEN @From AND @To
+            ORDER BY BookingDate, TransactionId
+            """;
+
+        await using var connection = await _connections.OpenAsync(ct);
+        var rows = await connection.QueryAsync<HistoryRow>(new CommandDefinition(sql,
+            new { UserId = userId, From = from.ToDateTime(TimeOnly.MinValue), To = to.ToDateTime(TimeOnly.MinValue) },
+            cancellationToken: ct));
+
+        return rows.Select(ToStored).ToList();
+    }
+
     public async Task<(IReadOnlyList<StoredHistoryTransaction> Items, int TotalCount)> ListAsync(
         long userId, DateOnly? from, DateOnly? to, int page, int pageSize, CancellationToken ct = default)
     {
@@ -104,14 +122,17 @@ public sealed class TransactionHistoryRepository : ITransactionHistoryRepository
         var total = await results.ReadSingleAsync<int>();
         var rows = await results.ReadAsync<HistoryRow>();
 
-        return (rows.Select(r => new StoredHistoryTransaction(
+        return (rows.Select(ToStored).ToList(), total);
+    }
+
+    private static StoredHistoryTransaction ToStored(HistoryRow r)
+        => new(
             r.TransactionId,
             DateOnly.FromDateTime(r.BookingDate),
             r.Description,
             r.Direction == "Inbound" ? r.Amount : -r.Amount,
             r.CurrencyCode,
-            r.Category)).ToList(), total);
-    }
+            r.Category);
 
     private static DataTable ToStagingTable(IEnumerable<HistoryTransaction> transactions)
     {

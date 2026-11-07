@@ -19,6 +19,10 @@ public interface ITransactionHistoryRepository
         long userId, string source, string? fileName, IReadOnlyList<HistoryTransaction> transactions,
         CancellationToken ct = default);
 
+    /// <summary>Every live transaction in the range, oldest first; for analytics.</summary>
+    Task<IReadOnlyList<StoredHistoryTransaction>> ListRangeAsync(
+        long userId, DateOnly from, DateOnly to, CancellationToken ct = default);
+
     Task<(IReadOnlyList<StoredHistoryTransaction> Items, int TotalCount)> ListAsync(
         long userId, DateOnly? from, DateOnly? to, int page, int pageSize, CancellationToken ct = default);
 }

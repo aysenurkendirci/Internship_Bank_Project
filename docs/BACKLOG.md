@@ -95,7 +95,7 @@
 - [x] Tekrarlayan ödeme tespiti; test seti precision/recall 1,00 (sentetik veri, sınırları belgeli) — log #034
 - [x] Anomali tespiti (robust z-skoru), test seti 36/36, duyarlılık analizi — log #035
 - [x] Tahmin: 3 basit yöntem, backtest ile seçim, kalibre aralık; kâhin referansı ile gürültü tabanı — log #036
-- [ ] Analitik API'si
+- [x] Analitik API'si: trendler, tekrarlayan ödemeler (takip durumu), anomaliler, tahmin — log #037
 - [ ] Değerlendirme raporu (tez için)
 
 ## Sonraki sprintler
