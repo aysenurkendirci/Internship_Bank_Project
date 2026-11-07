@@ -75,9 +75,15 @@
 - Kapsam dışı: peşin nakit ödeme seçeneği (karttan değil hesaptan), kart limiti kontrolü. İkisi de ileride `PurchaseOption`'a eklenebilir.
 - Sırada: Sprint 5, CSV içe aktarma ve sentetik veri.
 
+## Sprint 5 — İşlem geçmişi: CSV ve sentetik veri
+
+- [x] `V003`: `finance.Transactions`, `finance.ImportBatches`, parmak izi ile mükerrer koruması — log #029
+- [ ] CSV parser: encoding (UTF-8 / Windows-1254), ayraç, Türkçe tutar ve tarih formatları
+- [ ] Import ve listeleme API'si, mükerrer satır tespiti
+- [ ] Deterministik sentetik veri üretici
+
 ## Sonraki sprintler
 
-5. CSV içe aktarma ve deterministik sentetik veri üretici
 6. Analitik: kategori trendleri, tekrarlayan ödeme tespiti, anomali tespiti, güven aralıklı tahmin
 7. Angular ekranları
    - [ ] **Production build `main`'de bozuk**: `app.scss` bütçeyi aşıyor

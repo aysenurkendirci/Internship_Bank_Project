@@ -988,3 +988,31 @@ Ek testler:
 - 0 taksitli seçenek → 400
 
 **Commit:** `feat(finance): expose installment scenario comparison endpoint`
+
+---
+
+## #029 — İşlem geçmişi şeması ve import denetim kaydı
+
+**Sprint:** 5
+
+**İhtiyaç.** Analitik özellikler (kategori trendi, tekrarlayan ödeme ve anomali tespiti) geçmiş işlem verisi gerektiriyor.
+Kullanıcı bu veriyi diğer bankalardan CSV ekstresi olarak getirecek veya demo için sentetik olarak üretecek.
+
+**Neden mevcut `dbo.Transactions` değil?** O tablo bankanın kendi hesaplarına (`AccountId`) bağlı. Başka bir bankanın
+ekstresindeki satırın bu sistemde bir hesabı yok. İki kavramı tek tabloya zorlamak ya nullable bir `AccountId`
+ya da sahte hesaplar gerektirirdi.
+
+**Tasarım.**
+- `finance.ImportBatches`: her yükleme için bir satır (kim, ne zaman, hangi dosya, kaç satır, kaçı mükerrer).
+  - Denetim izi sağlıyor.
+  - Bir dosyadan gelen her şeyi tanımlayabiliyor (ileride "bu yüklemeyi geri al").
+  - `ImportedRows + DuplicateRows = TotalRows` kuralı bir `CHECK` constraint ile garanti altında.
+- `finance.Transactions`: tutar pozitif, yön ayrı kolonda (`dbo.Transactions` ile aynı kural). Kategori opsiyonel,
+  çünkü CSV'lerin çoğunda kategori yok.
+- **Mükerrer koruması veritabanında:** `(UserId, Fingerprint)` üzerinde `UNIQUE` index. Uygulama mükerrer satırları zaten
+  ayıklayacak, ama eşzamanlı iki yükleme gibi durumlarda son garanti veritabanı. Index sadece silinmemiş satırları
+  kapsıyor (filtered), böylece silinen bir import tekrar yüklenebiliyor.
+- Analitik sorgular için `(UserId, BookingDate)` index'i. Tutar, yön ve kategori `INCLUDE` ile index'te taşınıyor, böylece
+  sorgular tabloya gitmeden cevaplanabiliyor (covering index).
+
+**Commit:** `build(db): add transaction history and import batch tables`
