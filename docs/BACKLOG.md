@@ -6,7 +6,7 @@
 - [x] JWT secret'ını kaynak koddan çıkar — log #002
 - [x] Şemayı versiyonla: SQL Server + DbUp, baseline `V001` — ADR-0002, log #003
 - [x] Infrastructure katmanını Oracle'dan SQL Server'a taşı — log #004
-- [ ] **Şifreler düz metin saklanıyor**: `PasswordHasher` gerçek hash kullanmalı (PBKDF2)
+- [x] **Şifreler düz metin saklanıyordu**: PBKDF2 ile hash — log #005
 - [x] `CancellationToken`'ı repository → Dapper'a kadar ilet — log #004
 - [ ] `CancellationToken`'ı controller → service → repository zincirinde eksiksiz ilet (AuthService)
 - [ ] `DashboardRepository`'deki sunum mantığını (etiket, ikon, sabit `0.024m`) doğru katmana taşı
