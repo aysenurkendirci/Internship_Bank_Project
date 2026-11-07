@@ -59,6 +59,47 @@ public sealed class MoneyTests
         Assert.Equal(Tl(0.3m), Tl(0.1m) + Tl(0.2m));
     }
 
+    [Fact]
+    public void Allocate_UnevenAmount_AddsRemainderToFirstShare()
+    {
+        var shares = Tl(1000m).Allocate(3);
+
+        Assert.Equal([Tl(333.34m), Tl(333.33m), Tl(333.33m)], shares);
+    }
+
+    [Theory]
+    [InlineData("1000", 3)]
+    [InlineData("100", 7)]
+    [InlineData("0.05", 3)]
+    [InlineData("12999.99", 12)]
+    [InlineData("-100", 3)]
+    public void Allocate_SharesAlwaysSumToTotal(string total, int parts)
+    {
+        var amount = Tl(Parse(total));
+
+        var shares = amount.Allocate(parts);
+
+        Assert.Equal(parts, shares.Count);
+        Assert.Equal(amount, shares.Aggregate((a, b) => a + b));
+        Assert.All(shares, s => Assert.Equal(s, s.Round()));
+    }
+
+    [Fact]
+    public void Allocate_UnroundedTotal_IsRoundedFirst()
+    {
+        var shares = Tl(100.005m).Allocate(2);
+
+        Assert.Equal(Tl(100.01m), shares.Aggregate((a, b) => a + b));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Allocate_NonPositiveParts_IsRejected(int parts)
+    {
+        Assert.Throws<DomainException>(() => Tl(100m).Allocate(parts));
+    }
+
     [Theory]
     [InlineData("try")]
     [InlineData("TRY")]

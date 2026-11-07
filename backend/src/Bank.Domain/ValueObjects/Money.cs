@@ -35,6 +35,28 @@ public sealed record Money : IComparable<Money>
     public Money Round()
         => new(Math.Round(Amount, MinorUnitDigits, MidpointRounding.AwayFromZero), Currency);
 
+    /// <summary>
+    /// Splits the amount into <paramref name="parts"/> cent-exact shares whose sum equals the
+    /// rounded total. Dividing naively loses cents (1000 / 3 = 333.33 × 3 = 999.99); the
+    /// remainder is added to the first share, as banks do for the first installment.
+    /// </summary>
+    public IReadOnlyList<Money> Allocate(int parts)
+    {
+        if (parts < 1)
+            throw new DomainException("Tutar en az bir parçaya bölünmelidir.");
+
+        var total = Round().Amount;
+        var share = Math.Round(total / parts, MinorUnitDigits, MidpointRounding.ToZero);
+        var remainder = total - share * parts;
+
+        var shares = new Money[parts];
+        shares[0] = new Money(share + remainder, Currency);
+        for (var i = 1; i < parts; i++)
+            shares[i] = new Money(share, Currency);
+
+        return shares;
+    }
+
     public static Money operator +(Money left, Money right)
     {
         EnsureSameCurrency(left, right);
