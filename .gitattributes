@@ -1,0 +1,11 @@
+# Store text with LF in the repository and check it out as LF on every OS,
+# so line endings never depend on a developer's core.autocrlf setting.
+* text=auto eol=lf
+
+# Windows-only scripts need CRLF to run
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.ico binary
+*.png binary
+*.jpg binary
