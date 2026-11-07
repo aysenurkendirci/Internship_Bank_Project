@@ -1936,3 +1936,40 @@ Her şeyi anonimleştirmek daha basit olurdu, ama "Kira – Kadıköy" gibi bir 
 ADR'yi "Önerildi" durumunda bıraktım. Saklama süreleri hukuki bir konu ve onları tahmin edip koda gömmek istemedim.
 
 **Commit:** `docs(adr): propose how to handle the right to erasure`
+
+---
+
+## #057 — Servislerden command/query handler'larına
+
+**Sprint:** 9
+
+Para transferini yazmaya başlamadan önce application katmanının şeklini değiştirdim. Transfer; doğrulama, idempotency ve transaction
+isteyen ilk gerçek yazma işlemi olacak. Bu işleri servis servis elle tekrar etmek yerine tek bir boru hattında toplamak istedim
+([ADR-0006](adr/0006-cqrs-with-mediatr.md)).
+
+Ne değişti:
+- Her uç artık tek bir command ya da query'ye karşılık geliyor. `Features/<Alan>/<Senaryo>.cs` dosyasında istek kaydı ve handler'ı
+  birlikte duruyor. Controller'lar sadece HTTP'yi biliyor ve isteği `ISender`'a veriyor. On servis sınıfı ve arayüzleri kalktı.
+- Pipeline'da iki behavior var. `ValidationBehavior` FluentValidation validator'larını handler'dan önce çalıştırıyor.
+  `LoggingBehavior` her isteğin süresini ölçüyor ve 500 ms'yi aşanları uyarı olarak logluyor. Log'a isteğin içeriği değil, sadece tip
+  adı yazılıyor, çünkü login command'ı şifre taşıyor.
+- Controller'lardaki `[Range]` attribute'ları (projeksiyon süresi, sayfa boyutu, analiz süreleri) ve serviste kalan "başlangıç tarihi
+  bitiş tarihinden sonra olamaz" kontrolü validator'lara taşındı. İstek gövdesinin şekli ise data annotation'larla HTTP kenarında
+  kalıyor, aynı kural iki yerde yazılmıyor.
+- Validator hatası, ASP.NET'in kendi model doğrulamasıyla aynı `errors` biçiminde dönüyor. Web istemcisinde tek satır değişmedi.
+
+Birkaç küçük karar:
+- **MediatR 12.5.0'da sabit.** 13'ten sonraki sürümler ticari lisans / RPL-1.5'e geçmiş. NuGet önbelleğindeki 14.2.0'ın lisans dosyasını
+  okuyunca fark ettim. 12.5.0, Apache-2.0 ile yayınlanan son sürüm.
+- **Handler'lar birbirini çağırmıyor.** KVKK dışa aktarımı eskiden üç servisi çağırıyordu. Şimdi aynı eşlemeleri (`CreditCardMapping`
+  vb.) doğrudan kullanıyor. Handler'dan handler çağırmak, pipeline'ı iç içe ikinci kez çalıştırır ve bağımlılıkları gizler.
+- **Bir isim çakışması.** Dışa aktarım için ilk açtığım `Features.PersonalData` namespace'i, TC maskeleyen `PersonalData` sınıfını
+  gölgeledi: C#'ta kapsayan namespace'teki isim, `using` ile gelen isimden önce bulunuyor. Klasör `Features.Privacy` oldu.
+- MediatR 12.5'te `next` delegesi bir `CancellationToken` alıyor. Behavior'lar artık isteğin token'ını iletiyor. Bunu, delegeyi
+  parametresiz çağıran testi yazarken derleyici hatasından öğrendim.
+
+Refactor sırasında 55 HTTP entegrasyon testi hiç değişmedi ve her adımda yeşil kaldı. Değişen tek test sınıfı, `AuthService`'i doğrudan
+kullanan unit testti (`AuthCommandTests` oldu). Yeni testler: geçersiz bir isteğin handler'a hiç ulaşmadığı ve hata biçimi.
+
+**Commit'ler:** `feat(application): add a MediatR pipeline with validation and timing`, `refactor(auth): ...`, `refactor(finance): ...`,
+`refactor(planning): ...`, `refactor(history): ...`, `refactor(analytics): ...`

@@ -143,5 +143,18 @@
 - Değişiklik geçmişini uygulama koduna değil veritabanına bırakmak (temporal tablolar), "audit kaydı yazmayı unutma" riskini tamamen ortadan kaldırdı.
 - Refresh token bilerek ertelendi. Yarım bir oturum mekanizması (rotation var, reuse detection yok gibi) hiç olmamasından daha riskli. Plan ADR-0004'te.
 
+## Sprint 9 — Mimari ve bankacılık çekirdeği
+
+Hedef: projeyi bir bankanın backend'ine benzer hâle getirmek. Uygulama katmanı command/query yapısına geçiyor, ardından
+hesaplar arası para transferi çift taraflı kayıtla ekleniyor.
+
+- [x] Uygulama katmanı CQRS'e geçti: MediatR handler'ları, FluentValidation ve süre ölçen pipeline — ADR-0006, log #057
+- [ ] Hesaplar: kullanıcının hesapları, TR IBAN doğrulaması
+- [ ] Para transferi: çift taraflı kayıt (ledger), idempotency anahtarı, eşzamanlı isteklerde bakiye güvenliği
+- [ ] Kart ayarları: temassız / internet kullanımı ve limitler
+- [ ] Transactional outbox ve RabbitMQ ile olay yayını
+- [ ] Yapısal log (Serilog) ve istek bazlı correlation id
+- [ ] Docker Compose ile tek komutla ayağa kalkan ortam
+
 ## Sonraki sprintler
 
