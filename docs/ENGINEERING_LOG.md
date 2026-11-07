@@ -1915,3 +1915,24 @@ Erişim hakkının kardeşi olan silme hakkı (unutulma hakkı) henüz yok. Soft
 anlama geleceği (anonimleştirme mi, fiziksel silme mi, geçmiş tablolar ne olacak) ayrı bir karar gerektiriyor.
 
 **Commit:** `feat(privacy): let users export all their personal data`
+
+---
+
+## #056 — Silme hakkı: önce karar, sonra kod
+
+**Sprint:** 8
+
+#055'in sonunda ertelediğim soruya döndüm. Silme hakkını bir `DELETE /api/me` ucuyla karşılamak kolay görünüyordu, ama sistemin iki
+özelliği buna izin vermiyor. Soft delete yüzünden "silinen" kayıt yerinde duruyor. Temporal tablolar yüzünden de kaydın her eski hâli
+geçmiş tablosunda. Versioning açıkken SQL Server geçmiş tablosundaki satırları silmeye izin vermiyor, yani uygulama kendi yetkisiyle bu
+veriyi silemiyor bile.
+
+Verileri kimin ürettiğine göre ayırınca karar netleşti ([ADR-0005](adr/0005-right-to-erasure.md)):
+- Kullanıcının kendi girdiği finans verisini saklamak için bir yükümlülük yok. Bu veri geçmişiyle birlikte, ayrı yetkili bir bakım
+  prosedüründe fiziksel olarak silinecek.
+- Bankacılık çekirdeğindeki mali kayıtlar yasal süre boyunca saklanmak zorunda. Orada silme yerine kişisel alanlar anonimleştirilecek.
+
+Her şeyi anonimleştirmek daha basit olurdu, ama "Kira – Kadıköy" gibi bir açıklama anonimleştirildikten sonra da kişiyi tanımlayabilir.
+ADR'yi "Önerildi" durumunda bıraktım. Saklama süreleri hukuki bir konu ve onları tahmin edip koda gömmek istemedim.
+
+**Commit:** `docs(adr): propose how to handle the right to erasure`

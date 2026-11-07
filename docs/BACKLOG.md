@@ -135,7 +135,7 @@
 - [x] `/health/live` ve `/health/ready` — log #053
 - [x] Temporal tablolarla kart, düzenli kalem ve taksit planlarının tam değişiklik geçmişi — log #054
 - [x] KVKK erişim hakkı: kişisel verilerin tamamını JSON olarak dışa aktarma — log #055
-- [ ] KVKK silme hakkı: yaklaşım ADR-0005'te önerildi (finans verisi geçmişiyle silinir, bankacılık çekirdeği anonimleştirilir); hukuk görüşü bekliyor
+- [ ] KVKK silme hakkı: yaklaşım ADR-0005'te önerildi (finans verisi geçmişiyle silinir, bankacılık çekirdeği anonimleştirilir); hukuk görüşü bekliyor — log #056
 
 **Sprint 8 retrospektifi**
 - Giriş uçları artık kaba kuvvete karşı sınırlı, her deneme iz bırakıyor, log'larda ve token'da kişisel veri yok.
