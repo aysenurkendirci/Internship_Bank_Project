@@ -41,7 +41,7 @@
 - [x] Girdi doğrulaması (400), TCKN checksum, `DomainException` → 400 — log #019
 - [x] `V002`: `finance` şeması, audit, soft delete, `ROWVERSION`, bileşik FK ile sahiplik garantisi — log #020
 - [x] Kredi kartı CRUD: sahiplik, `If-Match` ile eşzamanlılık, atomik soft delete — log #021
-- [ ] Gelir / gider / abonelik CRUD
+- [x] Gelir / gider / abonelik CRUD, `?kind=` filtresi, kart referansı doğrulaması — log #022
 - [ ] Taksit planı ve ödeme takvimi endpoint'i
 - [ ] Entegrasyon testleri: kullanıcı izolasyonu, eşzamanlılık, doğrulama
 

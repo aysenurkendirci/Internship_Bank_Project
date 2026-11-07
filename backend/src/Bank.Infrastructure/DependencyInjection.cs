@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<ICreditCardRepository, CreditCardRepository>();
+        services.AddScoped<IRecurringCashFlowRepository, RecurringCashFlowRepository>();
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();

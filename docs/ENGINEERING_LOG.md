@@ -703,3 +703,49 @@ kültürüyle** parse ediyordu. Türkçe'de ondalık ayracı virgül olduğu iç
 Bu senaryolar sprint sonunda otomatik entegrasyon testlerine dönüştürülecek.
 
 **Commit:** `feat(finance): add credit card CRUD with ownership and concurrency checks`
+
+---
+
+## #022 — Gelir / gider / abonelik CRUD ve kart referansının doğrulanması
+
+**Sprint:** 2
+
+**Kapsam.** `api/finance/recurring-cash-flows`: #021'deki kalıpla (sahiplik, `If-Match`, soft delete) CRUD.
+Abonelik yönetimi için `GET ?kind=Subscription` filtresi.
+
+**Kart referansı üç katmanda korunuyor.**
+
+| Katman | Neyi yakalıyor | Neden orada |
+|---|---|---|
+| Domain (`RecurringCashFlow`) | Gelirin karta bağlanması | Saf iş kuralı, veriye ihtiyaç yok |
+| Servis | Kartın bu kullanıcıya ait ve **silinmemiş** olması, para biriminin kartla aynı olması | Kullanıcıya anlamlı mesaj vermek için. Veritabanı soft delete'i ve para birimini göremez |
+| Veritabanı | Başka kullanıcının kartı (bileşik FK, #020) | Uygulamada bir kontrol unutulsa bile son savunma |
+
+Başka kullanıcının kartı seçildiğinde cevap **"Seçilen kart bulunamadı"** oluyor. "Bu kart size ait değil" demek,
+kartın var olduğunu sızdırırdı.
+
+**Diğer kararlar.**
+- `StartDate` kontratta `DateOnly?` + `[Required]`. Değer tipi olsaydı, gönderilmediğinde sessizce `0001-01-01`
+  olur ve doğrulamadan geçerdi.
+- `DATE` kolonları repository'de `DateTime` olarak okunup `DateOnly`'ye çevriliyor. Dapper'ın `DateOnly` desteği
+  sürümden sürüme değiştiği için en taşınabilir yol bu.
+- Karta bağlı ödemenin para birimi kartınkiyle aynı olmalı. Gerçekte yurt dışı abonelikler TL karta döviz
+  olarak yansıyabilir, ama kur dönüşümü projeksiyonu tahmine dayalı hâle getirir. Bu, bilinçli olarak kapsam dışı
+  bırakıldı.
+
+**Bilinen sınır.** Servis kartın silinmediğini kontrol ettikten sonra ve kayıt eklenmeden önce kart silinirse, silinmiş
+karta bağlı bir kayıt oluşabilir. Kart silme sorgusu referans kontrolünü atomik yapıyor (#021), ama tersi yönde bir
+kilit yok. Kişisel finans kullanımında aynı kullanıcının bu iki işlemi milisaniyeler içinde yapması pratikte beklenmiyor.
+Gerekirse `UPDLOCK` ile kapatılabilir.
+
+**Doğrulama.** Gerçek API'ye karşı:
+- kendi kartına abonelik → 201
+- karta bağlı gelir → 400
+- başka kullanıcının kartı → 400 "Seçilen kart bulunamadı"
+- TRY karta USD ödeme → 400
+- başlangıç tarihi yok → 400, bitiş başlangıçtan önce → 400
+- `?kind=Subscription` sadece aboneliği döndürdü, geçersiz filtre → 400
+- **kullanımdaki kartı silmek → 409**. Abonelik silindikten sonra kart silindi → 204
+- aynı version ile ikinci güncelleme → 409
+
+**Commit:** `feat(finance): add CRUD for recurring income, expenses and subscriptions`
