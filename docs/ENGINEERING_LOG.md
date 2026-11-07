@@ -1060,3 +1060,59 @@ kalmadığı bir script ile doğrulandı.
 1254 ile kodlayıp parser'a veriyor.
 
 **Commit:** `feat(import): parse bank statement CSV exports`
+
+---
+
+## #031 — Ekstre import'u: mükerrer koruması, toplu yazma ve "ya hep ya hiç"
+
+**Sprint:** 5
+
+**Kapsam.**
+- `POST /api/finance/transactions/import`: multipart CSV, en fazla 2 MB ve 10.000 satır.
+- `GET /api/finance/transactions?from=&to=&page=&pageSize=`: sayfalı geçmiş.
+
+**Karar 1: Satır parmak izi.** Aynı ekstrenin tekrar yüklenmesi veya Ocak–Mart ile Mart–Mayıs ekstrelerinin çakışması
+mükerrer kayıt üretmemeli. Ama aynı gün aynı kafede iki 85,50 TL'lik kahve **iki gerçek işlemdir**. Sadece
+"tarih + tutar + açıklama" ile ikincisi mükerrer sanılıp atılırdı. Parmak izi şu şekilde hesaplanıyor:
+
+`SHA-256(tarih | tutar | katlanmış açıklama | bu satırın dosyadaki aynı satırlar arasındaki sırası)`
+
+Böylece:
+- İki kahve 1. ve 2. sıra olduğu için ayrı kayıt oluyor.
+- Aynı dosya tekrar yüklendiğinde aynı sıralar, yani aynı parmak izleri çıkıyor ve hepsi mükerrer sayılıyor.
+- Çakışan ekstrede ortak gün aynı sıralarla geldiği için sadece yeni satırlar ekleniyor.
+
+Varsayım: bir ekstre bir günü ya tamamen içerir ya hiç içermez. Bankalar ekstreyi gün sınırında kestiği için bu geçerli.
+
+**Karar 2: Toplu yazma.** 10.000 satır için 10.000 ayrı `INSERT` yerine:
+1. `SqlBulkCopy` ile oturuma özel geçici tabloya (`#Staging`) yükleme.
+2. Mükerrer sayımı `UPDLOCK, HOLDLOCK` ile. Aynı dosyanın eşzamanlı iki yüklemesi, kontrol ile ekleme arasına giremiyor.
+3. Tek bir `INSERT ... SELECT ... WHERE NOT EXISTS`.
+
+Hepsi tek transaction'da. Veritabanındaki `UNIQUE (UserId, Fingerprint)` index'i (#029) son garanti.
+
+**Karar 3: Ya hep ya hiç.** Tek bir hatalı satır bile dosyanın tamamını reddediyor. Cevap 400 ve satır numaralı bir
+hata listesi içeriyor (en fazla 50 hata). Kısmi import, kullanıcıyı hangi satırların girip hangilerinin girmediğini
+tahmin etmeye zorlar. Bankacılıkta toplu işlemlerde (ör. EFT dosyaları) de genel yaklaşım budur.
+
+**Testin yakaladığı hata: Türkçe I, ikinci kez.** Parmak izinde açıklamayı `ToUpperInvariant()` ile normalize ediyordum.
+`"Kadıköy".ToUpperInvariant()` sonucu `"KADıKÖY"`: noktasız ı değişmiyor. Bir banka `MİGROS`, diğeri `MIGROS` yazarsa
+çakışan ekstrede **aynı işlem iki kez** kaydedilirdi. #030'daki başlık katlama mantığı ortak bir `TextFolding.Fold`
+fonksiyonuna çıkarıldı ve iki yerde de kullanılıyor. Aynı problemi iki ayrı yerde iki ayrı şekilde çözmek yerine tek
+çözüm, tek test seti (DRY).
+
+**Kaynak koddaki görünmez karakterler.** Yazım sırasında `\u00A0` ve `\u0307` kaçış dizileri kaynakta görünmez
+karakterlere dönüşmüştü (#030). Bütün `.cs` dosyaları bir script ile tarandı. Kalan tek eşleşme bir dosya başındaki
+UTF-8 BOM'du (.NET şablonunun standart çıktısı, zararsız).
+
+**Doğrulama (8 entegrasyon testi, gerçek DB).**
+- 4 satırlık ekstre (iki aynı kahve dahil) → 4 kayıt.
+- Aynı dosya tekrar → 0 yeni, 4 mükerrer.
+- Çakışan ekstre → sadece yeni satır eklendi (1 yeni, 3 mükerrer).
+- Hatalı dosya → 400, "Satır 3", "Satır 4" hataları, **hiçbir satır kaydedilmedi**.
+- Windows-1254 dosya → "ŞOK MARKET ÇAĞLAYAN" doğru kaydedildi.
+- Başka kullanıcı → 0 kayıt görüyor.
+- Tarih filtresi ve sayfalama.
+- 2 MB üstü dosya → 413.
+
+**Commit:** `feat(finance): import statement CSVs into transaction history`

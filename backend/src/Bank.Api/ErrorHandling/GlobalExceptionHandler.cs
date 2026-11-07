@@ -26,6 +26,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         var (status, title) = exception switch
         {
             DomainException => (StatusCodes.Status400BadRequest, "İş kuralı ihlali"),
+            ImportRejectedException => (StatusCodes.Status400BadRequest, "Dosya içe aktarılamadı"),
             BadRequestException => (StatusCodes.Status400BadRequest, "Geçersiz istek"),
             NotFoundException => (StatusCodes.Status404NotFound, "Kayıt bulunamadı"),
             ConflictException => (StatusCodes.Status409Conflict, "İşlem mevcut kayıtla çakışıyor"),
@@ -38,7 +39,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
 
         context.Response.StatusCode = status;
 
-        return await _problemDetails.TryWriteAsync(new ProblemDetailsContext
+        var problem = new ProblemDetailsContext
         {
             HttpContext = context,
             Exception = exception,
@@ -48,6 +49,11 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
                 Title = title,
                 Detail = exception is AppException or DomainException ? exception.Message : null
             }
-        });
+        };
+
+        if (exception is ImportRejectedException rejected)
+            problem.ProblemDetails.Extensions["errors"] = rejected.Errors;
+
+        return await _problemDetails.TryWriteAsync(problem);
     }
 }

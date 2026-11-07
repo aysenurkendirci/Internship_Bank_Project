@@ -176,7 +176,7 @@ public static class StatementCsvParser
     {
         public static Columns From(string[] headers)
         {
-            var normalized = headers.Select(NormalizeHeader).ToList();
+            var normalized = headers.Select(TextFolding.Fold).ToList();
             int? Find(string[] names) => normalized.FindIndex(names.Contains) is var i and >= 0 ? i : null;
 
             var date = Find(DateHeaders);
@@ -193,30 +193,6 @@ public static class StatementCsvParser
                 error = "Başlık satırında 'Tutar' kolonu ya da 'Borç' ve 'Alacak' kolonları bulunmalıdır.";
 
             return new Columns(date, description, amount, debit, credit, category, error);
-        }
-
-        /// <summary>
-        /// Lower-cases and folds Turkish letters to ASCII. Neither culture alone works: invariant
-        /// lower-casing leaves "İ" unchanged ("TARİH" → "tarİh"), and Turkish lower-casing turns the
-        /// "I" in "DESCRIPTION" into a dotless "ı".
-        /// </summary>
-        private static string NormalizeHeader(string header)
-        {
-            // NFC first, so a decomposed "I + combining dot" becomes a single "İ" handled below.
-            var lower = header.Trim().Normalize(NormalizationForm.FormC).ToLowerInvariant();
-            var builder = new StringBuilder(lower.Length);
-            foreach (var c in lower)
-                builder.Append(c switch
-                {
-                    'ı' or 'İ' => 'i',
-                    'ş' => 's',
-                    'ğ' => 'g',
-                    'ü' => 'u',
-                    'ö' => 'o',
-                    'ç' => 'c',
-                    _ => c
-                });
-            return builder.ToString();
         }
     }
 }

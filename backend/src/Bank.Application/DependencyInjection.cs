@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<ProjectionInputLoader>();
         services.AddScoped<IProjectionService, ProjectionService>();
         services.AddScoped<IScenarioService, ScenarioService>();
+        services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
 
         return services;
     }

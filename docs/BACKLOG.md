@@ -79,7 +79,7 @@
 
 - [x] `V003`: `finance.Transactions`, `finance.ImportBatches`, parmak izi ile mükerrer koruması — log #029
 - [x] CSV parser: encoding, ayraç, Borç/Alacak, Türkçe tutar/tarih, Türkçe İ — log #030
-- [ ] Import ve listeleme API'si, mükerrer satır tespiti
+- [x] Import (parmak izi, bulk copy, ya hep ya hiç) ve sayfalı listeleme — log #031
 - [ ] Deterministik sentetik veri üretici
 
 ## Sonraki sprintler
