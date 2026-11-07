@@ -130,7 +130,8 @@
 - [x] Giriş uçlarında IP başına rate limiting, güvenlik başlıkları, `no-store` — log #049
 - [x] Giriş denemelerinin güvenlik kaydı, TC maskeli; log'da tam TC geçmediği testle kilitli — log #050
 - [x] Token'da sadece kullanıcı id'si; e-posta çıkarıldı — log #051
-- [ ] Refresh token + HttpOnly cookie: tasarım kararı ADR-0004'te, uygulama sonraki adım
+- [x] Refresh token, rotation, tekrar kullanım tespiti ve çıkışta iptal (sunucu tarafı) — ADR-0004, log #063
+- [ ] Web istemcisi refresh akışına geçsin, sonra erişim token'ı ömrü 5–10 dakikaya insin (UI aşamasında)
 - [x] CI: warnings-as-errors, açık taraması, SQL Server container ile entegrasyon testleri, web build ve testleri — log #052
 - [x] `/health/live` ve `/health/ready` — log #053
 - [x] Temporal tablolarla kart, düzenli kalem ve taksit planlarının tam değişiklik geçmişi — log #054

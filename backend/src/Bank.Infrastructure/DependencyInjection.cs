@@ -36,11 +36,13 @@ public static class DependencyInjection
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         AddMessaging(services, configuration);
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<ISessionPolicy, SessionPolicy>();
 
         // Code asks TimeProvider for the current time instead of DateTime.Now, so tests can pin it.
         services.TryAddSingleton(TimeProvider.System);

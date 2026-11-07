@@ -2100,3 +2100,36 @@ Docker bu makinede kurulu olmadığı için compose'u çalıştıramadım. CI he
 ortaya çıkacak. Sistemin bir bütün olarak container'larda ayağa kalktığını henüz görmedim.
 
 **Commit'ler:** `feat(api): read the client address from a trusted reverse proxy`, `build: run the whole system with docker compose`
+
+---
+
+## #063 — Refresh token: sunucu tarafı
+
+**Sprint:** 9
+
+ADR-0004'te tasarladığım oturum modelinin sunucu tarafını uyguladım. Frontend'e dokunmadım, çünkü o tarafın değişmesi ekranların
+bulunduğu aşamaya ait. Mevcut istemci cookie'yi görmezden gelip eskisi gibi çalışıyor.
+
+- Giriş ve kayıt, 256 bitlik rastgele bir yenileme token'ı üretip `HttpOnly; Secure; SameSite=Strict; Path=/api/auth` cookie'siyle
+  veriyor. Gövdede token yok, JavaScript onu okuyamıyor.
+- Veritabanına token'ın kendisi değil SHA-256 özeti yazılıyor (`dbo.RefreshTokens`). Tablonun bir kopyası sızsa bile oturum açmak için
+  kullanılamaz. Parolalardan farklı olarak yavaş bir hash gerekmiyor: 256 rastgele bit tahmin edilemez.
+- `POST /api/auth/refresh`: token'ı iptal edip yenisini veriyor (rotation). İptal tek bir `UPDATE ... WHERE RevokedAt IS NULL` ile
+  yapılıyor. Aynı token'la aynı anda gelen dört istekten tam biri geçiyor, bunu test ediyor.
+- **Tekrar kullanım tespiti:** daha önce kullanılmış bir token tekrar gelirse iki tarafın elinde bir kopya var demektir. Hangisinin
+  gerçek kullanıcı olduğu anlaşılamaz, bu yüzden kullanıcının bütün oturumları kapanıyor. Başka bir kullanıcının oturumları etkilenmiyor.
+- `POST /api/auth/logout` sunucudaki token'ı iptal ediyor, çalınmış bir kopya da işe yaramıyor.
+- İki uç `X-Requested-By: bank-web` başlığı olmadan 403 veriyor. Tarayıcı çapraz site isteğine cookie'yi kendisi ekleyebilir ama özel
+  başlığı CORS preflight olmadan ekleyemez. Başlık eksikse token da tüketilmiyor (testle doğrulandı).
+
+Bir tasarım ayrıntısı: reddedilen token bir exception değil, `null` sonuç olarak dönüyor. Command'lar transaction içinde çalışıyor ve
+exception transaction'ı geri alır. Tekrar kullanımda "bütün oturumları iptal et" işleminin kalıcı olması gerekiyor. 401'i handler
+bittikten sonra controller atıyor.
+
+Test yazarken kendi hatamı yakaladım: iki test başta kırıldı çünkü Dapper `string` parametresini `NVARCHAR` (UTF-16) gönderiyor ve
+SQL Server'ın `HASHBYTES`'ı uygulamanın UTF-8 hash'inden farklı bir değer üretiyor. Ürün kodu doğruydu, sorguyu `VARCHAR` yaptım.
+Reuse tespitini bilerek devre dışı bırakınca `UsingATokenTwice_RevokesEveryTokenOfTheUser` kırıldı.
+
+**Henüz yok:** süresi dolmuş token satırlarının temizlenmesi ve web istemcisinin geçişi. Erişim token'ı ömrü, istemci geçene kadar 60 dakikada kalıyor.
+
+**Commit'ler:** `build(db): add refresh tokens`, `feat(auth): issue, rotate and revoke refresh tokens`

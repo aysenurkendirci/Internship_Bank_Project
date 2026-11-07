@@ -16,6 +16,8 @@ public sealed class AuthCommandTests
     private readonly IAuthRepository _repo = Substitute.For<IAuthRepository>();
     private readonly IPasswordHasher _hasher = Substitute.For<IPasswordHasher>();
     private readonly ITokenGenerator _tokens = Substitute.For<ITokenGenerator>();
+    private readonly IRefreshTokenRepository _refreshTokens = Substitute.For<IRefreshTokenRepository>();
+    private readonly ISessionPolicy _policy = Substitute.For<ISessionPolicy>();
     private readonly RecordingLogger<LoginCommandHandler> _log = new();
     private readonly LoginCommandHandler _login;
     private readonly RegisterCommandHandler _register;
@@ -31,8 +33,10 @@ public sealed class AuthCommandTests
 
     public AuthCommandTests()
     {
-        _login = new LoginCommandHandler(_repo, _hasher, _tokens, _log);
-        _register = new RegisterCommandHandler(_repo, _hasher, _tokens, new RecordingLogger<RegisterCommandHandler>());
+        _policy.RefreshTokenLifetime.Returns(TimeSpan.FromHours(8));
+        var issuer = new RefreshTokenIssuer(_refreshTokens, _policy, TimeProvider.System);
+        _login = new LoginCommandHandler(_repo, _hasher, _tokens, issuer, _log);
+        _register = new RegisterCommandHandler(_repo, _hasher, _tokens, issuer, new RecordingLogger<RegisterCommandHandler>());
         _tokens.Generate(Arg.Any<long>()).Returns("jwt");
     }
 
@@ -115,7 +119,8 @@ public sealed class AuthCommandTests
         Assert.DoesNotContain(_log.Messages, m => m.Contains(TcNo) || m.Contains("99999999990"));
     }
 
-    private Task<AuthResponse> Login(LoginRequest credentials) => _login.Handle(new LoginCommand(credentials), default);
+    private async Task<AuthResponse> Login(LoginRequest credentials)
+        => (await _login.Handle(new LoginCommand(credentials), default)).Response;
 
     private void GivenExistingUserWithPassword(string password)
     {

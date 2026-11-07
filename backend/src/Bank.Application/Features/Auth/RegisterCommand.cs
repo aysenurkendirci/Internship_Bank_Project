@@ -8,25 +8,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Bank.Application.Features.Auth;
 
-public sealed record RegisterCommand(RegisterRequest Registration) : IRequest<AuthResponse>;
+public sealed record RegisterCommand(RegisterRequest Registration) : IRequest<AuthResult>;
 
-public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
+public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResult>
 {
     private readonly IAuthRepository _repo;
     private readonly IPasswordHasher _hasher;
     private readonly ITokenGenerator _tokens;
+    private readonly RefreshTokenIssuer _refreshTokens;
     private readonly ILogger<RegisterCommandHandler> _logger;
 
     public RegisterCommandHandler(
-        IAuthRepository repo, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<RegisterCommandHandler> logger)
+        IAuthRepository repo, IPasswordHasher hasher, ITokenGenerator tokens, RefreshTokenIssuer refreshTokens,
+        ILogger<RegisterCommandHandler> logger)
     {
         _repo = repo;
         _hasher = hasher;
         _tokens = tokens;
+        _refreshTokens = refreshTokens;
         _logger = logger;
     }
 
-    public async Task<AuthResponse> Handle(RegisterCommand command, CancellationToken ct)
+    public async Task<AuthResult> Handle(RegisterCommand command, CancellationToken ct)
     {
         var registration = command.Registration;
         var maskedTc = PersonalData.MaskTcKimlikNo(registration.TcNo);
@@ -40,6 +43,6 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
         var user = await _repo.CreateUserAsync(registration, _hasher.Hash(registration.Password), ct);
 
         _logger.LogInformation("User {UserId} registered with {TcNo}", user.UserId, maskedTc);
-        return AuthResponses.For(user, _tokens);
+        return await AuthResponses.CreateAsync(user.UserId, $"{user.FirstName} {user.LastName}", _tokens, _refreshTokens, ct);
     }
 }

@@ -1,6 +1,6 @@
 # ADR-0004: Oturum güvenliğini sertleştirme planı
 
-**Durum:** Kabul edildi, uygulaması ertelendi
+**Durum:** Kabul edildi. Sunucu tarafı uygulandı; web istemcisinin geçişi ve erişim token'ının kısaltılması bekliyor.
 
 ## Bağlam
 
@@ -32,12 +32,27 @@ Akış:
 - Cookie kullanıldığı için `/refresh` ve `/logout` uçlarına CSRF koruması gerekir: `SameSite=Strict` ve ek olarak özel bir başlık
   kontrolü.
 
-## Neden şimdi değil
+## Neden iki aşamada
 
 Bu değişiklik hem backend'de (yeni tablo, uçlar, rotation ve reuse kuralları) hem frontend'de (bellekte token, sessiz yenileme,
 eşzamanlı isteklerin tek bir yenilemeyi beklemesi) oturumun tamamına dokunuyor. Yarım uygulanmış bir oturum mekanizması, olmamasından
 daha tehlikeli: örneğin rotation var ama reuse detection yoksa, çalınan token sonsuza kadar yenilenebilir. Doğru yapılıp uçtan uca test
 edilene kadar mevcut model korunuyor. Mevcut modelin riskleri `SessionService` belgesinde açıkça yazılı.
+
+## Uygulama durumu
+
+**Sunucu tarafı tamam** (log #063). Giriş ve kayıt yenileme token'ını `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`
+cookie'sinde veriyor, `POST /api/auth/refresh` rotation ile yeni çift veriyor, `POST /api/auth/logout` token'ı iptal ediyor.
+Kullanılmış bir token tekrar gelirse kullanıcının bütün oturumları kapanıyor, bu bir entegrasyon testiyle kilitli ve kod bilerek
+bozulduğunda test kırılıyor. Token veritabanında yalnızca SHA-256 özeti olarak duruyor. Cookie'yi kullanan iki uç `X-Requested-By`
+başlığını da istiyor (CSRF).
+
+**Bekleyen: web istemcisi.** Bellekte tutulan erişim token'ı, 401'de tek seferlik sessiz yenileme ve eşzamanlı isteklerin tek bir
+yenilemeyi beklemesi frontend işi. İstemci geçene kadar `Jwt:ExpiresMinutes` 60'ta kalıyor: ömrü şimdi 5–10 dakikaya indirmek
+mevcut web istemcisini her 10 dakikada bir oturumdan atardı. İstemci geçince değer kısaltılacak.
+
+Yeni bir açık yok: mevcut istemci cookie'yi görmezden geliyor ve eskisi gibi çalışıyor. Cookie'deki token kullanılmadan 8 saat
+sonra (ayarlanabilir, `Session:RefreshTokenHours`) süresi doluyor.
 
 ## Sonuçlar
 
