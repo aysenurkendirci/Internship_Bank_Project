@@ -208,3 +208,34 @@ DB constraint hatası → içinde SQL detayı olmayan genel 500. Son senaryo, gi
 olduğunu da gösterdi. Geçersiz istek 400 almalı, bu iş Sprint 2'ye eklendi.
 
 **Commit:** `fix(api): return problem details and stop leaking internals on errors`
+
+---
+
+## #007 — Repoda kişisel ayarlar, boş dosyalar ve şablon kalıntıları
+
+**Sprint:** 0 · **Tarih:** 2026-11-07
+
+**Sorun.** Takip edilen dosyalar tek tek incelendiğinde şunlar bulundu:
+- Kök `.vscode/` klasöründe başka bir makineden kalma C/C++ debug ayarları vardı. İçinde o makinenin
+  kullanıcı adını içeren mutlak dosya yolları geçiyordu.
+- Kişisel AI asistanı yapılandırmaları (`copilot-instructions.md`, `mcp.json`) commit'lenmişti.
+- 12 adet **tamamen boş** `.cs` dosyası vardı (`Money`, `User`, `Card`, `ApiResponse`…). Ayrıca Domain
+  klasöründe namespace'i `Bank.Contracts` olan bir dosya duruyordu.
+- `Bank.Api.http` şablondan kalmıştı ve var olmayan `/weatherforecast` adresini çağırıyordu.
+- Tailwind lint ayarı (`settings.json`) kaynak kod klasörü `src/` içindeydi.
+
+**Analiz.** Boş dosyalar kodu okuyan birine "domain modeli var" izlenimi veriyor ama aslında hiçbir şey
+içermiyor. Kişisel IDE ve araç ayarları her geliştiricide farklıdır. Commit'lenirlerse çakışma
+çıkarır ve kişisel bilgileri (dosya yolları, kullanıcı adları) sızdırırlar.
+
+**Çözüm.**
+- Boş ve şablon dosyalar silindi. Domain modeli Sprint 1'de testleriyle birlikte gerçekten yazılacak.
+- Kişisel ayarlar takipten çıkarıldı (diskte duruyorlar) ve `.gitignore`'a eklendi.
+- Ekipçe paylaşılması anlamlı olan ayarlar (`frontend/.vscode/` içindeki extensions, launch, tasks ve
+  lint ayarı) repoda kaldı.
+
+**Not.** İlk denemede `.github/copilot-instructions.md` deseni `frontend/` altındaki dosyayı yakalamadı.
+Ortasında `/` olan gitignore desenleri kök dizine sabitlenir. `**/` önekiyle düzeltildi ve
+`git check-ignore -v` ile doğrulandı.
+
+**Commit:** `chore: remove personal tooling config, empty files and template leftovers`

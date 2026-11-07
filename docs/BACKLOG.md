@@ -15,7 +15,7 @@
 - [ ] `IDashboardService` / `IDashboardRepository` dosyaları yer değiştirmiş, namespace uyuşmazlığı
 - [ ] Tarihler JSON'da UTC işaretsiz (`Z` yok) dönüyor
 - [ ] `CardsController`: aynı servis çağrısı iki kez yapılıyor, kullanılmayan `userId` parse'ı
-- [ ] Boş dosyaları temizle (Domain entity/enum/value object'leri, `RequestLoggingMiddleware`, `ApiResponse`)
+- [x] Boş dosyalar, kişisel IDE/AI ayarları ve şablon kalıntıları temizlendi — log #007
 - [ ] Test projeleri (xUnit) ve ilk testler
 - [ ] `System.Security.Cryptography.Pkcs` açığı (NU1903), SqlClient üzerinden transitive geliyor
 

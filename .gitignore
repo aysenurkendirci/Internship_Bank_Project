@@ -16,5 +16,10 @@ appsettings.*.local.json
 Thumbs.db
 *.icloud
 
-# IDE
+# IDE: personal settings stay local; frontend/.vscode holds shared workspace settings
+/.vscode/
 .idea/
+
+# Personal AI assistant configuration
+**/.github/copilot-instructions.md
+**/.vscode/mcp.json
