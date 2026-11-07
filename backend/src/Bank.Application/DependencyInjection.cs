@@ -12,12 +12,14 @@ public static class DependencyInjection
     {
         var assembly = typeof(DependencyInjection).Assembly;
 
-        // Logging wraps validation so rejected requests are timed and logged too.
+        // Order matters: logging wraps everything so rejected requests are timed too, and validation runs
+        // before a transaction is opened, so invalid input never touches the database.
         services.AddMediatR(config =>
         {
             config.RegisterServicesFromAssembly(assembly);
             config.AddOpenBehavior(typeof(LoggingBehavior<,>));
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            config.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
