@@ -69,7 +69,8 @@ Uygulamada verilen ayrıntı kararlar:
 
 ## Sonuçlar
 
-- Uygulama: bir migration (prosedür ve bakım rolü), `DELETE /api/me` ucu (yeniden şifre doğrulamasıyla) ve "silinen kullanıcının
-  hiçbir verisi, geçmiş tabloları dahil, kalmadı" entegrasyon testi.
-- Yasal saklama sürelerinin kesin değerleri ve hangi kayıtlara uygulandığı bir hukuk görüşüyle netleştirilmeden bu ADR "Önerildi"
-  durumunda kalır.
+- Kişisel finans verisi geri dönüşsüz silinir. Silme ve geçmiş tablolarının temizliği tek transaction'da yapıldığı için yarım kalmış bir
+  silme durumu oluşmaz.
+- Bir silme ancak şifre yeniden girilirse ve hesaplarda para yoksa çalışır. Silinen kullanıcının eski token'ları birkaç saniye içinde
+  reddedilir.
+- Çekirdek kayıtların saklama süresi dolunca temizlenmesi, süreler hukuki görüşle netleşene kadar bekliyor.
