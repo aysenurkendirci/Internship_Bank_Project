@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net.Http.Json;
 using Bank.Contracts.Finance;
 using Bank.IntegrationTests.Infrastructure;
@@ -50,6 +51,10 @@ public sealed class AuditHistoryTests
         await using var connection = new SqlConnection(ApiFactory.ConnectionString);
         var beforeChange = await connection.ExecuteScalarAsync<DateTime>("SELECT SYSUTCDATETIME()");
 
+        // The in-memory test server answers so fast that the update can start within a millisecond of the moment
+        // above; the history's own timestamps have 100 ns resolution, so leave room between the two.
+        await Task.Delay(50);
+
         var update = new HttpRequestMessage(HttpMethod.Put, $"/api/finance/credit-cards/{card.Id}")
         {
             Content = JsonContent.Create(new CreditCardRequest("Bonus", 90_000m, "TRY", 20, 10))
@@ -57,9 +62,15 @@ public sealed class AuditHistoryTests
         update.Headers.TryAddWithoutValidation("If-Match", card.Version);
         (await client.SendAsync(update)).EnsureSuccessStatusCode();
 
+        // Sent as datetime2: Dapper's default for DateTime is datetime, which rounds to about 3 ms and can round
+        // past the moment the update was recorded.
+        var parameters = new DynamicParameters();
+        parameters.Add("At", beforeChange, DbType.DateTime2);
+        parameters.Add("Id", card.Id);
+
         var limitThen = await connection.ExecuteScalarAsync<decimal>(
             "SELECT LimitAmount FROM finance.CreditCards FOR SYSTEM_TIME AS OF @At WHERE CreditCardId = @Id",
-            new { At = beforeChange, card.Id });
+            parameters);
 
         Assert.Equal(50_000m, limitThen);
     }
