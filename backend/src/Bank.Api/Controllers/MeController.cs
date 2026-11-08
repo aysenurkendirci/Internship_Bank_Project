@@ -1,8 +1,10 @@
+using Bank.Api.Security;
 using Bank.Application.Features.Privacy;
 using Bank.Contracts.Account;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Bank.Api.Controllers;
 
@@ -21,5 +23,19 @@ public sealed class MeController : ControllerBase
     {
         Response.Headers.ContentDisposition = "attachment; filename=\"kisisel-verilerim.json\"";
         return Ok(await _sender.Send(new ExportPersonalDataQuery(), ct));
+    }
+
+    /// <summary>
+    /// Erases the signed-in customer (KVKK right to erasure): personal finance data is deleted with its history,
+    /// accounts are closed and the person is removed from the user record. Needs the password again and an empty
+    /// balance. Final.
+    /// </summary>
+    [HttpDelete]
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
+    public async Task<IActionResult> EraseAccount([FromBody] EraseAccountRequest request, CancellationToken ct)
+    {
+        await _sender.Send(new EraseAccountCommand(request.Password), ct);
+        RefreshCookie.Clear(Response);
+        return NoContent();
     }
 }

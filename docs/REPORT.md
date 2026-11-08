@@ -98,9 +98,9 @@ Evet. En net örnek: ayın 1'inde kira, 15'inde maaş olan bir kullanıcının a
 
 - **Refresh token.** Tasarım [ADR-0004](adr/0004-session-hardening.md)'te. Yarım bir oturum mekanizması, hiç olmamasından daha riskli
   olduğu için acele etmedim.
-- **KVKK silme hakkı.** Erişim hakkı var, silme hakkı henüz yok. Soft delete ve temporal tablolar düz bir `DELETE`'i anlamsız
-  kılıyor. Yaklaşım [ADR-0005](adr/0005-right-to-erasure.md)'te: kişisel finans verisi geçmişiyle birlikte silinir, bankacılık
-  çekirdeği anonimleştirilir. Yasal saklama süreleri netleşmeden koda dökmedim.
+- **Saklama süresi dolan kayıtların silinmesi.** Silme hakkı uygulandı ([ADR-0005](adr/0005-right-to-erasure.md)): finans verisi
+  geçmişiyle birlikte silinir, bankacılık çekirdeği anonimleştirilir. Çekirdek kayıtların saklama süresi dolunca temizlenmesi, süreler
+  hukuki görüşle netleşmeden koda dökülmedi.
 - **Resmi tatiller, döviz kurları, kategori bazlı yasal taksit sınırları.** Hepsi belgelerde açıkça kapsam dışı olarak yazılı.
 - **Görsel tasarım.** Ekranlar işlevsel ve bileşenlere ayrılmış durumda. Görsel tasarım Google Stitch'te yapılacak
   ([prompt](design/STITCH_PROMPT.md)).

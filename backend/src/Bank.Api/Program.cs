@@ -6,6 +6,7 @@ using Bank.Api.Logging;
 using Bank.Api.Security;
 using Bank.Api.Serialization;
 using Bank.Application;
+using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -78,6 +79,19 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOper
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // A token outlives the account it was issued for, so an erased user's token is refused here.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var userId = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var erasure = context.HttpContext.RequestServices.GetRequiredService<IErasureRepository>();
+
+                if (long.TryParse(userId, out var id) && await erasure.IsErasedAsync(id, context.HttpContext.RequestAborted))
+                    context.Fail("The account has been erased.");
+            }
+        };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

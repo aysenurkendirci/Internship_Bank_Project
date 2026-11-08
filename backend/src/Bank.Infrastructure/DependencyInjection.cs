@@ -37,6 +37,8 @@ public static class DependencyInjection
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IErasureRepository, ErasureRepository>();
+        services.AddMemoryCache();
 
         AddMessaging(services, configuration);
 

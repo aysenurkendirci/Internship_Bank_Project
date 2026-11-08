@@ -2133,3 +2133,34 @@ Reuse tespitini bilerek devre dışı bırakınca `UsingATokenTwice_RevokesEvery
 **Henüz yok:** süresi dolmuş token satırlarının temizlenmesi ve web istemcisinin geçişi. Erişim token'ı ömrü, istemci geçene kadar 60 dakikada kalıyor.
 
 **Commit'ler:** `build(db): add refresh tokens`, `feat(auth): issue, rotate and revoke refresh tokens`
+
+---
+
+## #064 — Silme hakkı: uygulama
+
+**Sprint:** 9
+
+#056'daki kararı uyguladım. Silme tek bir veritabanı prosedüründe (`compliance.EraseUser`), tek transaction içinde yapılıyor:
+temporal tabloların versioning'i kapatılıyor, kullanıcının satırları ana ve geçmiş tablolardan siliniyor, versioning aynı geçmiş
+tablolarıyla yeniden açılıyor. Sonra oturumlar siliniyor, hesaplar kapatılıyor, kartlar iptal ediliyor ve `dbo.Users` satırındaki kişi
+bilgileri yer tutucularla değiştiriliyor. TC kimlik no ayrı bir tabloya taşınıyor.
+
+Üç şey beklediğimden farklı çıktı:
+
+- **Migration derlenmedi.** İlk denemede SQL Server `13560` hatasıyla geçmiş tablosuna yazan `DELETE`'leri daha prosedür oluşturulurken
+  reddetti: versioning açıkken geçmiş tablosuna yazmak derleme anında bile yasak. O satırlar dinamik SQL'e (`sp_executesql`) taşındı,
+  çünkü tabloların versioning'i yalnızca prosedür çalışırken kapalı. Script transaction içinde çalıştığı için geliştirme veritabanında
+  yarım nesne kalmadı, bunu önce kontrol ettim.
+- **Eski token sorunu.** Silinen kullanıcının erişim token'ı süresi dolana kadar geçerli kalıyordu ve o kullanıcı adına yeni veri
+  oluşturabiliyordu. JWT doğrulaması artık silinmiş kullanıcıyı reddediyor. Her istekte veritabanına gitmemek için cevap 30 saniye
+  bellekte tutuluyor. Silinen kullanıcı eski token'ı en fazla bu kadar daha kullanabilir. Bunu kabul edilebilir buldum ve ADR'ye yazdım.
+- **Para kaybolması.** Bakiyesi olan hesabı kapatmak parayı görünmez yapar. Bu yüzden bakiyesi sıfırdan farklı kullanıcı silinemiyor
+  (`409`, "paranızı aktarın"). Prosedür kontrolü transaction içinde tekrar ediyor.
+
+Testler: finans verisi ve geçmiş tabloları gerçekten boşalıyor (kartı güncelleyip geçmişte ikinci bir sürüm oluşturarak), başka
+kullanıcının verisi duruyor, hesaplar ve ledger kalıyor, kişi bilgisi kalmıyor, TC ayrı tabloda, giriş ve eski token'lar çalışmıyor,
+yanlış şifrede hiçbir şey silinmiyor, iki kez silmek zararsız. Geçmiş tablosu silmesini bilerek kapatınca ilgili test kırıldı.
+
+Hukuki görüş bekleyen kısım değişmedi: çekirdek kayıtların saklama süresi dolunca silinmesi henüz yazılmadı.
+
+**Commit'ler:** `build(db): add the erasure procedure`, `feat(privacy): let customers erase their account`
