@@ -1,52 +1,76 @@
-<div class="min-h-screen flex flex-col lg:flex-row">
-  <aside class="bg-white border-b lg:border-b-0 lg:border-r border-slate-100 lg:w-72 lg:min-h-screen lg:p-8 p-4 flex lg:flex-col gap-4">
-    <div class="flex items-center gap-3 lg:mb-10">
-      <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
-        <span class="material-symbols-outlined">bolt</span>
-      </div>
-      <span class="text-2xl font-black text-slate-900 tracking-tight hidden sm:inline">NeoBank</span>
+<div class="min-h-screen lg:flex">
+  <aside class="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0 bg-white border-r border-line">
+    <div class="h-16 px-5 flex items-center border-b border-line">
+      <span class="text-lg font-semibold tracking-tight text-brand">NeoBank</span>
     </div>
 
-    <nav class="flex lg:flex-col gap-1 overflow-x-auto no-scrollbar flex-1" aria-label="Ana menü">
-      @for (item of navItems; track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="bg-blue-50 text-blue-600"
-          [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-          class="flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 whitespace-nowrap transition-colors"
-        >
-          <span class="material-symbols-outlined">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
-        </a>
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6" aria-label="Ana menü">
+      @for (group of navGroups; track group.title) {
+        <div>
+          <p class="px-2 mb-1 text-xs font-medium text-ink-faint">{{ group.title }}</p>
+          @for (item of group.items; track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-brand-tint !text-brand font-medium"
+              [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+              class="flex items-center gap-2.5 h-9 px-2 rounded-md text-sm text-ink-soft hover:bg-canvas transition-colors"
+            >
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">{{ item.icon }}</span>
+              {{ item.label }}
+            </a>
+          }
+        </div>
       }
     </nav>
 
-    <div class="flex lg:flex-col items-center lg:items-stretch gap-3 lg:mt-auto lg:pt-6 lg:border-t border-slate-100">
+    <div class="border-t border-line px-3 py-3 space-y-0.5">
       @if (fullName(); as name) {
-        <p class="text-sm font-bold text-slate-700 truncate hidden lg:block">{{ name }}</p>
+        <p class="px-2 pb-2 text-sm font-medium text-ink truncate">{{ name }}</p>
       }
       <button
         type="button"
         (click)="exportMyData()"
         [disabled]="exporting()"
-        class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-50"
-        title="Hakkınızda tutulan bütün verileri JSON dosyası olarak indirir"
+        class="w-full flex items-center gap-2.5 h-9 px-2 rounded-md text-sm text-ink-soft hover:bg-canvas disabled:opacity-50"
       >
-        <span class="material-symbols-outlined">download</span>
-        <span class="hidden sm:inline">{{ exporting() ? 'Hazırlanıyor...' : 'Verilerimi indir' }}</span>
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">download</span>
+        {{ exporting() ? 'Hazırlanıyor...' : 'Verilerimi indir' }}
       </button>
       <button
         type="button"
         (click)="logout()"
-        class="flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-50"
+        class="w-full flex items-center gap-2.5 h-9 px-2 rounded-md text-sm text-ink-soft hover:bg-canvas"
       >
-        <span class="material-symbols-outlined">logout</span>
-        <span class="hidden sm:inline">Çıkış</span>
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>
+        Çıkış
       </button>
     </div>
   </aside>
 
-  <main class="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
+  <header class="lg:hidden sticky top-0 z-10 bg-white border-b border-line">
+    <div class="h-14 px-4 flex items-center justify-between">
+      <span class="text-lg font-semibold tracking-tight text-brand">NeoBank</span>
+      <button type="button" (click)="logout()" class="p-2 -mr-2 text-ink-soft" aria-label="Çıkış">
+        <span class="material-symbols-outlined text-[22px]" aria-hidden="true">logout</span>
+      </button>
+    </div>
+    <nav class="flex gap-1 px-3 pb-2 overflow-x-auto no-scrollbar" aria-label="Ana menü">
+      @for (group of navGroups; track group.title) {
+        @for (item of group.items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="bg-brand-tint !text-brand font-medium"
+            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+            class="px-3 py-1.5 rounded-md text-sm text-ink-soft whitespace-nowrap"
+          >
+            {{ item.label }}
+          </a>
+        }
+      }
+    </nav>
+  </header>
+
+  <main class="flex-1 min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="max-w-6xl mx-auto">
       <router-outlet />
     </div>

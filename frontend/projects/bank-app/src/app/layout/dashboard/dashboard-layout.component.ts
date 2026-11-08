@@ -10,6 +10,11 @@ interface NavItem {
   readonly icon: string;
 }
 
+interface NavGroup {
+  readonly title: string;
+  readonly items: readonly NavItem[];
+}
+
 @Component({
   selector: 'app-dashboard-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
@@ -24,14 +29,22 @@ export class DashboardLayoutComponent {
 
   protected readonly fullName = this.session.fullName;
 
-  protected readonly navItems: readonly NavItem[] = [
-    { path: '/dashboard', label: 'Ana Sayfa', icon: 'grid_view' },
-    { path: '/dashboard/cash-flow', label: 'Nakit akışı', icon: 'timeline' },
-    { path: '/dashboard/scenarios', label: 'Taksit senaryosu', icon: 'compare_arrows' },
-    { path: '/dashboard/recurring', label: 'Gelir ve giderler', icon: 'event_repeat' },
-    { path: '/dashboard/cards', label: 'Kartlar ve taksitler', icon: 'credit_card' },
-    { path: '/dashboard/transactions', label: 'İşlem geçmişi', icon: 'receipt_long' },
-    { path: '/dashboard/analytics', label: 'Analiz', icon: 'insights' },
+  protected readonly navGroups: readonly NavGroup[] = [
+    {
+      title: 'Bankacılık',
+      items: [{ path: '/dashboard', label: 'Ana Sayfa', icon: 'home' }],
+    },
+    {
+      title: 'Planlama',
+      items: [
+        { path: '/dashboard/cash-flow', label: 'Nakit akışı', icon: 'timeline' },
+        { path: '/dashboard/scenarios', label: 'Taksit senaryosu', icon: 'compare_arrows' },
+        { path: '/dashboard/recurring', label: 'Gelir ve giderler', icon: 'event_repeat' },
+        { path: '/dashboard/cards', label: 'Kartlar ve taksitler', icon: 'credit_card' },
+        { path: '/dashboard/transactions', label: 'İşlem geçmişi', icon: 'receipt_long' },
+        { path: '/dashboard/analytics', label: 'Analiz', icon: 'insights' },
+      ],
+    },
   ];
 
   /** Saves the personal data export as a file; the browser's download handles the rest. */

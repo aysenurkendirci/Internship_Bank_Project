@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -7,12 +7,23 @@ import { DashboardApi } from '../../data-access/api/dashboard.api';
 import { PlanningApi } from '../../data-access/api/finance.api';
 import { DashboardResponse } from '../../data-access/models/dashboard.models';
 import { Projection } from '../../data-access/models/finance.models';
+import { NoticeComponent } from '../../shared/ui/notice.component';
 import { ProjectionSummaryComponent } from '../cash-flow/components/projection-summary.component';
-import { ACCOUNT_STATUS_LABELS, ACCOUNT_TYPE_DISPLAY } from './account-display';
+import { AccountListComponent } from './components/account-list.component';
+import { BankCardTileComponent } from './components/bank-card-tile.component';
+import { RecentTransactionsComponent } from './components/recent-transactions.component';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CurrencyPipe, DatePipe, NgClass, RouterLink, ProjectionSummaryComponent],
+  imports: [
+    CurrencyPipe,
+    RouterLink,
+    NoticeComponent,
+    ProjectionSummaryComponent,
+    BankCardTileComponent,
+    RecentTransactionsComponent,
+    AccountListComponent,
+  ],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
@@ -25,10 +36,6 @@ export class DashboardComponent {
 
   /** The next three months at a glance; loaded on its own so a failure here never hides the accounts. */
   protected readonly outlook = signal<Projection | null>(null);
-
-  protected readonly accountTypeDisplay = ACCOUNT_TYPE_DISPLAY;
-  protected readonly accountStatusLabels = ACCOUNT_STATUS_LABELS;
-  protected readonly cardBackgrounds = ['bg-slate-900', 'bg-blue-600', 'bg-indigo-500'];
 
   constructor() {
     this.planning.projection(3).subscribe({ next: (projection) => this.outlook.set(projection) });
