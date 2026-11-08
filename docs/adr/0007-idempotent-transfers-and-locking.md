@@ -32,4 +32,6 @@ Para transferi iki ayrı sorunla karşılaşıyor ve ikisi de sessizce yanlış 
 ## Sonuçlar
 
 - Testler yarışı gerçekten üretir: 100 TL'ye 30'ar TL'lik on paralel transfer (tam üçü geçer), ters yönlü paralel transferler, aynı anahtarla beş eşzamanlı tekrar. Kilit ipuçları koddan silindiğinde üç test de kırılır.
-- Veritabanı deadlock'u yine de bir kurtarma yolu gerektirir: SQL Server bir döngü bulursa bir tarafı kurban seçer (`1205`). Bu durumda transaction'ın yeniden denenmesi güvenlidir, çünkü hiçbir şey commit edilmemiştir.
+- Veritabanı deadlock'u yine de bir kurtarma yolu gerektirir: SQL Server bir döngü bulursa bir tarafı kurban seçer (`1205`). Bu durumda
+  transaction'ın yeniden denenmesi güvenlidir, çünkü hiçbir şey commit edilmemiştir. `TransactionBehavior` bu hatada komutu en fazla
+  üç kez çalıştırır (kısa, artan bekleme ile). Diğer hatalar yeniden denenmez.

@@ -2164,3 +2164,28 @@ yanlış şifrede hiçbir şey silinmiyor, iki kez silmek zararsız. Geçmiş ta
 Hukuki görüş bekleyen kısım değişmedi: çekirdek kayıtların saklama süresi dolunca silinmesi henüz yazılmadı.
 
 **Commit'ler:** `build(db): add the erasure procedure`, `feat(privacy): let customers erase their account`
+
+---
+
+## #065 — Aralıklı kırılan test ve deadlock yeniden denemesi
+
+**Sprint:** 9
+
+PR'daki CI yeşildi, ama aynı kodun `main`'e birleştikten sonraki çalışması `Integration tests` adımında kırmızı çıktı. GitHub log'larına
+giriş olmadan erişilemediği için hangi testin kırıldığını göremedim. Önce görünür hâle getirmek için testleri GitHub Actions test
+logger'ına bağladım: her başarısız test artık bir anotasyon olarak, mesajıyla birlikte, API'den okunabiliyor.
+
+Yerelde art arda koşturduğumda bir kez `AuditHistoryTests.PastStateCanBeQueriedAsOfAPointInTime` kırıldı (beklenen 50 000, gelen 90 000).
+Test, güncellemeden hemen önceki anı `SYSUTCDATETIME()` ile alıp `FOR SYSTEM_TIME AS OF` ile geçmişi soruyor. Dapper bir `DateTime`'ı
+varsayılan olarak `datetime` gönderiyor, bu yaklaşık 3 ms'ye yuvarlanıyor. Yuvarlama yukarı olursa değer, hemen ardından gelen güncellemenin
+zamanını geçiyor ve sorgu eski değil yeni sürümü görüyor. Bellek içi test sunucusu güncellemeyi bir milisaniyeye yakın sürede
+cevapladığı için bu yarış mümkün. Ürün koduyla ilgisi yok. Düzeltme: parametre `datetime2` olarak gidiyor ve güncellemeden önce 50 ms
+boşluk var. Düzeltmeden sonra bütün paketi beş kez art arda koşturdum, hepsi geçti. Bunun CI'daki kırmızıyla aynı hata olduğunu
+doğrulayamadım: bu bir tahmin, doğrulama bir branch push'u ve yeni anotasyonlarla yapılacak.
+
+Bu sırada ADR-0007'de not düştüğüm eksiği de kapattım: SQL Server deadlock bulunca bir transaction'ı kurban seçip `1205` ile geri
+alır. `TransactionBehavior` artık bu hatada komutu en fazla üç kez yeniden çalıştırıyor, yeniden denemeden önce kısa ve artan bir
+bekleme ile. Başka hatalar (iş kuralı ihlali, çakışma) yeniden denenmiyor. Beş birim testi: başarıda bir kez commit, iki deadlock'tan
+sonra başarı, üçüncüde pes etme, başka hatada tekrar yok, transaction gerektirmeyen komutların atlanması.
+
+**Commit'ler:** `ci: report failing tests as annotations and run on every branch push`, `fix(tests): ...`, `feat(application): retry a command that was a deadlock victim`

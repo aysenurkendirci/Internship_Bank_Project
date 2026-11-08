@@ -9,8 +9,14 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(DbSession session) => _session = session;
 
+    // SQL Server error 1205: the transaction was chosen as the victim of a deadlock and has been rolled back.
+    private const int DeadlockVictim = 1205;
+
     public async Task<ITransactionScope> BeginAsync(CancellationToken ct)
         => new Scope(_session, await _session.BeginTransactionAsync(ct));
+
+    public bool IsRetryable(Exception exception)
+        => exception is SqlException { Number: DeadlockVictim };
 
     private sealed class Scope : ITransactionScope
     {

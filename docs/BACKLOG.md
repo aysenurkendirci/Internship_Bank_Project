@@ -137,6 +137,8 @@
 - [x] Temporal tablolarla kart, düzenli kalem ve taksit planlarının tam değişiklik geçmişi — log #054
 - [x] KVKK erişim hakkı: kişisel verilerin tamamını JSON olarak dışa aktarma — log #055
 - [x] KVKK silme hakkı: finans verisi geçmişiyle silinir, bankacılık çekirdeği anonimleştirilir, oturumlar kapanır — ADR-0005, log #056, #064
+- [x] Deadlock kurbanı olan transaction'ın otomatik yeniden denenmesi; aralıklı kırılan bir zaman testi düzeltildi — log #065
+- [ ] CI'daki `main` kırmızısının nedenini doğrula (test logger'ı eklendi, bir branch push'u ile görülecek)
 - [ ] Bankacılık çekirdeği kayıtlarının saklama süresi dolunca silinmesi (süreler hukuki görüş bekliyor)
 
 **Sprint 8 retrospektifi**
