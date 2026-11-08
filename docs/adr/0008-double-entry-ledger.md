@@ -1,6 +1,6 @@
 # ADR-0008: Transferler çift taraflı kayıtla tutulur
 
-**Durum:** Kabul edildi
+Durum: Kabul edildi
 
 ## Bağlam
 
@@ -9,7 +9,7 @@ Bir bakiyenin neden o değerde olduğunu açıklayabilmek, bankacılıkta temel 
 
 ## Karar
 
-- Her transfer `payments.LedgerEntries` tablosuna **bir borç (Debit) ve bir alacak (Credit)** satırı olarak yazılır. Satırlar aynı tutarı taşır, yani para hiçbir zaman oluşmaz ya da kaybolmaz.
+- Her transfer `payments.LedgerEntries` tablosuna bir borç (Debit) ve bir alacak (Credit) satırı olarak yazılır. Satırlar aynı tutarı taşır, yani para hiçbir zaman oluşmaz ya da kaybolmaz.
 - Her satır, işlemden sonraki bakiyeyi (`BalanceAfter`) taşır. Hesap ekstresi doğrudan bu tablodan okunur.
 - Kayıtlar eklenir, hiçbir zaman güncellenmez ya da silinmez. Hata düzeltmesi, ters yönde yeni bir transfer olarak yapılır.
 - Kurallar domain'de (`FundsTransfer`): aynı hesap, aynı para birimi, tam kuruş, aktif hesaplar, yeterli bakiye ve alıcı adının hesap sahibiyle eşleşmesi. İki hesap da kontrol edilmeden hiçbir bakiye değiştirilmez.
@@ -18,8 +18,8 @@ Bir bakiyenin neden o değerde olduğunu açıklayabilmek, bankacılıkta temel 
 
 ## Değerlendirilen alternatif
 
-- **Sadece bakiye sütunu ve işlem listesi.** Basit, ama bakiye ile hareketlerin toplamı ayrışırsa hangisinin doğru olduğu söylenemez.
-- **Event sourcing (bakiye = olayların toplamı).** Daha güçlü, ama bu ölçekte gereksiz karmaşıklık. Ledger + bakiye sütunu + constraint yeterli güvenceyi daha az maliyetle veriyor.
+- Sadece bakiye sütunu ve işlem listesi. Basit, ama bakiye ile hareketlerin toplamı ayrışırsa hangisinin doğru olduğu söylenemez.
+- Event sourcing (bakiye = olayların toplamı). Daha güçlü, ama bu ölçekte gereksiz karmaşıklık. Ledger + bakiye sütunu + constraint yeterli güvenceyi daha az maliyetle veriyor.
 
 ## Sonuçlar
 

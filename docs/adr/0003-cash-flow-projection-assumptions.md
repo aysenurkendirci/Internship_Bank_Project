@@ -1,6 +1,6 @@
 # ADR-0003: Nakit akışı projeksiyonunun varsayımları
 
-**Durum:** Kabul edildi
+Durum: Kabul edildi
 
 ## Bağlam
 
@@ -16,7 +16,7 @@ varsayımları ve nedenlerini kayıt altına alıyor.
 ### 1. Kart harcaması, ekstrenin son ödeme gününde hesaptan çıkar
 
 Karttan yapılan her harcama (taksitler ve karta bağlı düzenli ödemeler) ait olduğu ekstrede toplanır. Hesaptan
-**tek bir "kart ödemesi" olarak, son ödeme gününde** düşer. Ekstrenin içeriği (`Charges`) ayrıca listelenir.
+tek bir "kart ödemesi" olarak, son ödeme gününde düşer. Ekstrenin içeriği (`Charges`) ayrıca listelenir.
 
 *Neden:* Paranın hesaptan gerçekten çıktığı an budur. Harcama gününü esas almak, kart ödemelerini yanlış aya yazar.
 
@@ -36,8 +36,8 @@ en fazla 30 gün, artı hafta sonu kayması. Üç aylık geriye bakış bunu gü
 
 ### 4. Aynı gün içinde çıkışlar girişlerden önce işlenir
 
-Aynı gün hem maaş hem kira varsa, hangisinin önce hesaba geçeceği bankaya ve saate bağlıdır. Motor **kötü
-senaryoyu** seçer: önce çıkışlar işlenir.
+Aynı gün hem maaş hem kira varsa, hangisinin önce hesaba geçeceği bankaya ve saate bağlıdır. Motor kötü
+senaryoyu seçer: önce çıkışlar işlenir.
 
 *Neden:* Projeksiyonun amacı finansal baskıyı erken göstermek. Riski olduğundan düşük göstermektense yüksek
 göstermek daha güvenli. Bankacılıkta risk tarafında durmak genel bir ilkedir.
@@ -55,7 +55,7 @@ bölme veya yanıltıcı bir sonsuz değer üretilmez.
 ### 7. Tek para birimi
 
 Projeksiyon, başlangıç bakiyesinin para biriminde (TRY) yapılır. Başka para birimindeki kalemler kur tahmini
-gerektirdiği için **dışarıda bırakılır ve `ExcludedItems` listesinde açıkça raporlanır**. Sonuç hiçbir zaman eksik
+gerektirdiği için dışarıda bırakılır ve `ExcludedItems` listesinde açıkça raporlanır. Sonuç hiçbir zaman eksik
 olduğu halde tamammış gibi davranmaz.
 
 ### 8. Başlangıç bakiyesi aktif TRY hesaplarının toplamıdır ve projeksiyon yarından başlar
@@ -68,7 +68,7 @@ anlamına gelebilir.
 - Resmi tatiller (hafta sonu kaydırması var, bayram tatilleri yok)
 - Döviz kurları
 - Değişken tutarlı faturalar (elektrik, doğalgaz). Bunlar sabit bir tahmini tutarla girilebilir. İstatistiksel
-  tahmin Sprint 6'da ele alınacak.
+  tahmin ayrı ele alınıyor.
 
 ## Sonuçlar
 
