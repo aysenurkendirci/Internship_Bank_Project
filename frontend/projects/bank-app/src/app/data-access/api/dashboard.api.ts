@@ -1,14 +1,15 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { DashboardResponse } from '../models/dashboard.models';
+import { BaseApi } from './base-api';
 
+/** The home screen's data. */
 @Injectable({ providedIn: 'root' })
-export class DashboardApi {
-  private readonly http = inject(HttpClient);
+export class DashboardApi extends BaseApi {
+  protected readonly root = '/api/dashboard';
 
   getDashboard(): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>('/api/dashboard');
+    return this.http.get<DashboardResponse>(this.url());
   }
 }

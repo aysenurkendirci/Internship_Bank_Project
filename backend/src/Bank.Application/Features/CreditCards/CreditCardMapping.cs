@@ -5,6 +5,7 @@ using Bank.Domain.ValueObjects;
 
 namespace Bank.Application.Features.CreditCards;
 
+/// <summary>Conversions shared by the credit card handlers and the data export.</summary>
 internal static class CreditCardMapping
 {
     public const string NotFoundMessage = "Kart bulunamadı.";

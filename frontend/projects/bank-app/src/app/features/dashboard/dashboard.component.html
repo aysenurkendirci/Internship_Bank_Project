@@ -1,127 +1,62 @@
-@if (loading()) {
-  <p class="p-6 text-center font-bold text-slate-500">Veriler hazırlanıyor...</p>
+@if (loading() && !data()) {
+  <app-skeleton [rows]="4" />
 }
 
 @if (error(); as message) {
-  <p class="p-4 rounded-xl bg-red-50 text-red-700 border border-red-100" role="alert">{{ message }}</p>
+  <app-notice [message]="message" />
 }
 
 @if (data(); as data) {
-  <header class="mb-8">
-    <h1 class="text-3xl font-black text-slate-900">Merhaba, {{ data.user.firstName }}</h1>
-    <p class="text-slate-400 font-bold">Hesaplarınızın güncel özeti.</p>
+  <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="page-title">{{ greeting }}, {{ data.user.firstName }}</h1>
+      <p class="page-subtitle">{{ today | date: 'd MMMM y, EEEE' }}</p>
+    </div>
+    <a routerLink="/dashboard/transfer" class="btn-primary">Para gönder</a>
   </header>
 
-  <section class="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 mb-10">
-    <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Toplam varlık (TL hesaplar)</p>
-    <p class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">
-      {{ data.totalWealth | currency }}
-    </p>
+  <section class="panel mb-8">
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-ink-soft">Toplam varlık (TL hesaplar)</p>
+      <button
+        type="button"
+        class="p-1 -m-1 text-ink-faint hover:text-ink"
+        [attr.aria-label]="privacy.hidden() ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'"
+        [attr.aria-pressed]="privacy.hidden()"
+        (click)="privacy.toggle()"
+      >
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">{{ privacy.hidden() ? 'visibility_off' : 'visibility' }}</span>
+      </button>
+    </div>
+    <p class="text-3xl sm:text-4xl font-semibold tracking-tight tabular-nums mt-1"><app-money [amount]="data.totalWealth" /></p>
   </section>
 
   @if (outlook(); as projection) {
-    <section class="mb-10">
-      <div class="flex items-center justify-between mb-4">
+    <section class="mb-8">
+      <div class="flex items-center justify-between mb-3">
         <h2 class="section-title">Önümüzdeki 3 ay</h2>
-        <a routerLink="/dashboard/cash-flow" class="btn-link">Nakit akışına git</a>
+        <a routerLink="/dashboard/cash-flow" class="btn-link">Nakit akışı</a>
       </div>
       <app-projection-summary [projection]="projection" />
     </section>
   }
 
   @if (data.cards.length > 0) {
-    <section class="mb-10">
-      <h2 class="text-xl font-black text-slate-900 mb-4">Kartlarım</h2>
-
-      <div class="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
-        @for (card of data.cards; track card.cardId; let i = $index) {
-          <div
-            [ngClass]="cardBackgrounds[i % cardBackgrounds.length]"
-            class="min-w-[300px] h-[190px] rounded-[32px] p-8 text-white flex flex-col justify-between shadow-xl flex-shrink-0"
-          >
-            <div class="flex justify-between items-start">
-              <span class="text-sm font-black uppercase tracking-widest opacity-80">
-                {{ card.cardType === 'Credit' ? 'Kredi kartı' : 'Banka kartı' }}
-              </span>
-              @if (card.settings?.contactless) {
-                <span class="material-symbols-outlined opacity-50" aria-label="Temassız">contactless</span>
-              }
-            </div>
-
-            <p class="text-xl font-bold tracking-[0.3em] opacity-90">{{ card.cardNoMasked }}</p>
-
-            <div class="flex justify-between items-end">
-              <div>
-                <p class="text-[10px] font-black uppercase opacity-60 mb-1">Bakiye</p>
-                <p class="text-xl font-black">{{ card.balance | currency }}</p>
-              </div>
-              <span class="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black border border-white/20 uppercase">
-                {{ card.isVirtual ? 'Sanal' : 'Fiziksel' }}
-              </span>
-            </div>
-          </div>
+    <section class="mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="section-title">Kartlarım</h2>
+        <a routerLink="/dashboard/bank-cards" class="btn-link">Kart ayarları</a>
+      </div>
+      <div class="flex gap-3 overflow-x-auto no-scrollbar">
+        @for (card of data.cards; track card.cardId) {
+          <app-bank-card-tile [card]="card" />
         }
       </div>
     </section>
   }
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <section class="lg:col-span-2">
-      <h2 class="text-xl font-black text-slate-900 mb-4">Son işlemler</h2>
-
-      @if (data.recentTransactions.length === 0) {
-        <p class="p-6 bg-white rounded-[24px] border border-slate-100 text-slate-400 font-bold">Henüz işlem yok.</p>
-      }
-
-      <ul class="space-y-3">
-        @for (tx of data.recentTransactions; track tx.txId) {
-          <li class="flex items-center justify-between p-5 bg-white rounded-[24px] border border-slate-100 shadow-sm">
-            <div class="flex items-center gap-4">
-              <span class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 material-symbols-outlined">
-                {{ tx.direction === 'Inbound' ? 'south_west' : 'north_east' }}
-              </span>
-              <div>
-                <p class="font-black text-slate-900 leading-tight">{{ tx.title }}</p>
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">
-                  {{ tx.category }} · {{ tx.createdAt | date: 'd MMMM, HH:mm' }}
-                </p>
-              </div>
-            </div>
-            <p [ngClass]="tx.direction === 'Inbound' ? 'text-emerald-600' : 'text-slate-900'" class="font-black tracking-tight">
-              {{ tx.direction === 'Inbound' ? '+' : '−' }}{{ tx.amount | currency }}
-            </p>
-          </li>
-        }
-      </ul>
-    </section>
-
-    <section>
-      <h2 class="text-xl font-black text-slate-900 mb-4">Hesaplarım</h2>
-
-      <ul class="space-y-3">
-        @for (acc of data.accounts; track acc.accountId) {
-          <li class="bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <span class="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center material-symbols-outlined">
-                {{ accountTypeDisplay[acc.accountType].icon }}
-              </span>
-              <span
-                [ngClass]="acc.status === 'Active' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 bg-slate-50'"
-                class="text-[10px] font-black px-2.5 py-1 rounded-full uppercase"
-              >
-                {{ accountStatusLabels[acc.status] }}
-              </span>
-            </div>
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">
-              {{ accountTypeDisplay[acc.accountType].label }}
-            </p>
-            <p class="text-2xl font-black text-slate-900 tracking-tighter">
-              {{ acc.balance | currency: acc.currencyCode : 'symbol-narrow' }}
-            </p>
-            <p class="text-[10px] font-bold text-slate-400 mt-2 tracking-widest">{{ acc.iban }}</p>
-          </li>
-        }
-      </ul>
-    </section>
+  <div class="grid gap-8 lg:grid-cols-5">
+    <app-recent-transactions class="lg:col-span-3" [transactions]="data.recentTransactions" />
+    <app-account-list class="lg:col-span-2" [accounts]="data.accounts" />
   </div>
 }

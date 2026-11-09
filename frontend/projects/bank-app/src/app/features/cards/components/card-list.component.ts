@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 
 import { CreditCard } from '../../../data-access/models/finance.models';
 
+/** The credit cards being tracked, with edit and delete actions passed up to the page. */
 @Component({
   selector: 'app-card-list',
   imports: [CurrencyPipe],
@@ -13,16 +14,16 @@ import { CreditCard } from '../../../data-access/models/finance.models';
         <li class="panel flex flex-col gap-3">
           <div class="flex items-start justify-between">
             <div>
-              <p class="text-lg font-black text-slate-900">{{ card.name }}</p>
-              <p class="text-sm font-semibold text-slate-500">
+              <p class="text-lg font-semibold text-ink">{{ card.name }}</p>
+              <p class="text-sm text-ink-soft">
                 Kesim günü: {{ card.statementDay }} · Son ödeme: kesimden {{ card.paymentDueDays }} gün sonra
               </p>
             </div>
-            <p class="font-black text-slate-900">{{ card.limitAmount | currency: card.currencyCode : 'symbol-narrow' }}</p>
+            <p class="font-semibold text-ink">{{ card.limitAmount | currency: card.currencyCode : 'symbol-narrow' }}</p>
           </div>
           <div class="flex gap-4">
             <button type="button" class="btn-link" (click)="edit.emit(card)">Düzenle</button>
-            <button type="button" class="btn-link text-red-600" (click)="remove.emit(card)" [disabled]="busy()">Sil</button>
+            <button type="button" class="btn-link text-danger" (click)="remove.emit(card)" [disabled]="busy()">Sil</button>
           </div>
         </li>
       }

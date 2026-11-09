@@ -1,7 +1,9 @@
+import type { IsoDate } from '../../core/util/dates';
+
 // Mirrors the backend contracts in Bank.Contracts/Finance. Dates travel as ISO "yyyy-MM-dd" strings
 // and are kept as strings: converting them to Date objects would shift them by the user's time zone.
 
-export type IsoDate = string;
+export type { IsoDate };
 export type CurrencyCode = 'TRY' | 'USD' | 'EUR';
 
 // --- Credit cards ---

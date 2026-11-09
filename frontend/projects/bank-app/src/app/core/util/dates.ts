@@ -1,4 +1,5 @@
-import { IsoDate } from '../../data-access/models/finance.models';
+/** A calendar date as "yyyy-MM-dd", the format the API exchanges dates in. */
+export type IsoDate = string;
 
 /**
  * The user's local calendar date as "yyyy-MM-dd". `toISOString()` cannot be used: it converts to UTC

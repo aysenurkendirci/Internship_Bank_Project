@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.Accounts;
 
+/// <summary>The current customer's accounts with their balances.</summary>
 public sealed record ListAccountsQuery : IRequest<IReadOnlyList<AccountResponse>>;
 
 public sealed class ListAccountsQueryHandler : IRequestHandler<ListAccountsQuery, IReadOnlyList<AccountResponse>>

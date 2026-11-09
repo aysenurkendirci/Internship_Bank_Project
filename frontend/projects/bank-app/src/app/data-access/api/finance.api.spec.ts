@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { CreditCardRequest } from '../models/finance.models';
-import { AccountApi } from './account.api';
+import { ProfileApi } from './profile.api';
 import { CreditCardsApi, TransactionsApi } from './finance.api';
 
 describe('finance API clients', () => {
@@ -40,7 +40,7 @@ describe('finance API clients', () => {
   });
 
   it('downloads the personal data export as a file, not as parsed JSON', () => {
-    TestBed.inject(AccountApi).exportPersonalData().subscribe();
+    TestBed.inject(ProfileApi).exportPersonalData().subscribe();
 
     const call = http.expectOne('/api/me/data-export');
     expect(call.request.responseType).toBe('blob');

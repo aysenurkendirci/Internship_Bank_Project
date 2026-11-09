@@ -1,6 +1,6 @@
 # ADR-0002: Oracle yerine SQL Server, şema yönetimi DbUp ile
 
-**Durum:** Kabul edildi · **Yerine geçtiği karar:** [ADR-0001](0001-database-schema-migrations.md)
+Durum: Kabul edildi · Yerine geçtiği karar: [ADR-0001](0001-database-schema-migrations.md)
 
 ## Bağlam
 
@@ -20,13 +20,13 @@ Kriterler:
 | Seçenek | Değerlendirme |
 |---|---|
 | Oracle'da kalmak | Sektörde güçlü, ama mevcut şema kayıp. Lokal kurulum ve istemci araçları ayrıca gerekiyor. |
-| **SQL Server** | Makinede kurulu (2022 Developer), Windows Authentication ile şifresiz bağlantı kuruluyor, Microsoft.Data.SqlClient birinci sınıf .NET sürücüsü. Türkiye'de birçok banka ve katılım bankasında kullanılıyor. |
+| SQL Server | Makinede kurulu (2022 Developer), Windows Authentication ile şifresiz bağlantı kuruluyor, Microsoft.Data.SqlClient birinci sınıf .NET sürücüsü. Türkiye'de birçok banka ve katılım bankasında kullanılıyor. |
 | PostgreSQL | Güçlü ve açık kaynak, ama ek kurulum gerektiriyor ve bu projede belirgin bir avantaj sunmuyor. |
 
 ## Karar
 
-1. **Veritabanı: SQL Server.**
-2. **Veri erişimi: Dapper + parametreli SQL**, sorgular repository sınıflarında duruyor.
+1. Veritabanı: SQL Server.
+2. Veri erişimi: Dapper + parametreli SQL, sorgular repository sınıflarında duruyor.
    - Oracle'daki stored procedure yaklaşımı bırakıldı. Gerekçe: sorgu ile onu kullanan kod aynı
      commit'te, aynı code review'da görünüyor. Bir sorgu değişikliği için ayrı bir veritabanı
      deploy'u gerekmiyor (KISS).
@@ -34,10 +34,10 @@ Kriterler:
    - EF Core da değerlendirildi. Projenin hesaplama ağırlıklı kısmı (nakit akışı projeksiyonu)
      zaten bellekte, saf domain kodunda çalışacak. Veri erişimi basit okuma/yazmalardan oluşuyor.
      Mevcut Dapper altyapısını korumak daha az değişiklik demek.
-3. **Şema yönetimi: DbUp** (ADR-0001'deki gerekçeler geçerli):
+3. Şema yönetimi: DbUp (ADR-0001'deki gerekçeler geçerli):
    - Scriptler `backend/src/Bank.Database/Migrations/` altında `V001__aciklama.sql` biçiminde.
      Proje içine gömülü kaynak (embedded resource) olarak derleniyor, uygulamayla aynı versiyonda dağıtılıyor.
-   - Çalışmış bir script **asla değiştirilmez**. Değişiklik her zaman yeni bir script olarak eklenir.
+   - Çalışmış bir script asla değiştirilmez. Değişiklik her zaman yeni bir script olarak eklenir.
    - Migration'ları API değil, ayrı bir konsol uygulaması (`Bank.Database`) çalıştırır.
      API'nin veritabanı kullanıcısı DDL yetkisine ihtiyaç duymaz (least privilege).
 

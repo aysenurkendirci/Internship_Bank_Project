@@ -16,6 +16,8 @@ public sealed class AuthCommandTests
     private readonly IAuthRepository _repo = Substitute.For<IAuthRepository>();
     private readonly IPasswordHasher _hasher = Substitute.For<IPasswordHasher>();
     private readonly ITokenGenerator _tokens = Substitute.For<ITokenGenerator>();
+    private readonly IRefreshTokenRepository _refreshTokens = Substitute.For<IRefreshTokenRepository>();
+    private readonly ISessionPolicy _policy = Substitute.For<ISessionPolicy>();
     private readonly RecordingLogger<LoginCommandHandler> _log = new();
     private readonly LoginCommandHandler _login;
     private readonly RegisterCommandHandler _register;
@@ -31,8 +33,10 @@ public sealed class AuthCommandTests
 
     public AuthCommandTests()
     {
-        _login = new LoginCommandHandler(_repo, _hasher, _tokens, _log);
-        _register = new RegisterCommandHandler(_repo, _hasher, _tokens, new RecordingLogger<RegisterCommandHandler>());
+        _policy.RefreshTokenLifetime.Returns(TimeSpan.FromHours(8));
+        var issuer = new RefreshTokenIssuer(_refreshTokens, _policy, TimeProvider.System);
+        _login = new LoginCommandHandler(_repo, _hasher, _tokens, issuer, _log);
+        _register = new RegisterCommandHandler(_repo, _hasher, _tokens, issuer, new RecordingLogger<RegisterCommandHandler>());
         _tokens.Generate(Arg.Any<long>()).Returns("jwt");
     }
 
@@ -82,21 +86,19 @@ public sealed class AuthCommandTests
 
         await Assert.ThrowsAsync<ConflictException>(() => _register.Handle(new RegisterCommand(NewRegistration()), default));
 
-        await _repo.DidNotReceive().CreateUserAsync(
-            Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _repo.DidNotReceive().CreateUserAsync(Arg.Any<NewUser>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Register_StoresHashNotPlainPassword()
     {
         _hasher.Hash("P@ssw0rd!").Returns("hashed-value");
-        _repo.CreateUserAsync(Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _repo.CreateUserAsync(Arg.Any<NewUser>(), Arg.Any<CancellationToken>())
              .Returns(ExistingUser);
 
         await _register.Handle(new RegisterCommand(NewRegistration()), default);
 
-        await _repo.Received(1).CreateUserAsync(
-            Arg.Any<RegisterRequest>(), "hashed-value", Arg.Any<CancellationToken>());
+        await _repo.Received(1).CreateUserAsync(Arg.Is<NewUser>(u => u.PasswordHash == "hashed-value"), Arg.Any<CancellationToken>());
     }
 
     // KVKK: security events are logged, but an identity number never appears in full.
@@ -115,7 +117,8 @@ public sealed class AuthCommandTests
         Assert.DoesNotContain(_log.Messages, m => m.Contains(TcNo) || m.Contains("99999999990"));
     }
 
-    private Task<AuthResponse> Login(LoginRequest credentials) => _login.Handle(new LoginCommand(credentials), default);
+    private async Task<AuthResponse> Login(LoginRequest credentials)
+        => (await _login.Handle(new LoginCommand(credentials), default)).Response;
 
     private void GivenExistingUserWithPassword(string password)
     {

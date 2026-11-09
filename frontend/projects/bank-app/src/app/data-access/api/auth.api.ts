@@ -1,20 +1,19 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.models';
+import { BaseApi } from './base-api';
 
-// URLs are relative: the dev server proxies /api to the backend, and in production the API is
-// served from the same origin, so no host name is baked into the bundle.
+/** Sign-in and sign-up. Refreshing and ending a session belong to SessionService. */
 @Injectable({ providedIn: 'root' })
-export class AuthApi {
-  private readonly http = inject(HttpClient);
+export class AuthApi extends BaseApi {
+  protected readonly root = '/api/auth';
 
   login(req: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', req);
+    return this.http.post<AuthResponse>(this.url('/login'), req);
   }
 
   register(req: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/register', req);
+    return this.http.post<AuthResponse>(this.url('/register'), req);
   }
 }

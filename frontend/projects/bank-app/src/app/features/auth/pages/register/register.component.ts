@@ -1,60 +1,51 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
-import { problemMessage } from '../../../../core/http/problem-details';
+import { BasePage } from '../../../../core/page/base-page';
 import { AuthApi } from '../../../../data-access/api/auth.api';
+import { AuthShellComponent } from '../../../../layout/auth/auth-shell.component';
+import { NoticeComponent } from '../../../../shared/ui/notice.component';
 
-import { InputComponent } from '../../../../shared/input/input.component';
-import { ButtonComponent } from '../../../../shared/button/button.component';
+type Membership = 'Personal' | 'Corporate';
 
+/** Creates the account, then sends the customer to sign in with the identity number already filled in. */
 @Component({
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthShellComponent, NoticeComponent],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
 })
-export class RegisterComponent {
-  private fb = inject(FormBuilder);
-  private auth = inject(AuthApi);
-  private router = inject(Router);
+export class RegisterComponent extends BasePage {
+  private readonly auth = inject(AuthApi);
+  private readonly router = inject(Router);
 
-  protected readonly loading = signal(false);
-  protected readonly error = signal<string | null>(null);
+  protected readonly memberships: readonly { value: Membership; label: string }[] = [
+    { value: 'Personal', label: 'Bireysel' },
+    { value: 'Corporate', label: 'Kurumsal' },
+  ];
 
-  form = this.fb.nonNullable.group({
+  protected readonly form = inject(FormBuilder).nonNullable.group({
     tcNo: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    membership: ['Personal' as 'Personal' | 'Corporate'],
+    membership: ['Personal' as Membership],
   });
 
-  setMembership(v: 'Personal' | 'Corporate') {
-    this.form.controls.membership.setValue(v);
+  protected show(field: keyof typeof this.form.controls): boolean {
+    const control = this.form.controls[field];
+    return control.touched && control.invalid;
   }
 
-  submit() {
-    // Touch first so every invalid field shows its message, then stop.
+  protected submit(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.loading()) return;
-
-    this.loading.set(true);
-    this.error.set(null);
+    if (this.form.invalid || this.busy()) return;
 
     const payload = this.form.getRawValue();
-
-    this.auth
-      .register(payload)
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: () =>
-          this.router.navigate(['/auth/login'], { queryParams: { registered: '1', tcNo: payload.tcNo } }),
-        error: (err) => this.error.set(problemMessage(err, 'Kayıt tamamlanamadı.')),
-      });
+    this.act(this.auth.register(payload), {
+      fallback: 'Kayıt tamamlanamadı.',
+      onDone: () => this.router.navigate(['/auth/login'], { queryParams: { registered: '1', tcNo: payload.tcNo } }),
+    });
   }
 }

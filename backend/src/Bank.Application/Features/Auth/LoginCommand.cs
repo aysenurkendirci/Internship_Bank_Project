@@ -8,30 +8,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Bank.Application.Features.Auth;
 
-public sealed record LoginCommand(LoginRequest Credentials) : IRequest<AuthResponse>;
+public sealed record LoginCommand(LoginRequest Credentials) : IRequest<AuthResult>;
 
 /// <remarks>
 /// Every sign-in attempt is logged as a security event so brute force and credential stuffing can be
 /// spotted. The client always gets the same "wrong identity number or password" answer, but the log
 /// keeps the real reason. Identity numbers are masked before they reach the log.
 /// </remarks>
-public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
+public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
 {
     private readonly IAuthRepository _repo;
     private readonly IPasswordHasher _hasher;
     private readonly ITokenGenerator _tokens;
+    private readonly RefreshTokenIssuer _refreshTokens;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
-        IAuthRepository repo, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<LoginCommandHandler> logger)
+        IAuthRepository repo, IPasswordHasher hasher, ITokenGenerator tokens, RefreshTokenIssuer refreshTokens,
+        ILogger<LoginCommandHandler> logger)
     {
         _repo = repo;
         _hasher = hasher;
         _tokens = tokens;
+        _refreshTokens = refreshTokens;
         _logger = logger;
     }
 
-    public async Task<AuthResponse> Handle(LoginCommand command, CancellationToken ct)
+    public async Task<AuthResult> Handle(LoginCommand command, CancellationToken ct)
     {
         var credentials = command.Credentials;
         var maskedTc = PersonalData.MaskTcKimlikNo(credentials.TcNo);
@@ -53,6 +56,6 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         await _repo.UpdateLastLoginAsync(user.UserId, ct);
 
         _logger.LogInformation("User {UserId} logged in", user.UserId);
-        return AuthResponses.For(user, _tokens);
+        return await AuthResponses.CreateAsync(user.UserId, $"{user.FirstName} {user.LastName}", _tokens, _refreshTokens, ct);
     }
 }

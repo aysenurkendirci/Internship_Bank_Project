@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.InstallmentPlans;
 
+/// <summary>Soft-deletes an installment plan.</summary>
 public sealed record DeleteInstallmentPlanCommand(long Id) : IRequest;
 
 public sealed class DeleteInstallmentPlanCommandHandler : IRequestHandler<DeleteInstallmentPlanCommand>

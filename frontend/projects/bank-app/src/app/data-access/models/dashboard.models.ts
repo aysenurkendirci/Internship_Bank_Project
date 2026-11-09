@@ -1,3 +1,4 @@
+// The home screen's response; mirrors Bank.Contracts.Dashboard.
 export interface DashboardResponse {
   user: UserSummary;
   totalWealth: number;

@@ -1,16 +1,16 @@
 # ADR-0004: Oturum güvenliğini sertleştirme planı
 
-**Durum:** Kabul edildi, uygulaması ertelendi
+Durum: Uygulandı.
 
 ## Bağlam
 
-Şu anki oturum modeli basit: girişte 60 dakikalık bir JWT dönüyor ve web istemcisi onu `localStorage`'da tutuyor. Sprint 8'de
-giriş uçlarına rate limit kondu (#049), denemeler maskeli olarak log'lanıyor (#050) ve token'dan kişisel veri çıkarıldı (#051).
+Şu anki oturum modeli basit: girişte 60 dakikalık bir JWT dönüyor ve web istemcisi onu `localStorage`'da tutuyor. Sonradan
+giriş uçlarına rate limit kondu, denemeler maskeli olarak log'lanıyor ve token'dan kişisel veri çıkarıldı.
 Ama iki zayıf nokta duruyor:
 
-1. **`localStorage` XSS'e açık.** Sayfaya bir şekilde script enjekte edilirse token okunup başka bir yere gönderilebilir. Angular'ın
+1. `localStorage` XSS'e açık. Sayfaya bir şekilde script enjekte edilirse token okunup başka bir yere gönderilebilir. Angular'ın
    şablon kaçışları ve sıkı CSP bu riski düşürüyor ama sıfırlamıyor.
-2. **Token geri alınamıyor.** Çalınan bir token, süresi dolana kadar (60 dakika) geçerli. Çıkış yapmak sadece tarayıcıdaki kopyayı siliyor.
+2. Token geri alınamıyor. Çalınan bir token, süresi dolana kadar (60 dakika) geçerli. Çıkış yapmak sadece tarayıcıdaki kopyayı siliyor.
 
 ## Karar
 
@@ -25,22 +25,31 @@ Bankacılık uygulamalarında yaygın olan iki token'lı modele geçilecek:
 
 Akış:
 - Her yenilemede eski yenileme token'ı iptal edilip yenisi verilir (rotation).
-- **Daha önce kullanılmış bir yenileme token'ı tekrar gelirse** bu çalınma belirtisidir ve o kullanıcının bütün oturumları iptal edilir
+- Daha önce kullanılmış bir yenileme token'ı tekrar gelirse bu çalınma belirtisidir ve o kullanıcının bütün oturumları iptal edilir
   (reuse detection).
 - Çıkış, sunucudaki yenileme token'ını iptal eder. Böylece çalınmış bir kopya da işe yaramaz.
-- Frontend'deki 401 yönetimi (#040), login'e göndermeden önce bir kez `/refresh` dener.
+- Frontend'deki 401 yönetimi, login'e göndermeden önce bir kez `/refresh` dener.
 - Cookie kullanıldığı için `/refresh` ve `/logout` uçlarına CSRF koruması gerekir: `SameSite=Strict` ve ek olarak özel bir başlık
   kontrolü.
 
-## Neden şimdi değil
+## Neden iki aşamada
 
 Bu değişiklik hem backend'de (yeni tablo, uçlar, rotation ve reuse kuralları) hem frontend'de (bellekte token, sessiz yenileme,
 eşzamanlı isteklerin tek bir yenilemeyi beklemesi) oturumun tamamına dokunuyor. Yarım uygulanmış bir oturum mekanizması, olmamasından
 daha tehlikeli: örneğin rotation var ama reuse detection yoksa, çalınan token sonsuza kadar yenilenebilir. Doğru yapılıp uçtan uca test
 edilene kadar mevcut model korunuyor. Mevcut modelin riskleri `SessionService` belgesinde açıkça yazılı.
 
+## Uygulama durumu
+
+Sunucu tarafı tamam. Giriş ve kayıt yenileme token'ını `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`
+cookie'sinde veriyor, `POST /api/auth/refresh` rotation ile yeni çift veriyor, `POST /api/auth/logout` token'ı iptal ediyor.
+Kullanılmış bir token tekrar gelirse kullanıcının bütün oturumları kapanıyor, bu bir entegrasyon testiyle kilitli ve kod bilerek
+bozulduğunda test kırılıyor. Token veritabanında yalnızca SHA-256 özeti olarak duruyor. Cookie'yi kullanan iki uç `X-Requested-By`
+başlığını da istiyor (CSRF).
+
+Web istemcisi de geçti. Erişim token'ı yalnızca bellekte duruyor, sayfa yenilenince uygulama açılmadan cookie ile yenisi alınıyor. 401 alan istek tek bir yenilemeden sonra tekrar deneniyor. Birlikte düşen istekler aynı yenilemeyi bekliyor. Sekmeler de Web Locks ile sıraya giriyor, çünkü aynı anda gelen iki yenileme tek kullanımlık cookie için hırsızlık gibi görünürdü. `Jwt:ExpiresMinutes` 10 oldu.
+
 ## Sonuçlar
 
-- Mevcut durumda token ömrü kısa tutuluyor (60 dakika, konfigürasyondan okunuyor).
-- Uygulama sırasında bu belgedeki akış bire bir izlenecek ve "kullanılmış token tekrar gelince bütün oturumlar kapanır" senaryosu bir
-  entegrasyon testiyle kilitlenecek.
+- Çalınan bir erişim token'ı en fazla 10 dakika işe yarar, çıkış yapmak yenileme token'ını sunucuda iptal eder.
+- "Kullanılmış token tekrar gelince bütün oturumlar kapanır" senaryosu bir entegrasyon testiyle kilitli.

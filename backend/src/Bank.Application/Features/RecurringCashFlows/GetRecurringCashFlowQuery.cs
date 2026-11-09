@@ -6,6 +6,7 @@ using MediatR;
 
 namespace Bank.Application.Features.RecurringCashFlows;
 
+/// <summary>One recurring item.</summary>
 public sealed record GetRecurringCashFlowQuery(long Id) : IRequest<RecurringCashFlowResponse>;
 
 public sealed class GetRecurringCashFlowQueryHandler : IRequestHandler<GetRecurringCashFlowQuery, RecurringCashFlowResponse>

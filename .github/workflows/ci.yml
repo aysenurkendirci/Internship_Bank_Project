@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 jobs:
@@ -60,10 +60,10 @@ jobs:
           ! grep -q "has the following vulnerable packages" vulnerable.txt
 
       - name: Unit tests
-        run: dotnet test tests/Bank.UnitTests -c Release --no-build
+        run: dotnet test tests/Bank.UnitTests -c Release --no-build --logger GitHubActions
 
       - name: Integration tests
-        run: dotnet test tests/Bank.IntegrationTests -c Release --no-build
+        run: dotnet test tests/Bank.IntegrationTests -c Release --no-build --logger GitHubActions
 
   # The images are not run here, but building them catches a broken Dockerfile before anyone needs it.
   images:
@@ -94,6 +94,9 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
+
+      - name: Layer boundaries
+        run: node scripts/check-layers.mjs
 
       - name: Production build
         run: npx ng build bank-app

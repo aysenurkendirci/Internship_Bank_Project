@@ -1,12 +1,12 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Common.Exceptions;
-using Bank.Contracts.Auth;
 using Bank.Infrastructure.Persistence;
 using Dapper;
 using Microsoft.Data.SqlClient;
 
 namespace Bank.Infrastructure.Repositories;
 
+/// <summary>Customers and credentials in dbo.Users.</summary>
 public sealed class AuthRepository : IAuthRepository
 {
     // SQL Server error numbers for unique constraint / unique index violations.
@@ -44,7 +44,7 @@ public sealed class AuthRepository : IAuthRepository
                ?? throw new InvalidOperationException($"No credentials stored for user {userId}.");
     }
 
-    public async Task<UserRow> CreateUserAsync(RegisterRequest req, string passwordHash, CancellationToken ct = default)
+    public async Task<UserRow> CreateUserAsync(NewUser user, CancellationToken ct = default)
     {
         // OUTPUT returns the inserted row in the same round trip, so no follow-up SELECT is needed.
         const string sql = """
@@ -53,26 +53,15 @@ public sealed class AuthRepository : IAuthRepository
             VALUES (@TcNo, @FirstName, @LastName, @Email, @Phone, @Membership, @PasswordHash)
             """;
 
-        var parameters = new
-        {
-            req.TcNo,
-            req.FirstName,
-            req.LastName,
-            req.Email,
-            req.Phone,
-            req.Membership,
-            PasswordHash = passwordHash
-        };
-
         await using var connection = await _connections.OpenAsync(ct);
         try
         {
             return await connection.QuerySingleAsync<UserRow>(
-                new CommandDefinition(sql, parameters, cancellationToken: ct));
+                new CommandDefinition(sql, user, cancellationToken: ct));
         }
         catch (SqlException ex) when (ex.Number is UniqueConstraintViolation or UniqueIndexViolation)
         {
-            // The service checks for duplicates first, but two concurrent requests can both pass
+            // The handler checks for duplicates first, but two concurrent requests can both pass
             // that check. The unique constraint is the real guarantee; report it as a conflict.
             throw new ConflictException("Bu TC kimlik numarası veya e-posta ile kayıtlı bir kullanıcı var.");
         }
@@ -98,5 +87,28 @@ public sealed class AuthRepository : IAuthRepository
 
         await using var connection = await _connections.OpenAsync(ct);
         await connection.ExecuteAsync(new CommandDefinition(sql, new { UserId = userId }, cancellationToken: ct));
+    }
+
+    public async Task UpdateContactAsync(long userId, string email, string phone, CancellationToken ct = default)
+    {
+        const string sql = "UPDATE dbo.Users SET Email = @Email, Phone = @Phone WHERE UserId = @UserId";
+
+        await using var connection = await _connections.OpenAsync(ct);
+        try
+        {
+            await connection.ExecuteAsync(new CommandDefinition(sql, new { UserId = userId, Email = email, Phone = phone }, cancellationToken: ct));
+        }
+        catch (SqlException ex) when (ex.Number is UniqueConstraintViolation or UniqueIndexViolation)
+        {
+            throw new ConflictException("Bu e-posta adresi başka bir hesapta kullanılıyor.");
+        }
+    }
+
+    public async Task UpdatePasswordAsync(long userId, string passwordHash, CancellationToken ct = default)
+    {
+        const string sql = "UPDATE dbo.Users SET PasswordHash = @PasswordHash WHERE UserId = @UserId";
+
+        await using var connection = await _connections.OpenAsync(ct);
+        await connection.ExecuteAsync(new CommandDefinition(sql, new { UserId = userId, PasswordHash = passwordHash }, cancellationToken: ct));
     }
 }

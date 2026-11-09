@@ -11,7 +11,7 @@ import { ComparisonRow } from '../comparison-rows';
   host: { class: 'block overflow-x-auto' },
   template: `
     <table class="w-full text-sm min-w-[820px]">
-      <thead class="text-left text-slate-400 uppercase text-[11px]">
+      <thead class="text-left text-ink-faint text-xs">
         <tr>
           <th class="py-2">Seçenek</th>
           <th class="text-right">Aylık taksit</th>
@@ -25,7 +25,7 @@ import { ComparisonRow } from '../comparison-rows';
       </thead>
       <tbody>
         @for (row of rows(); track row.label) {
-          <tr class="border-t border-slate-100 font-semibold text-slate-700">
+          <tr class="border-t border-line font-medium text-ink-soft">
             <td class="py-3">
               <span class="inline-flex items-center gap-2">
                 <span class="w-3 h-3 rounded" [style.background]="row.colour" aria-hidden="true"></span>
@@ -36,20 +36,20 @@ import { ComparisonRow } from '../comparison-rows';
             <td class="text-right">{{ row.totalAmount === null ? '—' : (row.totalAmount | currency) }}</td>
             <td class="text-right">{{ row.extraCost === null ? '—' : (row.extraCost | currency) }}</td>
             <td class="text-right">{{ row.metrics.peakMonthlyOutflow | currency }}</td>
-            <td class="text-right" [ngClass]="row.metrics.lowestBalance < 0 ? 'text-red-600' : ''">
+            <td class="text-right" [ngClass]="row.metrics.lowestBalance < 0 ? 'text-danger' : ''">
               {{ row.metrics.lowestBalance | currency }}
               @if (row.metrics.lowestBalanceDate) {
-                <span class="block text-xs text-slate-400">{{ row.metrics.lowestBalanceDate | date: 'd MMM y' }}</span>
+                <span class="block text-xs text-ink-faint">{{ row.metrics.lowestBalanceDate | date: 'd MMM y' }}</span>
               }
             </td>
             <td class="text-right">
               @if (row.metrics.monthsBelowZero > 0) {
-                <span class="inline-flex items-center gap-1 text-red-600">
+                <span class="inline-flex items-center gap-1 text-danger">
                   <span class="material-symbols-outlined text-base" aria-hidden="true">warning</span>
                   {{ row.metrics.monthsBelowZero }} ay
                 </span>
               } @else {
-                <span class="text-slate-400">Yok</span>
+                <span class="text-ink-faint">Yok</span>
               }
             </td>
             <td class="text-right">{{ row.metrics.closingBalance | currency }}</td>

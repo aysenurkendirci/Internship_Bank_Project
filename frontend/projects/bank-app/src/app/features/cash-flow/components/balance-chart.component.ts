@@ -3,7 +3,7 @@ import { EChartsCoreOption } from 'echarts/core';
 
 import { Projection } from '../../../data-access/models/finance.models';
 import { ChartComponent } from '../../../shared/chart/chart.component';
-import { CHART, baseAxisStyle, baseTooltip, formatTry, formatTryCompact } from '../../../shared/chart/chart-theme';
+import { CHART, baseAxisStyle, baseTooltip, formatDateTick, formatTry, formatTryCompact } from '../../../shared/chart/chart-theme';
 import { runningBalance } from '../running-balance';
 
 const dayName = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -38,7 +38,7 @@ export class BalanceChartComponent {
       axisPointer: { type: 'line', lineStyle: { color: CHART.textSecondary } },
       valueFormatter: (value: number) => formatTry(value),
     },
-    xAxis: { ...baseAxisStyle, type: 'time', splitLine: { show: false } },
+    xAxis: { ...baseAxisStyle, type: 'time', axisLabel: { ...baseAxisStyle.axisLabel, formatter: formatDateTick }, splitLine: { show: false } },
     yAxis: { ...baseAxisStyle, type: 'value', axisLabel: { ...baseAxisStyle.axisLabel, formatter: formatTryCompact } },
     series: [
       {

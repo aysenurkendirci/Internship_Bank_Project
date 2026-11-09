@@ -6,6 +6,7 @@ using MediatR;
 
 namespace Bank.Application.Features.CreditCards;
 
+/// <summary>One of the current customer's credit cards.</summary>
 public sealed record GetCreditCardQuery(long Id) : IRequest<CreditCardResponse>;
 
 public sealed class GetCreditCardQueryHandler : IRequestHandler<GetCreditCardQuery, CreditCardResponse>

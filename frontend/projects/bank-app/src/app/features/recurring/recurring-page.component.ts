@@ -1,9 +1,9 @@
 import { NgClass } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Observable, forkJoin } from 'rxjs';
 
-import { problemMessage } from '../../core/http/problem-details';
+import { ActOptions, BasePage } from '../../core/page/base-page';
+import { ConfirmService } from '../../core/ui/confirm.service';
 import { CreditCardsApi, RecurringCashFlowsApi } from '../../data-access/api/finance.api';
 import { CashFlowKind, CreditCard, RecurringCashFlow, RecurringCashFlowRequest } from '../../data-access/models/finance.models';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -13,12 +13,14 @@ import { RecurringItemFormComponent } from './components/recurring-item-form.com
 import { RecurringItemListComponent } from './components/recurring-item-list.component';
 import { KIND_LABELS } from './recurring-labels';
 
+/** Container: loads items and cards, filters by type and runs every change. */
 @Component({
   selector: 'app-recurring-page',
   imports: [NgClass, PageHeaderComponent, NoticeComponent, EmptyStateComponent, RecurringItemFormComponent, RecurringItemListComponent],
   templateUrl: './recurring-page.component.html',
 })
-export class RecurringPageComponent {
+export class RecurringPageComponent extends BasePage {
+  private readonly dialog = inject(ConfirmService);
   private readonly api = inject(RecurringCashFlowsApi);
   private readonly cardsApi = inject(CreditCardsApi);
 
@@ -29,8 +31,6 @@ export class RecurringPageComponent {
   protected readonly cards = signal<CreditCard[]>([]);
   protected readonly filter = signal<CashFlowKind | null>(null);
   protected readonly loaded = signal(false);
-  protected readonly busy = signal(false);
-  protected readonly error = signal<string | null>(null);
   protected readonly editing = signal<RecurringCashFlow | null | undefined>(undefined);
 
   protected readonly visibleItems = computed(() => {
@@ -39,6 +39,7 @@ export class RecurringPageComponent {
   });
 
   constructor() {
+    super();
     this.reload();
   }
 
@@ -49,37 +50,32 @@ export class RecurringPageComponent {
   }
 
   protected remove(item: RecurringCashFlow): void {
-    if (confirm(`"${item.name}" silinsin mi?`)) this.run(this.api.delete(item.id));
+    this.dialog.confirmDelete(`"${item.name}" silinsin mi?`).then((yes) => yes && this.run(this.api.delete(item.id)));
   }
 
   private reload(): void {
-    forkJoin({ items: this.api.list(), cards: this.cardsApi.list() }).subscribe({
-      next: ({ items, cards }) => {
+    this.load(
+      forkJoin({ items: this.api.list(), cards: this.cardsApi.list() }),
+      ({ items, cards }) => {
         this.items.set(items);
         this.cards.set(cards);
         this.loaded.set(true);
       },
-      error: (err) => this.error.set(problemMessage(err, 'Kayıtlar yüklenemedi.')),
-    });
+      'Kayıtlar yüklenemedi.',
+    );
   }
 
+  /** Runs a change and reloads. A 409 means the data moved underneath the user, so the edit is abandoned. */
   private run<T>(call: Observable<T>, onSuccess?: () => void): void {
-    this.busy.set(true);
-    this.error.set(null);
-    call.subscribe({
-      next: () => {
-        this.busy.set(false);
+    this.act(call, {
+      onDone: () => {
         onSuccess?.();
         this.reload();
       },
-      error: (err) => {
-        this.busy.set(false);
-        this.error.set(problemMessage(err));
-        if (err instanceof HttpErrorResponse && err.status === 409) {
-          this.editing.set(undefined);
-          this.reload();
-        }
+      onConflict: () => {
+        this.editing.set(undefined);
+        this.reload();
       },
-    });
+    } satisfies ActOptions<T>);
   }
 }

@@ -21,11 +21,11 @@ const MAX_FILE_BYTES = 2 * 1024 * 1024;
         <span class="material-symbols-outlined">science</span> 12 aylık demo verisi oluştur
       </button>
       @if (busy()) {
-        <span class="text-sm font-bold text-slate-500">İşleniyor...</span>
+        <span class="text-sm text-ink-soft">İşleniyor...</span>
       }
     </div>
 
-    <p class="text-xs font-semibold text-slate-400">
+    <p class="text-xs text-ink-faint">
       Gerekli kolonlar: Tarih, Açıklama ve Tutar (ya da Borç ve Alacak). Kategori isteğe bağlı. Noktalı virgül veya virgülle ayrılmış,
       UTF-8 ya da Excel'in Türkçe kodlamasıyla kaydedilmiş dosyalar okunur. Aynı satır ikinci kez eklenmez.
     </p>

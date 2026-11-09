@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { CreditCard, RecurringCashFlow } from '../../../data-access/models/finance.models';
 import { KIND_LABELS, describeSchedule } from '../recurring-labels';
 
+/** Recurring items with their type, schedule and amount. */
 @Component({
   selector: 'app-recurring-item-list',
   imports: [CurrencyPipe, DatePipe, NgClass],
@@ -16,14 +17,14 @@ import { KIND_LABELS, describeSchedule } from '../recurring-labels';
             <span
               class="badge"
               [ngClass]="{
-                'bg-emerald-50 text-emerald-700': item.kind === 'Income',
-                'bg-slate-100 text-slate-700': item.kind === 'Expense',
-                'bg-violet-50 text-violet-700': item.kind === 'Subscription'
+                'bg-positive-tint text-positive': item.kind === 'Income',
+                'bg-canvas text-ink-soft': item.kind === 'Expense',
+                'bg-brand-tint text-brand': item.kind === 'Subscription'
               }"
             >{{ kindLabels[item.kind] }}</span>
             <div>
-              <p class="font-black text-slate-900">{{ item.name }}</p>
-              <p class="text-sm font-semibold text-slate-500">
+              <p class="font-semibold text-ink">{{ item.name }}</p>
+              <p class="text-sm text-ink-soft">
                 {{ item.category }} · {{ schedule(item) }} · Başlangıç {{ item.startDate | date: 'd MMM y' }}
                 @if (item.endDate) { · Bitiş {{ item.endDate | date: 'd MMM y' }} }
                 @if (cardName(item.creditCardId); as card) { · {{ card }} kartından }
@@ -31,11 +32,11 @@ import { KIND_LABELS, describeSchedule } from '../recurring-labels';
             </div>
           </div>
           <div class="flex items-center gap-4">
-            <p class="font-black" [ngClass]="item.kind === 'Income' ? 'text-emerald-600' : 'text-slate-900'">
+            <p class="font-semibold" [ngClass]="item.kind === 'Income' ? 'text-positive' : 'text-ink'">
               {{ item.amount | currency: item.currencyCode : 'symbol-narrow' }}
             </p>
             <button type="button" class="btn-link" (click)="edit.emit(item)">Düzenle</button>
-            <button type="button" class="btn-link text-red-600" (click)="remove.emit(item)" [disabled]="busy()">Sil</button>
+            <button type="button" class="btn-link text-danger" (click)="remove.emit(item)" [disabled]="busy()">Sil</button>
           </div>
         </li>
       }

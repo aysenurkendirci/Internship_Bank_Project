@@ -9,15 +9,15 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'panel block' },
   template: `
-    <p class="field-label">{{ label() }}</p>
-    <p class="text-3xl font-black mt-2 flex items-center gap-2" [class]="critical() ? 'text-red-600' : 'text-slate-900'">
+    <p class="text-sm text-ink-soft">{{ label() }}</p>
+    <p class="text-2xl font-semibold tabular-nums mt-2 flex items-center gap-1.5" [class]="critical() ? 'text-danger' : 'text-ink'">
       @if (critical()) {
-        <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+        <span class="material-symbols-outlined text-[22px]" aria-hidden="true">warning</span>
       }
       {{ value() }}
     </p>
     @if (hint()) {
-      <p class="text-sm font-semibold text-slate-400 mt-1">{{ hint() }}</p>
+      <p class="text-xs text-ink-faint mt-1">{{ hint() }}</p>
     }
   `,
 })

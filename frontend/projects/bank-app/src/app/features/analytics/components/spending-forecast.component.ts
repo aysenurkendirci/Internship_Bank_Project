@@ -21,17 +21,17 @@ const METHOD_LABELS: Record<string, string> = {
   template: `
     <ul class="grid gap-4 sm:grid-cols-3 mb-6">
       @for (month of months(); track month.label) {
-        <li class="rounded-2xl bg-slate-50 p-4">
+        <li class="rounded-lg bg-canvas p-4">
           <p class="field-label">{{ month.label }}</p>
-          <p class="text-xl font-black text-slate-900 mt-1">
+          <p class="text-xl font-semibold text-ink mt-1">
             {{ month.lower | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }} – {{ month.upper | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}
           </p>
-          <p class="text-sm font-semibold text-slate-500">beklenen {{ month.expected | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}</p>
+          <p class="text-sm text-ink-soft">beklenen {{ month.expected | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}</p>
         </li>
       }
     </ul>
 
-    <p class="text-sm font-semibold text-slate-500 mb-3">
+    <p class="text-sm text-ink-soft mb-3">
       Market, restoran, ulaşım gibi günlük harcamalar; düzenli ödemeler ve tek seferlik büyük alışverişler hariç.
       Aralık %95 olasılıkla. Son {{ forecast().basedOnMonths }} aya göre en isabetli yöntem: <strong>{{ methodLabel(forecast().method) }}</strong>.
     </p>
@@ -39,12 +39,12 @@ const METHOD_LABELS: Record<string, string> = {
     <details class="text-sm">
       <summary class="btn-link cursor-pointer">Yöntemler geçmişte ne kadar isabetliydi?</summary>
       <table class="w-full mt-3">
-        <thead class="text-left text-slate-400 uppercase text-[11px]">
+        <thead class="text-left text-ink-faint text-xs">
           <tr><th class="py-2">Yöntem</th><th class="text-right">Ortalama sapma</th><th class="text-right">Aralığın tutturma oranı</th></tr>
         </thead>
         <tbody>
           @for (backtest of forecast().backtests; track backtest.method) {
-            <tr class="border-t border-slate-100 font-semibold text-slate-700">
+            <tr class="border-t border-line font-medium text-ink-soft">
               <td class="py-2">{{ methodLabel(backtest.method) }}</td>
               <td class="text-right">{{ backtest.meanAbsolutePercentageError | percent: '1.0-1' }}</td>
               <td class="text-right">{{ backtest.intervalCoverage | percent: '1.0-0' }}</td>

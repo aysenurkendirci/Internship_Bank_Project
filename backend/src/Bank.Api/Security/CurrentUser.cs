@@ -3,6 +3,7 @@ using Bank.Application.Abstractions.Security;
 
 namespace Bank.Api.Security;
 
+/// <summary>Reads the signed-in user from the validated token, so handlers never touch HttpContext.</summary>
 public sealed class CurrentUser : ICurrentUser
 {
     public long UserId { get; }

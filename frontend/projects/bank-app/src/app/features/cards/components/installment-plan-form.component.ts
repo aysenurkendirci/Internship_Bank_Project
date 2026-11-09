@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { todayIsoDate } from '../../../core/util/dates';
 import { CreditCard, InstallmentPlanRequest } from '../../../data-access/models/finance.models';
+import { BaseForm } from '../../../shared/forms/base-form';
 
+/** Records a purchase paid in installments. The currency comes from the chosen card. */
 @Component({
   selector: 'app-installment-plan-form',
   imports: [ReactiveFormsModule],
@@ -44,11 +46,8 @@ import { CreditCard, InstallmentPlanRequest } from '../../../data-access/models/
     </form>
   `,
 })
-export class InstallmentPlanFormComponent implements OnInit {
+export class InstallmentPlanFormComponent extends BaseForm<InstallmentPlanRequest> implements OnInit {
   readonly cards = input.required<readonly CreditCard[]>();
-  readonly busy = input(false);
-  readonly save = output<InstallmentPlanRequest>();
-  readonly cancel = output<void>();
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     creditCardId: [0, [Validators.required, Validators.min(1)]],
@@ -62,8 +61,7 @@ export class InstallmentPlanFormComponent implements OnInit {
     this.form.controls.creditCardId.setValue(this.cards()[0]?.id ?? 0);
   }
 
-  protected submit(): void {
-    this.form.markAllAsTouched();
-    if (this.form.valid) this.save.emit(this.form.getRawValue());
+  protected toRequest(): InstallmentPlanRequest {
+    return this.form.getRawValue();
   }
 }

@@ -1,7 +1,6 @@
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
 using Bank.Application.Common;
-using Bank.Application.Features.Planning;
 using Bank.Domain.Analytics;
 using Bank.Domain.Common;
 
@@ -38,7 +37,7 @@ public sealed class AnalyticsHistory
 
     public async Task<IReadOnlyList<HistoryEntry>> LoadAsync(DateOnly from, DateOnly to, CancellationToken ct)
         => (await _history.ListRangeAsync(_currentUser.UserId, from, to, ct))
-            .Where(t => t.CurrencyCode == ProjectionInputLoader.ProjectionCurrency.Code)
+            .Where(t => t.CurrencyCode == ReportingCurrency.Value.Code)
             .Select(t => new HistoryEntry(t.Date, t.Description, t.Amount, t.Category))
             .ToList();
 }

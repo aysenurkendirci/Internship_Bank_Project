@@ -6,6 +6,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories.Finance;
 
+/// <summary>Installment plans; schedules are calculated, so only the purchase itself is stored.</summary>
 public sealed class InstallmentPlanRepository : IInstallmentPlanRepository
 {
     private const string SelectColumns = """

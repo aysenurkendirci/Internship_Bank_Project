@@ -2,6 +2,7 @@ using Bank.Application.Abstractions.Messaging;
 using Bank.Application.Abstractions.Persistence;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
+using Bank.Infrastructure.Health;
 using Bank.Infrastructure.Messaging;
 using Bank.Infrastructure.Persistence;
 using Bank.Infrastructure.Repositories;
@@ -36,11 +37,17 @@ public static class DependencyInjection
         services.AddScoped<IBankCardRepository, BankCardRepository>();
         services.AddScoped<ITransactionHistoryRepository, TransactionHistoryRepository>();
         services.AddScoped<ITransferRepository, TransferRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IErasureRepository, ErasureRepository>();
+        services.AddMemoryCache();
+
+        services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
         AddMessaging(services, configuration);
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<ISessionPolicy, SessionPolicy>();
 
         // Code asks TimeProvider for the current time instead of DateTime.Now, so tests can pin it.
         services.TryAddSingleton(TimeProvider.System);

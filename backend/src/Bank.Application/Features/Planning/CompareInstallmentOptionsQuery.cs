@@ -1,3 +1,4 @@
+using Bank.Application.Common;
 using Bank.Contracts.Finance;
 using Bank.Domain.Scenarios;
 using Bank.Domain.ValueObjects;
@@ -29,7 +30,7 @@ public sealed class CompareInstallmentOptionsQueryHandler
             request.Description,
             request.PurchaseDate!.Value,
             request.Options
-                .Select(o => new PurchaseOption(o.InstallmentCount, new Money(o.TotalAmount, ProjectionInputLoader.ProjectionCurrency)))
+                .Select(o => new PurchaseOption(o.InstallmentCount, new Money(o.TotalAmount, ReportingCurrency.Value)))
                 .ToList());
 
         var comparison = ScenarioComparer.Compare(current, scenario);

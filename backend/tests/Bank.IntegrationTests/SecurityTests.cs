@@ -36,6 +36,17 @@ public sealed class SecurityTests
     }
 
     [Fact]
+    public async Task SessionRefresh_DoesNotCountAgainstTheLoginLimit()
+    {
+        using var throttled = _factory.WithWebHostBuilder(b => b.UseSetting("RateLimiting:Auth:PermitLimit", "3"));
+        var client = throttled.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Requested-By", "bank-web");
+
+        for (var i = 0; i < 5; i++)
+            Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsync("/api/auth/refresh", null)).StatusCode);
+    }
+
+    [Fact]
     public async Task FinancialData_IsNeverCached_AndCarriesBaselineSecurityHeaders()
     {
         var client = await _factory.CreateAuthenticatedClientAsync();

@@ -5,6 +5,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-empty-state',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
-  template: `<p class="panel text-slate-500 font-semibold"><ng-content /></p>`,
+  template: `<p class="panel text-sm text-ink-soft"><ng-content /></p>`,
 })
 export class EmptyStateComponent {}

@@ -1,67 +1,35 @@
-<div class="shell">
-  <section class="hero">
-    <div class="hero__bg"></div>
-    <div class="hero__grid"></div>
-    <div class="hero__content">
-      <div class="brand">
-        <div class="brand__icon">🏦</div>
-        <div class="brand__text">NEO<span>Bank</span></div>
-      </div>
+<app-auth-shell heading="Giriş yap" subtitle="T.C. kimlik numaranız ve şifrenizle devam edin.">
+  @if (notice(); as message) {
+    <app-notice class="mb-4" kind="success" [message]="message" />
+  }
+  @if (error(); as message) {
+    <app-notice class="mb-4" [message]="message" />
+  }
 
-      <div class="hero__copy">
-        <h1>FİNANSIN <br><span>YENİ NESİL</span><br> MİMARİSİ.</h1>
-        <p>Kurumsal portalınıza güvenli erişim sağlayın. İşlemleriniz uçtan uca güvence altında.</p>
-      </div>
+  <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+    <label class="field">
+      <span class="field-label">T.C. Kimlik No</span>
+      <input class="input" formControlName="tcNo" inputmode="numeric" maxlength="11" autocomplete="username" />
+      @if (form.controls.tcNo.touched && form.controls.tcNo.invalid) {
+        <span class="field-error">T.C. kimlik numarası zorunludur.</span>
+      }
+    </label>
 
-      <div class="hero__meta">
-        <span>EST. 2024</span><i></i><span>NEXT-GEN PROTOCOL</span>
-      </div>
-    </div>
-  </section>
+    <label class="field">
+      <span class="field-label">Şifre</span>
+      <input class="input" type="password" formControlName="password" autocomplete="current-password" />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <span class="field-error">Şifre zorunludur.</span>
+      }
+    </label>
 
-  <section class="auth">
-    <div class="auth__wrap">
-      <div class="card">
-        <div class="card__head">
-          <h2>Giriş Yap</h2>
-          <p>Kurumsal portalınıza güvenli erişim.</p>
-        </div>
+    <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+      {{ busy() ? 'Giriş yapılıyor...' : 'Giriş yap' }}
+    </button>
+  </form>
 
-        @if (notice(); as message) {
-          <div class="notice notice--success">{{ message }}</div>
-        }
-        @if (error(); as message) {
-          <div class="notice notice--error" role="alert">{{ message }}</div>
-        }
-
-        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-          <lib-input
-            label="T.C. Kimlik No"
-            placeholder="11 haneli"
-            [control]="form.controls.tcNo"
-            [showError]="form.controls.tcNo.touched && form.controls.tcNo.invalid"
-            errorText="TC kimlik numarası zorunludur">
-          </lib-input>
-
-          <lib-input
-            label="Şifre"
-            type="password"
-            placeholder="••••••••"
-            [control]="form.controls.password"
-            [showError]="form.controls.password.touched && form.controls.password.invalid"
-            errorText="Şifre zorunludur">
-          </lib-input>
-
-          <lib-button type="submit" [disabled]="loading()">
-            {{ loading() ? 'Giriş yapılıyor...' : 'GİRİŞ YAP' }}
-          </lib-button>
-
-          <div class="footer">
-            <span>Hesabın yok mu?</span>
-            <a routerLink="/auth/register">Kayıt Ol</a>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
-</div>
+  <p class="mt-6 text-sm text-ink-soft">
+    Hesabınız yok mu?
+    <a routerLink="/auth/register" class="btn-link">Kayıt olun</a>
+  </p>
+</app-auth-shell>

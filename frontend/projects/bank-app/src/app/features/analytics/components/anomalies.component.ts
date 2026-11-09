@@ -14,19 +14,19 @@ import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
       <app-empty-state>Son aylarda alışkanlıklarınızdan belirgin şekilde ayrılan bir harcama yok.</app-empty-state>
     }
 
-    <ul class="divide-y divide-slate-100">
+    <ul class="divide-y divide-line">
       @for (anomaly of anomalies(); track $index) {
         <li class="py-3 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="font-bold text-slate-800">
+            <p class="font-semibold text-ink">
               {{ anomaly.description }}
-              <span class="text-sm font-semibold text-slate-400">· {{ anomaly.date | date: 'd MMM y' }}</span>
+              <span class="text-sm text-ink-faint">· {{ anomaly.date | date: 'd MMM y' }}</span>
             </p>
-            <p class="text-sm font-semibold text-slate-500">
+            <p class="text-sm text-ink-soft">
               {{ anomaly.comparedWith }} için tipik tutarın ({{ anomaly.typicalAmount | currency }}) {{ anomaly.timesTypical }} katı
             </p>
           </div>
-          <span class="font-black text-slate-900">{{ anomaly.amount | currency }}</span>
+          <span class="font-semibold text-ink">{{ anomaly.amount | currency }}</span>
         </li>
       }
     </ul>

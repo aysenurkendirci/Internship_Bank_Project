@@ -6,6 +6,7 @@ using MediatR;
 
 namespace Bank.Application.Features.InstallmentPlans;
 
+/// <summary>One installment plan with its schedule.</summary>
 public sealed record GetInstallmentPlanQuery(long Id) : IRequest<InstallmentPlanResponse>;
 
 public sealed class GetInstallmentPlanQueryHandler : IRequestHandler<GetInstallmentPlanQuery, InstallmentPlanResponse>

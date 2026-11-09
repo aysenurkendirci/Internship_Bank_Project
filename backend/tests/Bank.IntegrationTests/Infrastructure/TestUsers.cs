@@ -14,10 +14,13 @@ public static class TestUsers
     public static async Task<HttpClient> CreateAuthenticatedClientAsync(this ApiFactory factory)
         => (await factory.CreateUserAsync()).Client;
 
-    public static async Task<(HttpClient Client, long UserId)> CreateUserAsync(this ApiFactory factory)
+    public static Task<(HttpClient Client, long UserId)> CreateUserAsync(this ApiFactory factory)
+        => factory.CreateUserAsync(NewRegistration());
+
+    /// <summary>For tests that need to know what was registered, e.g. to look for it in the database later.</summary>
+    public static async Task<(HttpClient Client, long UserId)> CreateUserAsync(this ApiFactory factory, RegisterRequest registration)
     {
         var client = factory.CreateClient();
-        var registration = NewRegistration();
 
         var response = await client.PostAsJsonAsync("/api/auth/register", registration);
         response.EnsureSuccessStatusCode();

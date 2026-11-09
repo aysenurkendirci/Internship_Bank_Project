@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.RecurringCashFlows;
 
+/// <summary>Soft-deletes a recurring item.</summary>
 public sealed record DeleteRecurringCashFlowCommand(long Id) : IRequest;
 
 public sealed class DeleteRecurringCashFlowCommandHandler : IRequestHandler<DeleteRecurringCashFlowCommand>

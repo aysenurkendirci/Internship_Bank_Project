@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Bank.Infrastructure.Security;
 
+/// <summary>Issues the signed access token, which carries nothing but the user id.</summary>
 public sealed class JwtTokenGenerator : ITokenGenerator
 {
     private readonly IConfiguration _config;

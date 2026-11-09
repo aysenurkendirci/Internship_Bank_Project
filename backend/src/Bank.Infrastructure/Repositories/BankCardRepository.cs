@@ -5,6 +5,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories;
 
+/// <summary>Settings of issued cards in dbo.Cards.</summary>
 public sealed class BankCardRepository : IBankCardRepository
 {
     private readonly SqlConnectionFactory _connections;
