@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -11,20 +11,19 @@ import {
   RecurringCashFlow,
   RecurringCashFlowRequest,
 } from '../../../data-access/models/finance.models';
+import { BaseForm } from '../../../shared/forms/base-form';
 import { KIND_LABELS } from '../recurring-labels';
 
+/** Add or edit an income, expense or subscription. */
 @Component({
   selector: 'app-recurring-item-form',
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './recurring-item-form.component.html',
 })
-export class RecurringItemFormComponent {
+export class RecurringItemFormComponent extends BaseForm<RecurringCashFlowRequest> {
   readonly item = input<RecurringCashFlow | null>(null);
   readonly cards = input.required<readonly CreditCard[]>();
-  readonly busy = input(false);
-  readonly save = output<RecurringCashFlowRequest>();
-  readonly cancel = output<void>();
 
   protected readonly kindLabels = KIND_LABELS;
   protected readonly kinds = Object.keys(KIND_LABELS) as CashFlowKind[];
@@ -47,6 +46,7 @@ export class RecurringItemFormComponent {
   protected readonly canUseCard = computed(() => this.kind() !== 'Income');
 
   constructor() {
+    super();
     effect(() => {
       const item = this.item();
       if (!item) {
@@ -68,15 +68,12 @@ export class RecurringItemFormComponent {
     });
   }
 
-  protected submit(): void {
-    this.form.markAllAsTouched();
-    if (this.form.invalid) return;
-
+  protected toRequest(): RecurringCashFlowRequest {
     const value = this.form.getRawValue();
-    this.save.emit({
+    return {
       ...value,
       endDate: value.endDate || null,
       creditCardId: value.kind !== 'Income' && value.creditCardId > 0 ? value.creditCardId : null,
-    });
+    };
   }
 }

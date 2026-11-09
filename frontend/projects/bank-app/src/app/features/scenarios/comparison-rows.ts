@@ -1,9 +1,8 @@
 import { ScenarioComparison, ScenarioMetrics } from '../../data-access/models/finance.models';
+import { CHART } from '../../shared/chart/chart-theme';
 
-// Validated categorical order (see chart-theme.ts); three of these sit below 3:1 on white, so the table
-// swatch, legend text and line-end labels carry identity alongside colour.
-const OPTION_COLOURS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300'];
-const BASELINE_COLOUR = '#94a3b8';
+// Some series colours sit below 3:1 on white, so the table swatch, legend text and line-end labels carry
+// identity alongside colour.
 
 export interface ComparisonRow {
   label: string;
@@ -23,10 +22,10 @@ export function toComparisonRows(result: ScenarioComparison): ComparisonRow[] {
   const cheapest = Math.min(...result.options.map((o) => o.totalAmount));
 
   return [
-    { label: 'Almasam', colour: BASELINE_COLOUR, monthlyInstallment: null, totalAmount: null, extraCost: null, metrics: result.baseline },
+    { label: 'Almasam', colour: CHART.baseline, monthlyInstallment: null, totalAmount: null, extraCost: null, metrics: result.baseline },
     ...result.options.map((option, i) => ({
       label: `${option.installmentCount} taksit`,
-      colour: OPTION_COLOURS[i],
+      colour: CHART.series[i],
       // The last installment is the regular amount; any rounding remainder sits on the first one.
       monthlyInstallment: option.installments[option.installments.length - 1]?.amount ?? null,
       totalAmount: option.totalAmount,

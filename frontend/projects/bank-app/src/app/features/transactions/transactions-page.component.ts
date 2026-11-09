@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { problemErrors, problemMessage } from '../../core/http/problem-details';
+import { problemErrors } from '../../core/http/problem-details';
+import { BasePage } from '../../core/page/base-page';
 import { TransactionsApi } from '../../data-access/api/finance.api';
 import { HistoryTransaction, ImportResult } from '../../data-access/models/finance.models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
@@ -40,7 +41,8 @@ const PAGE_SIZE = 50;
     />
   `,
 })
-export class TransactionsPageComponent {
+/** Container: uploads statements, generates demo data and pages through the imported lines. */
+export class TransactionsPageComponent extends BasePage {
   protected readonly api = inject(TransactionsApi);
 
   protected readonly pageSize = PAGE_SIZE;
@@ -49,42 +51,37 @@ export class TransactionsPageComponent {
   protected readonly page = signal(1);
   private range: DateRange = {};
 
-  protected readonly busy = signal(false);
   protected readonly result = signal<ImportResult | null>(null);
-  protected readonly error = signal<string | null>(null);
   protected readonly lineErrors = signal<string[]>([]);
 
   constructor() {
-    this.load();
+    super();
+    this.fetchPage();
   }
 
   protected store(call: Observable<ImportResult>): void {
-    this.busy.set(true);
     this.result.set(null);
     this.fail(null);
 
-    call.subscribe({
-      next: (result) => {
-        this.busy.set(false);
+    this.act(call, {
+      fallback: 'Dosya yüklenemedi.',
+      onDone: (result) => {
         this.result.set(result);
         this.applyFilter(this.range);
       },
-      error: (err) => {
-        this.busy.set(false);
-        this.fail(problemMessage(err, 'Dosya yüklenemedi.'), problemErrors(err));
-      },
+      onError: (err) => this.lineErrors.set(problemErrors(err)),
     });
   }
 
   protected applyFilter(range: DateRange): void {
     this.range = range;
     this.page.set(1);
-    this.load();
+    this.fetchPage();
   }
 
   protected goTo(page: number): void {
     this.page.set(page);
-    this.load();
+    this.fetchPage();
   }
 
   protected fail(message: string | null, lines: string[] = []): void {
@@ -92,13 +89,14 @@ export class TransactionsPageComponent {
     this.lineErrors.set(lines);
   }
 
-  private load(): void {
-    this.api.list(this.page(), PAGE_SIZE, this.range.from, this.range.to).subscribe({
-      next: (page) => {
+  private fetchPage(): void {
+    this.load(
+      this.api.list(this.page(), PAGE_SIZE, this.range.from, this.range.to),
+      (page) => {
         this.items.set(page.items);
         this.totalCount.set(page.totalCount);
       },
-      error: (err) => this.fail(problemMessage(err, 'İşlemler yüklenemedi.')),
-    });
+      'İşlemler yüklenemedi.',
+    );
   }
 }

@@ -18,16 +18,16 @@ const KIND_LABELS: Record<ProjectionEntryKind, string> = {
   host: { class: 'block' },
   template: `
     @if (entries().length === 0) {
-      <p class="text-slate-500 font-semibold">Bu dönemde hareket yok. Gelir, gider veya kart ekleyerek başlayın.</p>
+      <p class="text-ink-soft font-semibold">Bu dönemde hareket yok. Gelir, gider veya kart ekleyerek başlayın.</p>
     }
-    <ul class="divide-y divide-slate-100">
+    <ul class="divide-y divide-line">
       @for (entry of entries(); track $index) {
         <li class="py-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-3">
-              <span class="text-sm font-bold text-slate-400 w-24">{{ entry.date | date: 'd MMM y' }}</span>
-              <span class="font-bold text-slate-800">{{ entry.description }}</span>
-              <span class="badge bg-slate-100 text-slate-600">{{ kindLabels[entry.kind] }}</span>
+              <span class="text-sm font-semibold text-ink-faint w-24">{{ entry.date | date: 'd MMM y' }}</span>
+              <span class="font-semibold text-ink">{{ entry.description }}</span>
+              <span class="badge bg-canvas text-ink-soft">{{ kindLabels[entry.kind] }}</span>
             </div>
             <div class="flex items-center gap-3">
               @if (entry.charges.length > 0) {
@@ -35,15 +35,15 @@ const KIND_LABELS: Record<ProjectionEntryKind, string> = {
                   {{ entry.charges.length }} kalem
                 </button>
               }
-              <span class="font-black" [ngClass]="entry.amount < 0 ? 'text-slate-900' : 'text-emerald-600'">
+              <span class="font-semibold" [ngClass]="entry.amount < 0 ? 'text-ink' : 'text-positive'">
                 {{ entry.amount | currency }}
               </span>
             </div>
           </div>
           @if (open() === $index) {
-            <ul class="mt-2 ml-28 text-sm text-slate-600 space-y-1">
+            <ul class="mt-2 ml-28 text-sm text-ink-soft space-y-1">
               @if (entry.statementDate) {
-                <li class="text-xs text-slate-400 font-bold">Ekstre kesimi: {{ entry.statementDate | date: 'd MMMM y' }}</li>
+                <li class="text-xs text-ink-faint font-semibold">Ekstre kesimi: {{ entry.statementDate | date: 'd MMMM y' }}</li>
               }
               @for (charge of entry.charges; track $index) {
                 <li class="flex justify-between max-w-md"><span>{{ charge.description }}</span><span>{{ charge.amount | currency }}</span></li>

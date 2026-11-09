@@ -10,12 +10,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: { class: 'block' },
   template: `
     <div
-      [class]="kind() === 'error' ? 'notice-error' : 'notice-info'"
+      [class]="'notice-' + kind()"
       [attr.role]="kind() === 'error' ? 'alert' : 'status'"
     >
       <p>{{ message() }}</p>
       @if (details().length > 0) {
-        <ul class="mt-2 list-disc ml-5 text-sm font-medium space-y-0.5">
+        <ul class="mt-2 list-disc ml-5 space-y-0.5">
           @for (detail of details(); track $index) {
             <li>{{ detail }}</li>
           }
@@ -26,6 +26,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class NoticeComponent {
   readonly message = input.required<string>();
-  readonly kind = input<'error' | 'info'>('error');
+  readonly kind = input<'error' | 'info' | 'success'>('error');
   readonly details = input<readonly string[]>([]);
 }

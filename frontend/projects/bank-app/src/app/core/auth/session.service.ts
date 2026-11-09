@@ -1,6 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
 
-import { AuthResponse } from '../../data-access/models/auth.models';
+/** What the session needs from a sign-in. Declared here so core does not depend on the API models. */
+export interface SessionUser {
+  token: string;
+  fullName: string;
+}
 
 const TOKEN_KEY = 'token';
 const NAME_KEY = 'fullName';
@@ -21,7 +25,7 @@ export class SessionService {
   readonly fullName = this.nameSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.tokenSignal() !== null);
 
-  start(auth: AuthResponse): void {
+  start(auth: SessionUser): void {
     localStorage.setItem(TOKEN_KEY, auth.token);
     localStorage.setItem(NAME_KEY, auth.fullName);
     this.tokenSignal.set(auth.token);

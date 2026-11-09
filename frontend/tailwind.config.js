@@ -1,3 +1,6 @@
+// Colours come from design/tokens.json, the only place they are defined. Charts read the same file.
+const tokens = require('./projects/bank-app/src/design/tokens.json');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -8,22 +11,7 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
-      colors: {
-        canvas: '#f6f7f9',
-        line: '#e4e7ec',
-        ink: {
-          DEFAULT: '#101828',
-          soft: '#475467',
-          faint: '#667085',
-        },
-        brand: {
-          DEFAULT: '#0f2d59',
-          hover: '#1a3f78',
-          tint: '#eef2f8',
-        },
-        accent: '#1d4ed8',
-        positive: '#15803d',
-      },
+      colors: tokens.color,
     },
   },
   plugins: [],

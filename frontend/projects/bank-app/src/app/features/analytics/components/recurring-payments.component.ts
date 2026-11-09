@@ -17,21 +17,21 @@ import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
       <app-empty-state>En az üç aylık geçmişte düzenli tekrar eden bir ödeme bulunamadı.</app-empty-state>
     }
 
-    <ul class="divide-y divide-slate-100">
+    <ul class="divide-y divide-line">
       @for (payment of payments(); track payment.merchant + payment.direction) {
         <li class="py-3 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="font-bold text-slate-800">{{ payment.merchant }}</p>
-            <p class="text-sm font-semibold text-slate-500">
+            <p class="font-semibold text-ink">{{ payment.merchant }}</p>
+            <p class="text-sm font-semibold text-ink-soft">
               {{ payment.direction === 'Inbound' ? 'Gelir' : payment.pattern === 'Fixed' ? 'Sabit tutarlı' : 'Tutarı değişen' }}
               · ayın {{ payment.typicalDay }}. günü civarı · {{ payment.monthsObserved }} ayda görüldü
               · sıradaki: {{ payment.nextExpected | date: 'd MMM y' }}
             </p>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-black text-slate-900">{{ payment.typicalAmount | currency }}</span>
+            <span class="font-semibold text-ink">{{ payment.typicalAmount | currency }}</span>
             @if (payment.isTracked) {
-              <span class="badge bg-emerald-50 text-emerald-700">Takipte</span>
+              <span class="badge bg-positive-tint text-positive">Takipte</span>
             } @else {
               <button type="button" class="btn-link" [disabled]="busyMerchant() !== null" (click)="track.emit(payment)">
                 {{ busyMerchant() === payment.merchant ? 'Ekleniyor...' : 'Takibe al' }}

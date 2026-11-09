@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: { class: 'panel block' },
   template: `
     <p class="text-sm text-ink-soft">{{ label() }}</p>
-    <p class="text-2xl font-semibold tabular-nums mt-2 flex items-center gap-1.5" [class]="critical() ? 'text-red-700' : 'text-ink'">
+    <p class="text-2xl font-semibold tabular-nums mt-2 flex items-center gap-1.5" [class]="critical() ? 'text-danger' : 'text-ink'">
       @if (critical()) {
         <span class="material-symbols-outlined text-[22px]" aria-hidden="true">warning</span>
       }

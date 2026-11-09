@@ -1,14 +1,17 @@
-// Chart colours by role. Series slots follow the validated categorical order (blue, then orange):
-// CVD ΔE 24.7 and normal-vision ΔE 33.6 between them, both ≥ 3:1 against the white panel.
-// Status red is reserved for "below zero" and always appears with an icon and text, never alone.
+import tokens from '../../../design/tokens.json';
+
+// Chart colours by role, read from the same file Tailwind uses. Series slots follow the validated categorical
+// order. Status red is reserved for "below zero" and always appears with an icon and text, never alone.
 export const CHART = {
-  series1: '#2a78d6',
-  series2: '#eb6834',
-  critical: '#e34948',
-  textPrimary: '#0f172a',
-  textSecondary: '#64748b',
-  grid: '#e2e8f0',
-  surface: '#ffffff',
+  series: tokens.chart.series,
+  series1: tokens.chart.series[0],
+  series2: tokens.chart.series[1],
+  baseline: tokens.chart.baseline,
+  critical: tokens.chart.critical,
+  textPrimary: tokens.color.ink.DEFAULT,
+  textSecondary: tokens.color.ink.faint,
+  grid: tokens.color.line,
+  surface: tokens.color.surface,
   font: "'Inter', system-ui, sans-serif",
 } as const;
 

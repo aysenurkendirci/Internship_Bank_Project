@@ -16,7 +16,7 @@ const STATUS_LABELS: Record<string, string> = {
   host: {
     class: 'w-72 h-40 shrink-0 rounded-xl p-4 text-white flex flex-col justify-between',
     '[class.bg-brand]': '!card().isVirtual',
-    '[class.bg-slate-700]': 'card().isVirtual',
+    '[class.bg-brand-muted]': 'card().isVirtual',
     '[class.opacity-60]': 'card().status !== "Active"',
   },
   template: `
@@ -24,7 +24,7 @@ const STATUS_LABELS: Record<string, string> = {
       <span class="font-medium">{{ card().cardType === 'Credit' ? 'Kredi kartı' : 'Banka kartı' }}</span>
       <span class="text-white/70">{{ statusLabel() ?? (card().isVirtual ? 'Sanal' : 'Fiziksel') }}</span>
     </div>
-    <p class="tabular-nums tracking-wider text-white/90">{{ card().cardNoMasked }}</p>
+    <p class="tabular-numsr text-white/90">{{ card().cardNoMasked }}</p>
     <div>
       <p class="text-xs text-white/70">Bakiye</p>
       <p class="font-semibold tabular-nums">{{ card().balance | currency }}</p>

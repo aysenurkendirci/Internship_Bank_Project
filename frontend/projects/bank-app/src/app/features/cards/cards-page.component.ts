@@ -1,8 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { Observable, forkJoin } from 'rxjs';
 
-import { problemMessage } from '../../core/http/problem-details';
+import { ActOptions, BasePage } from '../../core/page/base-page';
 import { CreditCardsApi, InstallmentPlansApi } from '../../data-access/api/finance.api';
 import { CreditCard, CreditCardRequest, InstallmentPlan, InstallmentPlanRequest } from '../../data-access/models/finance.models';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -27,21 +26,20 @@ import { InstallmentPlanListComponent } from './components/installment-plan-list
   ],
   templateUrl: './cards-page.component.html',
 })
-export class CardsPageComponent {
+export class CardsPageComponent extends BasePage {
   private readonly cardsApi = inject(CreditCardsApi);
   private readonly plansApi = inject(InstallmentPlansApi);
 
   protected readonly cards = signal<CreditCard[]>([]);
   protected readonly plans = signal<InstallmentPlan[]>([]);
   protected readonly loaded = signal(false);
-  protected readonly busy = signal(false);
-  protected readonly error = signal<string | null>(null);
 
   /** The card being edited, null while adding one, undefined when the form is closed. */
   protected readonly editing = signal<CreditCard | null | undefined>(undefined);
   protected readonly addingPlan = signal(false);
 
   constructor() {
+    super();
     this.reload();
   }
 
@@ -64,34 +62,28 @@ export class CardsPageComponent {
   }
 
   private reload(): void {
-    forkJoin({ cards: this.cardsApi.list(), plans: this.plansApi.list() }).subscribe({
-      next: ({ cards, plans }) => {
+    this.load(
+      forkJoin({ cards: this.cardsApi.list(), plans: this.plansApi.list() }),
+      ({ cards, plans }) => {
         this.cards.set(cards);
         this.plans.set(plans);
         this.loaded.set(true);
       },
-      error: (err) => this.error.set(problemMessage(err, 'Kartlar yüklenemedi.')),
-    });
+      'Kartlar yüklenemedi.',
+    );
   }
 
-  /** Runs a change and reloads. A 409 means the data moved underneath the user, so it reloads too. */
+  /** Runs a change and reloads. A 409 means the data moved underneath the user, so the edit is abandoned. */
   private run<T>(call: Observable<T>, onSuccess?: () => void): void {
-    this.busy.set(true);
-    this.error.set(null);
-    call.subscribe({
-      next: () => {
-        this.busy.set(false);
+    this.act(call, {
+      onDone: () => {
         onSuccess?.();
         this.reload();
       },
-      error: (err) => {
-        this.busy.set(false);
-        this.error.set(problemMessage(err));
-        if (err instanceof HttpErrorResponse && err.status === 409 && this.editing()) {
-          this.editing.set(undefined);
-          this.reload();
-        }
+      onConflict: () => {
+        this.editing.set(undefined);
+        this.reload();
       },
-    });
+    } satisfies ActOptions<T>);
   }
 }

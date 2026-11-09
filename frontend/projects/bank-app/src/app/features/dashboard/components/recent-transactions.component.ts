@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { TransactionItem } from '../../../data-access/models/dashboard.models';
 
+/** The latest account movements. Incoming money is green; outgoing stays in the normal text colour. */
 @Component({
   selector: 'app-recent-transactions',
   imports: [CurrencyPipe, DatePipe],
@@ -10,7 +11,7 @@ import { TransactionItem } from '../../../data-access/models/dashboard.models';
   host: { class: 'block' },
   template: `
     <h2 class="section-title mb-3">Son işlemler</h2>
-    <div class="bg-white rounded-xl border border-line">
+    <div class="bg-surface rounded-xl border border-line">
       @if (transactions().length === 0) {
         <p class="p-5 text-sm text-ink-soft">Henüz işlem yok.</p>
       }

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
 
+// Every page is loaded on demand, so the first download stays small.
 export const routes: Routes = [
   {
     path: 'auth/login',

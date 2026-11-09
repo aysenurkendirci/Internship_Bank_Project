@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CreditCard, CreditCardRequest, CurrencyCode } from '../../../data-access/models/finance.models';
+import { BaseForm } from '../../../shared/forms/base-form';
 
 /** Add or edit a card. Given a card it pre-fills; given null it starts empty. */
 @Component({
@@ -44,11 +45,8 @@ import { CreditCard, CreditCardRequest, CurrencyCode } from '../../../data-acces
     </form>
   `,
 })
-export class CardFormComponent {
+export class CardFormComponent extends BaseForm<CreditCardRequest> {
   readonly card = input<CreditCard | null>(null);
-  readonly busy = input(false);
-  readonly save = output<CreditCardRequest>();
-  readonly cancel = output<void>();
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -59,6 +57,7 @@ export class CardFormComponent {
   });
 
   constructor() {
+    super();
     effect(() => {
       const card = this.card();
       if (card) {
@@ -70,8 +69,7 @@ export class CardFormComponent {
     });
   }
 
-  protected submit(): void {
-    this.form.markAllAsTouched();
-    if (this.form.valid) this.save.emit(this.form.getRawValue());
+  protected toRequest(): CreditCardRequest {
+    return this.form.getRawValue();
   }
 }

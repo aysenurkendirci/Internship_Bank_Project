@@ -1,8 +1,8 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
-import { Projection } from '../../../data-access/models/finance.models';
-import { StatTileComponent } from '../../../shared/ui/stat-tile.component';
+import { Projection } from '../../data-access/models/finance.models';
+import { StatTileComponent } from '../ui/stat-tile.component';
 
 /** The three headline figures of a projection. */
 @Component({
