@@ -95,6 +95,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Layer boundaries
+        run: node scripts/check-layers.mjs
+
       - name: Production build
         run: npx ng build bank-app
 
