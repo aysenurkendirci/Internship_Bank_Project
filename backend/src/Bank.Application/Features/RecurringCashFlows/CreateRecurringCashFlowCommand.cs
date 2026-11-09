@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.RecurringCashFlows;
 
+/// <summary>Adds a regular income, expense or subscription.</summary>
 public sealed record CreateRecurringCashFlowCommand(RecurringCashFlowRequest Item) : IRequest<RecurringCashFlowResponse>;
 
 public sealed class CreateRecurringCashFlowCommandHandler

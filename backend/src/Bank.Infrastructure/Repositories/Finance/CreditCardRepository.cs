@@ -7,6 +7,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories.Finance;
 
+/// <summary>Tracked credit cards; every query is scoped to the owner and skips soft-deleted rows.</summary>
 public sealed class CreditCardRepository : ICreditCardRepository
 {
     private const string SelectColumns = """

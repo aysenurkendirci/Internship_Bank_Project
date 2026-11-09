@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.Api.Controllers;
 
+/// <summary>Everything the home screen shows, in one response.</summary>
 [ApiController]
 [Route("api/dashboard")]
 [Authorize]

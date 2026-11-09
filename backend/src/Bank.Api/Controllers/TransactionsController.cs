@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.Api.Controllers;
 
+/// <summary>The latest account movements, taken from the dashboard read model.</summary>
 [ApiController]
 [Route("api/transactions")]
 [Authorize]

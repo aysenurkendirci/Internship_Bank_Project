@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Bank.Infrastructure.Persistence;
 
+/// <summary>Opens the transaction shared through DbSession and rolls it back unless it was committed.</summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
     private readonly DbSession _session;

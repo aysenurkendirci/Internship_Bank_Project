@@ -6,6 +6,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories;
 
+/// <summary>Builds the home screen's read model in a single round trip.</summary>
 public sealed class DashboardRepository : IDashboardRepository
 {
     private const int RecentTransactionCount = 5;

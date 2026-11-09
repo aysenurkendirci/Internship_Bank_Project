@@ -6,6 +6,7 @@ using MediatR;
 
 namespace Bank.Application.Features.TransactionHistory;
 
+/// <summary>One page of imported statement lines, newest first.</summary>
 public sealed record ListTransactionsQuery(DateOnly? From, DateOnly? To, int Page, int PageSize)
     : IRequest<PagedResponse<HistoryTransactionResponse>>;
 

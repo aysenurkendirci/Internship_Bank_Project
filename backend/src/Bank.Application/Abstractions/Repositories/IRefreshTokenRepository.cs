@@ -12,8 +12,11 @@ public interface IRefreshTokenRepository
 
     Task SetReplacementAsync(long tokenId, long replacedByTokenId, CancellationToken ct = default);
 
-    /// <summary>The owner of a token that was revoked earlier, or null if the token is unknown or still open.</summary>
-    Task<long?> FindOwnerOfRevokedAsync(byte[] tokenHash, CancellationToken ct = default);
+    /// <summary>
+    /// The owner of a token that was already exchanged for a new one, or null otherwise. A token revoked by a
+    /// logout or a password change has no replacement: seeing it again is just a stale device, not a stolen copy.
+    /// </summary>
+    Task<long?> FindOwnerOfReplacedAsync(byte[] tokenHash, CancellationToken ct = default);
 
     Task RevokeAllAsync(long userId, DateTime now, CancellationToken ct = default);
 

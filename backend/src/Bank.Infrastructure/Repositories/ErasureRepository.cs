@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Bank.Infrastructure.Repositories;
 
+/// <summary>Runs the erasure procedure and answers whether a user has been erased.</summary>
 public sealed class ErasureRepository : IErasureRepository
 {
     // An access token stays valid until it expires, so every request would otherwise have to ask the database

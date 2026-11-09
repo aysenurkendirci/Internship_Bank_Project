@@ -2,6 +2,7 @@ using Bank.Application.Abstractions.Messaging;
 using Bank.Application.Abstractions.Persistence;
 using Bank.Application.Abstractions.Repositories;
 using Bank.Application.Abstractions.Security;
+using Bank.Infrastructure.Health;
 using Bank.Infrastructure.Messaging;
 using Bank.Infrastructure.Persistence;
 using Bank.Infrastructure.Repositories;
@@ -39,6 +40,8 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IErasureRepository, ErasureRepository>();
         services.AddMemoryCache();
+
+        services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
         AddMessaging(services, configuration);
 

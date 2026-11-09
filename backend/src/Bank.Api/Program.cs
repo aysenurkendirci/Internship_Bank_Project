@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using Bank.Api.ErrorHandling;
-using Bank.Api.Health;
 using Bank.Api.Logging;
 using Bank.Api.Security;
 using Bank.Api.Serialization;
@@ -55,9 +54,6 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddAuthRateLimiting(builder.Configuration);
-
-builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();

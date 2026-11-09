@@ -86,21 +86,19 @@ public sealed class AuthCommandTests
 
         await Assert.ThrowsAsync<ConflictException>(() => _register.Handle(new RegisterCommand(NewRegistration()), default));
 
-        await _repo.DidNotReceive().CreateUserAsync(
-            Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _repo.DidNotReceive().CreateUserAsync(Arg.Any<NewUser>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Register_StoresHashNotPlainPassword()
     {
         _hasher.Hash("P@ssw0rd!").Returns("hashed-value");
-        _repo.CreateUserAsync(Arg.Any<RegisterRequest>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _repo.CreateUserAsync(Arg.Any<NewUser>(), Arg.Any<CancellationToken>())
              .Returns(ExistingUser);
 
         await _register.Handle(new RegisterCommand(NewRegistration()), default);
 
-        await _repo.Received(1).CreateUserAsync(
-            Arg.Any<RegisterRequest>(), "hashed-value", Arg.Any<CancellationToken>());
+        await _repo.Received(1).CreateUserAsync(Arg.Is<NewUser>(u => u.PasswordHash == "hashed-value"), Arg.Any<CancellationToken>());
     }
 
     // KVKK: security events are logged, but an identity number never appears in full.

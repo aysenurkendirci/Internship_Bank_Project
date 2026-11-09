@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bank.Application.Features.Auth;
 
+/// <summary>Creates a customer and signs them in.</summary>
 public sealed record RegisterCommand(RegisterRequest Registration) : IRequest<AuthResult>;
 
 public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResult>
@@ -40,7 +41,11 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
             throw new ConflictException("Bu TC kimlik numarası ile kayıtlı bir kullanıcı var.");
         }
 
-        var user = await _repo.CreateUserAsync(registration, _hasher.Hash(registration.Password), ct);
+        var user = await _repo.CreateUserAsync(
+            new NewUser(
+                registration.TcNo, registration.FirstName, registration.LastName, registration.Email,
+                registration.Phone, registration.Membership, _hasher.Hash(registration.Password)),
+            ct);
 
         _logger.LogInformation("User {UserId} registered with {TcNo}", user.UserId, maskedTc);
         return await AuthResponses.CreateAsync(user.UserId, $"{user.FirstName} {user.LastName}", _tokens, _refreshTokens, ct);

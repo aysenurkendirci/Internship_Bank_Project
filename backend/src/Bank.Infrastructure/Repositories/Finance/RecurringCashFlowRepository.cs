@@ -8,6 +8,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories.Finance;
 
+/// <summary>Recurring incomes, expenses and subscriptions.</summary>
 public sealed class RecurringCashFlowRepository : IRecurringCashFlowRepository
 {
     private const string SelectColumns = """

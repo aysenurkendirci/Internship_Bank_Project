@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.Api.Controllers;
 
+/// <summary>Cards the bank issued to the customer. The credit cards a customer tracks for planning live under api/finance.</summary>
 [ApiController]
 [Route("api/cards")]
 [Authorize]

@@ -69,7 +69,7 @@ public sealed class RefreshSessionCommandHandler : IRequestHandler<RefreshSessio
     // real user cannot be told, so every session of the user ends and they sign in again.
     private async Task RevokeEverythingIfReusedAsync(byte[] hash, DateTime now, CancellationToken ct)
     {
-        if (await _tokens.FindOwnerOfRevokedAsync(hash, ct) is not { } userId)
+        if (await _tokens.FindOwnerOfReplacedAsync(hash, ct) is not { } userId)
             return;
 
         await _tokens.RevokeAllAsync(userId, now, ct);

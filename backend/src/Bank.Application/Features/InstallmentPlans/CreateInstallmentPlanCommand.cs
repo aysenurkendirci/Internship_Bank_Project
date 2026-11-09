@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Bank.Application.Features.InstallmentPlans;
 
+/// <summary>Records a purchase paid in installments on one of the customer's cards.</summary>
 public sealed record CreateInstallmentPlanCommand(InstallmentPlanRequest Plan) : IRequest<InstallmentPlanResponse>;
 
 public sealed class CreateInstallmentPlanCommandHandler : IRequestHandler<CreateInstallmentPlanCommand, InstallmentPlanResponse>

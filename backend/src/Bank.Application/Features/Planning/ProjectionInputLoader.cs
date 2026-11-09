@@ -9,8 +9,6 @@ namespace Bank.Application.Features.Planning;
 /// <summary>Gathers the current user's finance data into the input the projection engine expects.</summary>
 public sealed class ProjectionInputLoader
 {
-    public static readonly Currency ProjectionCurrency = Currency.TRY;
-
     private readonly ICreditCardRepository _cards;
     private readonly IRecurringCashFlowRepository _cashFlows;
     private readonly IInstallmentPlanRepository _plans;
@@ -41,7 +39,7 @@ public sealed class ProjectionInputLoader
         var cards = await _cards.ListAsync(userId, ct);
         var cashFlows = await _cashFlows.ListAsync(userId, kind: null, ct);
         var plans = await _plans.ListAsync(userId, ct);
-        var balance = await _accounts.GetAvailableBalanceAsync(userId, ProjectionCurrency.Code, ct);
+        var balance = await _accounts.GetAvailableBalanceAsync(userId, ReportingCurrency.Value.Code, ct);
 
         // Today's movements are assumed to be in the current balance already (ADR-0003 §8).
         var from = BusinessDate.Today(_time).AddDays(1);
@@ -49,7 +47,7 @@ public sealed class ProjectionInputLoader
         return new ProjectionInput(
             from,
             months,
-            new Money(balance, ProjectionCurrency),
+            new Money(balance, ReportingCurrency.Value),
             cashFlows.Select(c => c.Value).ToList(),
             cards.Select(c => c.Value).ToList(),
             plans);

@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.InstallmentPlans;
 
+/// <summary>All installment plans of the current customer, with their schedules.</summary>
 public sealed record ListInstallmentPlansQuery : IRequest<IReadOnlyList<InstallmentPlanResponse>>;
 
 public sealed class ListInstallmentPlansQueryHandler

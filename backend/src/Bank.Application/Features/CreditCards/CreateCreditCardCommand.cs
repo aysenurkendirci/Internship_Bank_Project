@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.CreditCards;
 
+/// <summary>Adds a credit card the customer wants to plan around.</summary>
 public sealed record CreateCreditCardCommand(CreditCardRequest Card) : IRequest<CreditCardResponse>;
 
 public sealed class CreateCreditCardCommandHandler : IRequestHandler<CreateCreditCardCommand, CreditCardResponse>

@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.CreditCards;
 
+/// <summary>Soft-deletes a card, unless installments or card-paid items still depend on it.</summary>
 public sealed record DeleteCreditCardCommand(long Id) : IRequest;
 
 public sealed class DeleteCreditCardCommandHandler : IRequestHandler<DeleteCreditCardCommand>

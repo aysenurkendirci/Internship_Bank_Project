@@ -2,7 +2,7 @@ using Bank.Infrastructure.Persistence;
 using Dapper;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Bank.Api.Health;
+namespace Bank.Infrastructure.Health;
 
 /// <summary>
 /// Readiness: the API is only useful if it can reach its database. The check opens a connection and runs

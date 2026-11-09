@@ -5,6 +5,7 @@ using Dapper;
 
 namespace Bank.Infrastructure.Repositories;
 
+/// <summary>Reads accounts and opens new ones. Moving money is TransferRepository's job.</summary>
 public sealed class AccountRepository : IAccountRepository
 {
     private readonly SqlConnectionFactory _connections;

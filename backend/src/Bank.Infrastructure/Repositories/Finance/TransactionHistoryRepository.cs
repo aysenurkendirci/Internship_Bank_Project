@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Bank.Infrastructure.Repositories.Finance;
 
+/// <summary>Imported statement lines; bulk insert plus fingerprints keeps re-imports from adding duplicates.</summary>
 public sealed class TransactionHistoryRepository : ITransactionHistoryRepository
 {
     private readonly SqlConnectionFactory _connections;

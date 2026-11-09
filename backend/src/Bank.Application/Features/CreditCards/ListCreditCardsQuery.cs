@@ -5,6 +5,7 @@ using MediatR;
 
 namespace Bank.Application.Features.CreditCards;
 
+/// <summary>All credit cards the current customer tracks.</summary>
 public sealed record ListCreditCardsQuery : IRequest<IReadOnlyList<CreditCardResponse>>;
 
 public sealed class ListCreditCardsQueryHandler : IRequestHandler<ListCreditCardsQuery, IReadOnlyList<CreditCardResponse>>

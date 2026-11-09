@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Bank.Infrastructure.Security;
 
+/// <summary>Session settings read from configuration.</summary>
 public sealed class SessionPolicy : ISessionPolicy
 {
     // A working day: long enough that an open session survives a lunch break, short enough that a lost device

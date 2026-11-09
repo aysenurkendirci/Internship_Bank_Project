@@ -40,9 +40,9 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
             "UPDATE dbo.RefreshTokens SET ReplacedByTokenId = @ReplacedBy WHERE TokenId = @TokenId",
             new { TokenId = tokenId, ReplacedBy = replacedByTokenId }, ct);
 
-    public async Task<long?> FindOwnerOfRevokedAsync(byte[] tokenHash, CancellationToken ct = default)
+    public async Task<long?> FindOwnerOfReplacedAsync(byte[] tokenHash, CancellationToken ct = default)
         => await ScalarAsync<long?>(
-            "SELECT UserId FROM dbo.RefreshTokens WHERE TokenHash = @TokenHash AND RevokedAt IS NOT NULL",
+            "SELECT UserId FROM dbo.RefreshTokens WHERE TokenHash = @TokenHash AND ReplacedByTokenId IS NOT NULL",
             new { TokenHash = tokenHash }, ct);
 
     public async Task RevokeAllAsync(long userId, DateTime now, CancellationToken ct = default)

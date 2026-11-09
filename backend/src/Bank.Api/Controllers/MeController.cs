@@ -1,6 +1,8 @@
 using Bank.Api.Security;
 using Bank.Application.Features.Privacy;
+using Bank.Application.Features.Profile;
 using Bank.Contracts.Account;
+using Bank.Contracts.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,24 @@ public sealed class MeController : ControllerBase
     private readonly ISender _sender;
 
     public MeController(ISender sender) => _sender = sender;
+
+    [HttpGet]
+    public async Task<ActionResult<ProfileResponse>> Profile(CancellationToken ct)
+        => Ok(await _sender.Send(new GetProfileQuery(), ct));
+
+    [HttpPut]
+    public async Task<ActionResult<ProfileResponse>> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken ct)
+        => Ok(await _sender.Send(new UpdateProfileCommand(request), ct));
+
+    /// <summary>Changes the password and ends every other session; this one continues with a new refresh cookie.</summary>
+    [HttpPut("password")]
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
+    public async Task<ActionResult<AuthResponse>> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
+    {
+        var result = await _sender.Send(new ChangePasswordCommand(request), ct);
+        RefreshCookie.Write(Response, result.RefreshToken);
+        return Ok(result.Response);
+    }
 
     /// <summary>Downloads everything stored about the signed-in user as a JSON file (KVKK right of access).</summary>
     [HttpGet("data-export")]
