@@ -1,0 +1,68 @@
+<div class="max-w-2xl">
+  <app-page-header title="Hesap ayarları" subtitle="Kişisel bilgileriniz, şifreniz ve verileriniz." />
+
+  @if (error(); as message) {
+    <app-notice class="mb-4" [message]="message" />
+  }
+
+  @if (loading() && !profile()) {
+    <app-skeleton [rows]="4" />
+  }
+
+  @if (profile(); as profile) {
+    <div class="space-y-6">
+      <section class="panel">
+        <h2 class="section-title">Kişisel bilgiler</h2>
+        <dl class="mt-3 divide-y divide-line text-sm">
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Ad soyad</dt><dd>{{ profile.firstName }} {{ profile.lastName }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">T.C. kimlik no</dt><dd class="tabular-nums">{{ profile.maskedTcNo }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Üyelik tipi</dt><dd>{{ profile.membership === 'Corporate' ? 'Kurumsal' : 'Bireysel' }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Üyelik tarihi</dt><dd>{{ profile.registeredAt | date: 'd MMMM y' }}</dd></div>
+          @if (profile.lastLoginAt; as lastLogin) {
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Son giriş</dt><dd>{{ lastLogin | date: 'd MMMM y, HH:mm' }}</dd></div>
+          }
+        </dl>
+        <p class="mt-3 text-xs text-ink-faint">Ad ve kimlik bilgileri doğrulanmış olduğu için buradan değiştirilemez.</p>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title mb-4">İletişim bilgileri</h2>
+        <app-contact-form [profile]="profile" [busy]="busy()" (save)="saveContact($event)" />
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Şifre</h2>
+        <p class="text-sm text-ink-soft mt-1 mb-4">Değiştirdiğinizde diğer cihazlardaki oturumlarınız kapanır.</p>
+        <app-password-form [busy]="busy()" (save)="changePassword($event)" />
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Verilerim</h2>
+        <p class="text-sm text-ink-soft mt-1 mb-4">Hakkınızda saklanan bütün bilgileri bir dosya olarak indirin (KVKK).</p>
+        <button type="button" class="btn-secondary" [disabled]="busy()" (click)="downloadData()">Verilerimi indir</button>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Hesabımı sil</h2>
+        <p class="text-sm text-ink-soft mt-1">
+          Hesaplarınız kapatılır ve kişisel bilgileriniz silinir. Bu işlem geri alınamaz. Hesaplarınızda bakiye varsa önce sıfırlamanız gerekir.
+        </p>
+
+        @if (erasing()) {
+          <form class="mt-4 space-y-4" (ngSubmit)="erase()">
+            <label class="field">
+              <span class="field-label">Onaylamak için şifreniz</span>
+              <input class="input" type="password" name="erasePassword" autocomplete="current-password" [(ngModel)]="erasePassword" />
+            </label>
+            <div class="flex gap-2">
+              <button type="submit" class="btn-danger" [disabled]="busy() || !erasePassword">Hesabımı kalıcı olarak sil</button>
+              <button type="button" class="btn-secondary" (click)="erasing.set(false)">Vazgeç</button>
+            </div>
+          </form>
+        } @else {
+          <button type="button" class="btn-danger mt-4" (click)="erasing.set(true)">Hesabımı sil</button>
+        }
+      </section>
+    </div>
+  }
+</div>

@@ -25,7 +25,7 @@ import { ComparisonRow } from '../comparison-rows';
       </thead>
       <tbody>
         @for (row of rows(); track row.label) {
-          <tr class="border-t border-line font-semibold text-ink-soft">
+          <tr class="border-t border-line font-medium text-ink-soft">
             <td class="py-3">
               <span class="inline-flex items-center gap-2">
                 <span class="w-3 h-3 rounded" [style.background]="row.colour" aria-hidden="true"></span>

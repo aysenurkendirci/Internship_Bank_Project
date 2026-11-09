@@ -1,5 +1,5 @@
-@if (loading()) {
-  <p class="py-10 text-center text-sm text-ink-soft">Yükleniyor...</p>
+@if (loading() && !data()) {
+  <app-skeleton [rows]="4" />
 }
 
 @if (error(); as message) {
@@ -7,11 +7,28 @@
 }
 
 @if (data(); as data) {
-  <h1 class="page-title mb-6">Merhaba, {{ data.user.firstName }}</h1>
+  <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="page-title">{{ greeting }}, {{ data.user.firstName }}</h1>
+      <p class="page-subtitle">{{ today | date: 'd MMMM y, EEEE' }}</p>
+    </div>
+    <a routerLink="/dashboard/transfer" class="btn-primary">Para gönder</a>
+  </header>
 
   <section class="panel mb-8">
-    <p class="text-sm text-ink-soft">Toplam varlık (TL hesaplar)</p>
-    <p class="text-3xl sm:text-4xl font-semibold tracking-tight tabular-nums mt-1">{{ data.totalWealth | currency }}</p>
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-ink-soft">Toplam varlık (TL hesaplar)</p>
+      <button
+        type="button"
+        class="p-1 -m-1 text-ink-faint hover:text-ink"
+        [attr.aria-label]="privacy.hidden() ? 'Bakiyeleri göster' : 'Bakiyeleri gizle'"
+        [attr.aria-pressed]="privacy.hidden()"
+        (click)="privacy.toggle()"
+      >
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">{{ privacy.hidden() ? 'visibility_off' : 'visibility' }}</span>
+      </button>
+    </div>
+    <p class="text-3xl sm:text-4xl font-semibold tracking-tight tabular-nums mt-1"><app-money [amount]="data.totalWealth" /></p>
   </section>
 
   @if (outlook(); as projection) {
@@ -26,7 +43,10 @@
 
   @if (data.cards.length > 0) {
     <section class="mb-8">
-      <h2 class="section-title mb-3">Kartlarım</h2>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="section-title">Kartlarım</h2>
+        <a routerLink="/dashboard/bank-cards" class="btn-link">Kart ayarları</a>
+      </div>
       <div class="flex gap-3 overflow-x-auto no-scrollbar">
         @for (card of data.cards; track card.cardId) {
           <app-bank-card-tile [card]="card" />

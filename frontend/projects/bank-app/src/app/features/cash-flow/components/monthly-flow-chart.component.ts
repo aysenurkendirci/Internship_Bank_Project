@@ -32,7 +32,7 @@ export class MonthlyFlowChartComponent {
       textStyle: { fontFamily: CHART.font },
       legend: { top: 0, left: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12, textStyle: { color: CHART.textSecondary } },
       grid: { left: 8, right: 8, top: 36, bottom: 8, containLabel: true },
-      tooltip: { ...baseTooltip, trigger: 'axis', axisPointer: { type: '' }, valueFormatter: (v: number) => formatTry(v) },
+      tooltip: { ...baseTooltip, trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v: number) => formatTry(v) },
       xAxis: { ...baseAxisStyle, type: 'category', data: months.map((m) => formatMonth(m)), splitLine: { show: false } },
       yAxis: { ...baseAxisStyle, type: 'value', axisLabel: { ...baseAxisStyle.axisLabel, formatter: formatTryCompact } },
       series: [

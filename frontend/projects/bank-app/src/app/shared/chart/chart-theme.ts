@@ -24,6 +24,16 @@ export const formatTry = (value: number): string => tryFormatter.format(value);
 export const formatTryCompact = (value: number): string => tryCompact.format(value);
 
 /** Recessive axes and gridlines shared by every cartesian chart. */
+const tickMonth = new Intl.DateTimeFormat('tr-TR', { month: 'short' });
+const tickDay = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'short' });
+
+/** Labels for a date axis: "Ara", "Oca 2027" where the year turns, "15 Ara" between months. */
+export function formatDateTick(value: number): string {
+  const date = new Date(value);
+  if (date.getDate() !== 1) return tickDay.format(date);
+  return date.getMonth() === 0 ? `${tickMonth.format(date)} ${date.getFullYear()}` : tickMonth.format(date);
+}
+
 export const baseAxisStyle = {
   axisLine: { lineStyle: { color: CHART.grid } },
   axisTick: { show: false },

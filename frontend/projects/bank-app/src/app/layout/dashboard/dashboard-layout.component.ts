@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { SessionService } from '../../core/auth/session.service';
-import { AccountApi } from '../../data-access/api/account.api';
+import { ConfirmDialogComponent } from '../../shared/ui/confirm-dialog.component';
+import { ToastHostComponent } from '../../shared/ui/toast-host.component';
 
 interface NavItem {
   readonly path: string;
@@ -15,24 +16,27 @@ interface NavGroup {
   readonly items: readonly NavItem[];
 }
 
+/** The frame of the signed-in app: the menu, the user's corner, and the dialog and toast outlets. */
 @Component({
   selector: 'app-dashboard-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmDialogComponent, ToastHostComponent],
   templateUrl: './dashboard-layout.component.html',
 })
 export class DashboardLayoutComponent {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
-  private readonly account = inject(AccountApi);
-
-  protected readonly exporting = signal(false);
 
   protected readonly fullName = this.session.fullName;
 
   protected readonly navGroups: readonly NavGroup[] = [
     {
       title: 'Bankacılık',
-      items: [{ path: '/dashboard', label: 'Ana Sayfa', icon: 'home' }],
+      items: [
+        { path: '/dashboard', label: 'Ana Sayfa', icon: 'home' },
+        { path: '/dashboard/accounts', label: 'Hesaplarım', icon: 'account_balance' },
+        { path: '/dashboard/transfer', label: 'Para transferi', icon: 'send_money' },
+        { path: '/dashboard/bank-cards', label: 'Banka kartlarım', icon: 'payments' },
+      ],
     },
     {
       title: 'Planlama',
@@ -47,25 +51,7 @@ export class DashboardLayoutComponent {
     },
   ];
 
-  /** Saves the personal data export as a file; the browser's download handles the rest. */
-  exportMyData(): void {
-    this.exporting.set(true);
-    this.account.exportPersonalData().subscribe({
-      next: (file) => {
-        const url = URL.createObjectURL(file);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'kisisel-verilerim.json';
-        link.click();
-        URL.revokeObjectURL(url);
-        this.exporting.set(false);
-      },
-      error: () => this.exporting.set(false),
-    });
-  }
-
-  logout(): void {
-    this.session.end();
-    this.router.navigateByUrl('/auth/login');
+  protected logout(): void {
+    this.session.signOut().subscribe(() => this.router.navigateByUrl('/auth/login'));
   }
 }

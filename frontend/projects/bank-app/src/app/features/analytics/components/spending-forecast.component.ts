@@ -26,12 +26,12 @@ const METHOD_LABELS: Record<string, string> = {
           <p class="text-xl font-semibold text-ink mt-1">
             {{ month.lower | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }} – {{ month.upper | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}
           </p>
-          <p class="text-sm font-semibold text-ink-soft">beklenen {{ month.expected | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}</p>
+          <p class="text-sm text-ink-soft">beklenen {{ month.expected | currency: 'TRY' : 'symbol-narrow' : '1.0-0' }}</p>
         </li>
       }
     </ul>
 
-    <p class="text-sm font-semibold text-ink-soft mb-3">
+    <p class="text-sm text-ink-soft mb-3">
       Market, restoran, ulaşım gibi günlük harcamalar; düzenli ödemeler ve tek seferlik büyük alışverişler hariç.
       Aralık %95 olasılıkla. Son {{ forecast().basedOnMonths }} aya göre en isabetli yöntem: <strong>{{ methodLabel(forecast().method) }}</strong>.
     </p>
@@ -44,7 +44,7 @@ const METHOD_LABELS: Record<string, string> = {
         </thead>
         <tbody>
           @for (backtest of forecast().backtests; track backtest.method) {
-            <tr class="border-t border-line font-semibold text-ink-soft">
+            <tr class="border-t border-line font-medium text-ink-soft">
               <td class="py-2">{{ methodLabel(backtest.method) }}</td>
               <td class="text-right">{{ backtest.meanAbsolutePercentageError | percent: '1.0-1' }}</td>
               <td class="text-right">{{ backtest.intervalCoverage | percent: '1.0-0' }}</td>

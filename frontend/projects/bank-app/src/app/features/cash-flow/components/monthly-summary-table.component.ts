@@ -27,7 +27,7 @@ import { ProjectionMonth } from '../../../data-access/models/finance.models';
       </thead>
       <tbody>
         @for (m of months(); track m.year * 100 + m.month) {
-          <tr class="border-t border-line font-semibold text-ink-soft">
+          <tr class="border-t border-line font-medium text-ink-soft">
             <td class="py-3">{{ label(m) }}</td>
             <td class="text-right">{{ m.income | currency }}</td>
             <td class="text-right">{{ m.outflows | currency }}</td>
@@ -50,7 +50,7 @@ import { ProjectionMonth } from '../../../data-access/models/finance.models';
         }
       </tbody>
     </table>
-    <p class="text-xs font-semibold text-ink-faint mt-3">
+    <p class="text-xs text-ink-faint mt-3">
       Yük oranı: ayın toplam çıkışı / ayın geliri. Kart ödemeleri ekstrenin tamamının ödendiği varsayımıyla hesaplanır.
     </p>
   `,

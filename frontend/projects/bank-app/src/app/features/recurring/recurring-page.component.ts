@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Observable, forkJoin } from 'rxjs';
 
 import { ActOptions, BasePage } from '../../core/page/base-page';
+import { ConfirmService } from '../../core/ui/confirm.service';
 import { CreditCardsApi, RecurringCashFlowsApi } from '../../data-access/api/finance.api';
 import { CashFlowKind, CreditCard, RecurringCashFlow, RecurringCashFlowRequest } from '../../data-access/models/finance.models';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -19,6 +20,7 @@ import { KIND_LABELS } from './recurring-labels';
   templateUrl: './recurring-page.component.html',
 })
 export class RecurringPageComponent extends BasePage {
+  private readonly dialog = inject(ConfirmService);
   private readonly api = inject(RecurringCashFlowsApi);
   private readonly cardsApi = inject(CreditCardsApi);
 
@@ -48,7 +50,7 @@ export class RecurringPageComponent extends BasePage {
   }
 
   protected remove(item: RecurringCashFlow): void {
-    if (confirm(`"${item.name}" silinsin mi?`)) this.run(this.api.delete(item.id));
+    this.dialog.confirmDelete(`"${item.name}" silinsin mi?`).then((yes) => yes && this.run(this.api.delete(item.id)));
   }
 
   private reload(): void {

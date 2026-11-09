@@ -15,7 +15,7 @@ import { CreditCard, InstallmentPlan } from '../../../data-access/models/finance
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p class="font-semibold text-ink">{{ plan.description }}</p>
-              <p class="text-sm font-semibold text-ink-soft">
+              <p class="text-sm text-ink-soft">
                 {{ cardName(plan.creditCardId) }} · {{ plan.purchaseDate | date: 'd MMMM y' }} · {{ plan.installmentCount }} taksit
               </p>
             </div>
@@ -35,7 +35,7 @@ import { CreditCard, InstallmentPlan } from '../../../data-access/models/finance
               </thead>
               <tbody>
                 @for (installment of plan.installments; track installment.number) {
-                  <tr class="border-t border-line font-semibold text-ink-soft">
+                  <tr class="border-t border-line font-medium text-ink-soft">
                     <td class="py-2">{{ installment.number }}</td>
                     <td>{{ installment.statementDate | date: 'd MMM y' }}</td>
                     <td>{{ installment.dueDate | date: 'd MMM y' }}</td>

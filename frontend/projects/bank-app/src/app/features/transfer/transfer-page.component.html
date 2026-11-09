@@ -1,0 +1,118 @@
+<div class="max-w-xl">
+  <div class="print:hidden">
+    <app-page-header title="Para transferi" subtitle="Hesabınızdan bir IBAN'a para gönderin." />
+  </div>
+
+  @if (error(); as message) {
+    <app-notice class="mb-4" [message]="message" />
+  }
+
+  @switch (step()) {
+    @case ('form') {
+      @if (loading() && accounts().length === 0) {
+        <app-skeleton [rows]="4" />
+      } @else if (accounts().length === 0) {
+        @if (!error()) {
+          <p class="panel text-sm text-ink-soft">
+            Para göndermek için aktif bir hesabınız olmalı.
+            <a routerLink="/dashboard/accounts" class="btn-link">Hesaplarım</a>
+          </p>
+        }
+      } @else {
+        <form class="panel space-y-4" [formGroup]="form" (ngSubmit)="review()">
+          <label class="field">
+            <span class="field-label">Gönderen hesap</span>
+            <select class="input" formControlName="sourceAccountId">
+              @for (account of accounts(); track account.id) {
+                <option [ngValue]="account.id">
+                  {{ typeDisplay[account.accountType].label }} · {{ account.balance | currency: account.currencyCode : 'symbol-narrow' }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Alıcı IBAN</span>
+            <input class="input tabular-nums" formControlName="targetIban" maxlength="40" placeholder="TR00 0000 0000 0000 0000 0000 00" autocomplete="off" spellcheck="false" (input)="groupIban()" />
+            @if (show('targetIban')) {
+              <span class="field-error">IBAN geçerli değil. Rakamları kontrol edin.</span>
+            }
+          </label>
+
+          <label class="field">
+            <span class="field-label">Alıcı adı soyadı</span>
+            <input class="input" formControlName="recipientName" maxlength="140" autocomplete="off" />
+            @if (show('recipientName')) {
+              <span class="field-error">Alıcının adını girin. Hesap sahibiyle eşleşmelidir.</span>
+            }
+          </label>
+
+          <div class="field">
+            <div class="flex items-baseline justify-between">
+              <label class="field-label" for="amount">Tutar</label>
+              <button type="button" class="btn-link" (click)="sendAll()">Tamamı</button>
+            </div>
+            <input id="amount" class="input tabular-nums" type="number" min="0.01" step="0.01" formControlName="amount" />
+            @if (show('amount')) {
+              <span class="field-error">Sıfırdan büyük bir tutar girin.</span>
+            } @else if (exceedsBalance()) {
+              <span class="field-error">Tutar hesap bakiyesini aşıyor.</span>
+            }
+          </div>
+
+          <label class="field">
+            <span class="field-label">Açıklama</span>
+            <input class="input" formControlName="description" maxlength="140" />
+            @if (show('description')) {
+              <span class="field-error">Açıklama zorunludur.</span>
+            }
+          </label>
+
+          <button type="submit" class="btn-primary w-full">Devam et</button>
+        </form>
+      }
+    }
+
+    @case ('review') {
+      <section class="panel">
+        <h2 class="section-title">Bilgileri kontrol edin</h2>
+        <p class="text-sm text-ink-soft mt-1">Onayladığınızda para hesabınızdan çıkar.</p>
+        @let details = request();
+        <dl class="mt-4 divide-y divide-line text-sm">
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Gönderen</dt><dd class="text-right tabular-nums">{{ printed(source()?.iban ?? '') }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Alıcı</dt><dd class="text-right">{{ details.recipientName }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Alıcı IBAN</dt><dd class="text-right tabular-nums">{{ printed(details.targetIban) }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Açıklama</dt><dd class="text-right">{{ details.description }}</dd></div>
+          <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Tutar</dt><dd class="text-right text-base font-semibold tabular-nums">{{ details.amount | currency: source()?.currencyCode : 'symbol-narrow' }}</dd></div>
+        </dl>
+        <div class="mt-5 grid grid-cols-2 gap-2">
+          <button type="button" class="btn-secondary" (click)="edit()" [disabled]="busy()">Düzenle</button>
+          <button type="button" class="btn-primary" (click)="confirm()" [disabled]="busy()">{{ busy() ? 'Gönderiliyor...' : (error() ? 'Tekrar dene' : 'Onayla') }}</button>
+        </div>
+      </section>
+    }
+
+    @case ('receipt') {
+      @if (receipt(); as receipt) {
+        <section class="panel">
+          <h2 class="section-title">Transfer tamamlandı</h2>
+          <p class="text-2xl font-semibold tabular-nums mt-2">{{ receipt.amount | currency: receipt.currencyCode : 'symbol-narrow' }}</p>
+          <dl class="mt-4 divide-y divide-line text-sm">
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">İşlem no</dt><dd class="text-right tabular-nums">{{ receipt.id }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Tarih</dt><dd class="text-right">{{ receipt.createdAt | date: 'd MMMM y, HH:mm' }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Gönderen</dt><dd class="text-right tabular-nums">{{ printed(receipt.sourceIban) }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Alıcı</dt><dd class="text-right">{{ receipt.recipientName }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Alıcı IBAN</dt><dd class="text-right tabular-nums">{{ printed(receipt.targetIban) }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Açıklama</dt><dd class="text-right">{{ receipt.description }}</dd></div>
+            <div class="py-2.5 flex justify-between gap-4"><dt class="text-ink-soft">Kalan bakiye</dt><dd class="text-right tabular-nums">{{ receipt.sourceBalanceAfter | currency: receipt.currencyCode : 'symbol-narrow' }}</dd></div>
+          </dl>
+          <div class="mt-5 flex flex-wrap gap-2 print:hidden">
+            <button type="button" class="btn-primary" (click)="startOver()">Yeni transfer</button>
+            <button type="button" class="btn-secondary" (click)="print()">Yazdır</button>
+            <a routerLink="/dashboard" class="btn-secondary">Ana sayfa</a>
+          </div>
+        </section>
+      }
+    }
+  }
+</div>

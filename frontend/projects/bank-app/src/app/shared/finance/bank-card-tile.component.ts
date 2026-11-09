@@ -1,9 +1,9 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { CardItem } from '../../../data-access/models/dashboard.models';
+import { CardItem } from '../../data-access/models/dashboard.models';
+import { MoneyComponent } from './money.component';
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Partial<Record<string, string>> = {
   Blocked: 'Geçici kapalı',
   Cancelled: 'İptal',
 };
@@ -11,7 +11,7 @@ const STATUS_LABELS: Record<string, string> = {
 /** One issued card. Only a status other than active is mentioned: an active card is the normal case. */
 @Component({
   selector: 'app-bank-card-tile',
-  imports: [CurrencyPipe],
+  imports: [MoneyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'w-72 h-40 shrink-0 rounded-xl p-4 text-white flex flex-col justify-between',
@@ -24,10 +24,10 @@ const STATUS_LABELS: Record<string, string> = {
       <span class="font-medium">{{ card().cardType === 'Credit' ? 'Kredi kartı' : 'Banka kartı' }}</span>
       <span class="text-white/70">{{ statusLabel() ?? (card().isVirtual ? 'Sanal' : 'Fiziksel') }}</span>
     </div>
-    <p class="tabular-numsr text-white/90">{{ card().cardNoMasked }}</p>
+    <p class="tabular-nums text-white/90">{{ card().cardNoMasked }}</p>
     <div>
       <p class="text-xs text-white/70">Bakiye</p>
-      <p class="font-semibold tabular-nums">{{ card().balance | currency }}</p>
+      <p class="font-semibold tabular-nums"><app-money [amount]="card().balance" /></p>
     </div>
   `,
 })

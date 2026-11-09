@@ -15,7 +15,7 @@ import { CreditCard } from '../../../data-access/models/finance.models';
           <div class="flex items-start justify-between">
             <div>
               <p class="text-lg font-semibold text-ink">{{ card.name }}</p>
-              <p class="text-sm font-semibold text-ink-soft">
+              <p class="text-sm text-ink-soft">
                 Kesim günü: {{ card.statementDay }} · Son ödeme: kesimden {{ card.paymentDueDays }} gün sonra
               </p>
             </div>

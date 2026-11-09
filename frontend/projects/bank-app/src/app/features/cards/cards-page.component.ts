@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Observable, forkJoin } from 'rxjs';
 
 import { ActOptions, BasePage } from '../../core/page/base-page';
+import { ConfirmService } from '../../core/ui/confirm.service';
 import { CreditCardsApi, InstallmentPlansApi } from '../../data-access/api/finance.api';
 import { CreditCard, CreditCardRequest, InstallmentPlan, InstallmentPlanRequest } from '../../data-access/models/finance.models';
 import { EmptyStateComponent } from '../../shared/ui/empty-state.component';
@@ -27,6 +28,7 @@ import { InstallmentPlanListComponent } from './components/installment-plan-list
   templateUrl: './cards-page.component.html',
 })
 export class CardsPageComponent extends BasePage {
+  private readonly dialog = inject(ConfirmService);
   private readonly cardsApi = inject(CreditCardsApi);
   private readonly plansApi = inject(InstallmentPlansApi);
 
@@ -50,7 +52,7 @@ export class CardsPageComponent extends BasePage {
   }
 
   protected deleteCard(card: CreditCard): void {
-    if (confirm(`"${card.name}" kartı silinsin mi?`)) this.run(this.cardsApi.delete(card.id));
+    this.dialog.confirmDelete(`"${card.name}" kartı silinsin mi?`).then((yes) => yes && this.run(this.cardsApi.delete(card.id)));
   }
 
   protected savePlan(request: InstallmentPlanRequest): void {
@@ -58,7 +60,7 @@ export class CardsPageComponent extends BasePage {
   }
 
   protected deletePlan(plan: InstallmentPlan): void {
-    if (confirm(`"${plan.description}" taksit planı silinsin mi?`)) this.run(this.plansApi.delete(plan.id));
+    this.dialog.confirmDelete(`"${plan.description}" taksit planı silinsin mi?`).then((yes) => yes && this.run(this.plansApi.delete(plan.id)));
   }
 
   private reload(): void {

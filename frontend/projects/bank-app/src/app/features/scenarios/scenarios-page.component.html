@@ -16,7 +16,7 @@
 @if (comparison(); as result) {
   <section class="panel mb-8">
     <h2 class="section-title mb-1">Karşılaştırma</h2>
-    <p class="text-sm font-semibold text-ink-faint mb-4">
+    <p class="text-sm text-ink-faint mb-4">
       {{ result.from | date: 'MMMM y' }} – {{ result.to | date: 'MMMM y' }} arası; en uzun seçeneğin son taksitine kadar.
     </p>
     <app-scenario-comparison-table [rows]="rows()" />
@@ -24,7 +24,7 @@
 
   <section class="panel mb-6">
     <h2 class="section-title mb-1">Aylara göre en düşük bakiye</h2>
-    <p class="text-sm font-semibold text-ink-faint mb-4">Her ayın içinde görülen en düşük bakiye. Kırmızı çizgi sıfır.</p>
+    <p class="text-sm text-ink-faint mb-4">Her ayın içinde görülen en düşük bakiye. Kırmızı çizgi sıfır.</p>
     <app-scenario-chart [rows]="rows()" />
   </section>
 

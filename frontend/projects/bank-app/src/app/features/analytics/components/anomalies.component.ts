@@ -20,9 +20,9 @@ import { EmptyStateComponent } from '../../../shared/ui/empty-state.component';
           <div>
             <p class="font-semibold text-ink">
               {{ anomaly.description }}
-              <span class="text-sm font-semibold text-ink-faint">· {{ anomaly.date | date: 'd MMM y' }}</span>
+              <span class="text-sm text-ink-faint">· {{ anomaly.date | date: 'd MMM y' }}</span>
             </p>
-            <p class="text-sm font-semibold text-ink-soft">
+            <p class="text-sm text-ink-soft">
               {{ anomaly.comparedWith }} için tipik tutarın ({{ anomaly.typicalAmount | currency }}) {{ anomaly.timesTypical }} katı
             </p>
           </div>

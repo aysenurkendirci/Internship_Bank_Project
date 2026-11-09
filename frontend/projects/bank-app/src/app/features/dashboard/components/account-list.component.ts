@@ -1,18 +1,22 @@
-import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { formatIban } from '../../../core/util/iban';
 import { AccountItem } from '../../../data-access/models/dashboard.models';
-import { ACCOUNT_STATUS_LABELS, ACCOUNT_TYPE_DISPLAY } from '../account-display';
+import { ACCOUNT_STATUS_LABELS, ACCOUNT_TYPE_DISPLAY } from '../../../shared/finance/account-display';
+import { IbanCopyComponent } from '../../../shared/finance/iban-copy.component';
+import { MoneyComponent } from '../../../shared/finance/money.component';
 
-/** The customer's accounts on the home screen. Clicking an IBAN copies it. */
+/** The customer's accounts on the home screen. Each one leads to its statement. */
 @Component({
   selector: 'app-account-list',
-  imports: [CurrencyPipe],
+  imports: [RouterLink, IbanCopyComponent, MoneyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
-    <h2 class="section-title mb-3">Hesaplarım</h2>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="section-title">Hesaplarım</h2>
+      <a routerLink="/dashboard/accounts" class="btn-link">Tümü</a>
+    </div>
     <div class="bg-surface rounded-xl border border-line">
       @if (accounts().length === 0) {
         <p class="p-5 text-sm text-ink-soft">Henüz hesabınız yok.</p>
@@ -21,22 +25,15 @@ import { ACCOUNT_STATUS_LABELS, ACCOUNT_TYPE_DISPLAY } from '../account-display'
         @for (account of accounts(); track account.accountId) {
           <li class="px-4 py-3">
             <div class="flex items-baseline justify-between gap-3">
-              <p class="text-sm font-medium text-ink">
+              <a class="text-sm font-medium text-ink hover:text-accent" [routerLink]="['/dashboard/accounts', account.accountId]">
                 {{ typeDisplay[account.accountType].label }}
                 @if (account.status !== 'Active') {
                   <span class="badge bg-canvas text-ink-soft ml-1">{{ statusLabels[account.status] }}</span>
                 }
-              </p>
-              <p class="text-sm font-semibold tabular-nums">{{ account.balance | currency: account.currencyCode : 'symbol-narrow' }}</p>
+              </a>
+              <p class="text-sm font-semibold tabular-nums"><app-money [amount]="account.balance" [currency]="account.currencyCode" /></p>
             </div>
-            <button
-              type="button"
-              (click)="copy(account)"
-              class="mt-1 text-xs text-ink-faint tabular-nums hover:text-ink text-left"
-              title="IBAN'ı kopyala"
-            >
-              {{ copiedId() === account.accountId ? 'Kopyalandı' : printed(account.iban) }}
-            </button>
+            <app-iban-copy class="block mt-1" [iban]="account.iban" />
           </li>
         }
       </ul>
@@ -48,13 +45,4 @@ export class AccountListComponent {
 
   protected readonly typeDisplay = ACCOUNT_TYPE_DISPLAY;
   protected readonly statusLabels = ACCOUNT_STATUS_LABELS;
-  protected readonly copiedId = signal<number | null>(null);
-  protected readonly printed = formatIban;
-
-  protected copy(account: AccountItem): void {
-    navigator.clipboard.writeText(account.iban).then(() => {
-      this.copiedId.set(account.accountId);
-      setTimeout(() => this.copiedId.set(null), 1500);
-    });
-  }
 }
