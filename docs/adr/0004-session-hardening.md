@@ -1,6 +1,6 @@
 # ADR-0004: Oturum güvenliğini sertleştirme planı
 
-Durum: Kabul edildi. Sunucu tarafı uygulandı; web istemcisinin geçişi ve erişim token'ının kısaltılması bekliyor.
+Durum: Uygulandı.
 
 ## Bağlam
 
@@ -47,15 +47,9 @@ Kullanılmış bir token tekrar gelirse kullanıcının bütün oturumları kapa
 bozulduğunda test kırılıyor. Token veritabanında yalnızca SHA-256 özeti olarak duruyor. Cookie'yi kullanan iki uç `X-Requested-By`
 başlığını da istiyor (CSRF).
 
-Bekleyen: web istemcisi. Bellekte tutulan erişim token'ı, 401'de tek seferlik sessiz yenileme ve eşzamanlı isteklerin tek bir
-yenilemeyi beklemesi frontend işi. İstemci geçene kadar `Jwt:ExpiresMinutes` 60'ta kalıyor: ömrü şimdi 5–10 dakikaya indirmek
-mevcut web istemcisini her 10 dakikada bir oturumdan atardı. İstemci geçince değer kısaltılacak.
-
-Yeni bir açık yok: mevcut istemci cookie'yi görmezden geliyor ve eskisi gibi çalışıyor. Cookie'deki token kullanılmadan 8 saat
-sonra (ayarlanabilir, `Session:RefreshTokenHours`) süresi doluyor.
+Web istemcisi de geçti. Erişim token'ı yalnızca bellekte duruyor, sayfa yenilenince uygulama açılmadan cookie ile yenisi alınıyor. 401 alan istek tek bir yenilemeden sonra tekrar deneniyor. Birlikte düşen istekler aynı yenilemeyi bekliyor. Sekmeler de Web Locks ile sıraya giriyor, çünkü aynı anda gelen iki yenileme tek kullanımlık cookie için hırsızlık gibi görünürdü. `Jwt:ExpiresMinutes` 10 oldu.
 
 ## Sonuçlar
 
-- Mevcut durumda token ömrü kısa tutuluyor (60 dakika, konfigürasyondan okunuyor).
-- Uygulama sırasında bu belgedeki akış bire bir izlenecek ve "kullanılmış token tekrar gelince bütün oturumlar kapanır" senaryosu bir
-  entegrasyon testiyle kilitlenecek.
+- Çalınan bir erişim token'ı en fazla 10 dakika işe yarar, çıkış yapmak yenileme token'ını sunucuda iptal eder.
+- "Kullanılmış token tekrar gelince bütün oturumlar kapanır" senaryosu bir entegrasyon testiyle kilitli.

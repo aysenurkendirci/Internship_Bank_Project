@@ -29,6 +29,8 @@ public sealed class AuthController : ControllerBase
     /// Trades the refresh token cookie for a new access token (and a new cookie). A token that was already used
     /// ends every session of its user.
     /// </summary>
+    // The limit is there to stop password guessing. A refresh carries a long random token and runs on every page load.
+    [DisableRateLimiting]
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResponse>> Refresh(CancellationToken ct)
     {
@@ -45,6 +47,7 @@ public sealed class AuthController : ControllerBase
         return SignedIn(result);
     }
 
+    [DisableRateLimiting]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
