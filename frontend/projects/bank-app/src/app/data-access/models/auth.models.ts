@@ -1,3 +1,4 @@
+// Request and response shapes of the sign-in endpoints; they mirror Bank.Contracts.Auth.
 export interface LoginRequest {
   tcNo: string;
   password: string;
